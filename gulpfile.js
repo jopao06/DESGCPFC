@@ -29,6 +29,7 @@ gulp.task('serve', ['less'], function(){
 
     gulp.watch("less/*.less",['less']);
     gulp.watch("less/*.less").on('change', reload);
+    gulp.watch("*.html").on('change', reload);
 });
 
 // configure which files to watch and what tasks to use on file changes
