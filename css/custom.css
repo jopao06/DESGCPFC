@@ -29,3 +29,6 @@ h1{
   font-size: 4em;
   font-weight: normal;
 }
+.ui.masthead#minigames {
+  padding: 7em 0em;
+}
