@@ -1,0 +1,33 @@
+{
+  "name": "sp",
+  "version": "1.0.0",
+  "description": "Special problem",
+  "main": "gulpfile.js",
+  "dependencies": {
+    "browser-sync": "^2.17.5",
+    "gulp": "^3.9.1",
+    "gulp-jshint": "^2.0.1",
+    "gulp-less": "^3.1.0",
+    "install": "^0.8.1",
+    "jshint-stylish": "^2.2.1",
+    "jshint": "^2.9.4"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.18.5",
+    "gulp": "^3.9.1",
+    "gulp-util": "^3.0.8"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jopao06/DESGCPFC.git"
+  },
+  "author": "Juan Paulo Banares",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jopao06/DESGCPFC/issues"
+  },
+  "homepage": "https://github.com/jopao06/DESGCPFC#readme"
+}

@@ -12,10 +12,10 @@
     border-color: lighten(@base, 30%);
     div { .box-shadow(0 0 5px, 30%) }
 }
-
 h1{
     color: blue;
-}*/
+}
+*/
 .masthead.segment {
   min-height: 700px;
   padding: 1em 0em;
@@ -31,4 +31,15 @@ h1{
 }
 .ui.masthead#minigames {
   padding: 7em 0em;
+}
+#block-panel,
+#edit-panel,
+#overlay {
+  border: 2px solid;
+}
+#overlay {
+  position: absolute;
+  z-index: 10;
+  /*background-color:green;*/
+  visibility: hidden;
 }
