@@ -17,33 +17,140 @@ h1{
 }
 */
 
+@import "colors.less";
+
+
+html, body {
+  height: 100%;
+  background-color: @bgBlue;
+}
+
+/***************** INDEX *****************/
 .masthead.segment{
-    min-height: 700px;
-    padding: 1em 0em;
+  min-height: 700px;
+  padding: 1em 0em;
 }
 
 .masthead .ui.menu .ui.button{
-    margin-left: 0.5em;
+  margin-left: 0.5em;
 }
 
 .ui.header#game-title{
-    margin-top: 3em;
-    margin-bottom: 0em;
-    font-size: 4em;
-    font-weight: normal;
+  margin-top: 3em;
+  margin-bottom: 0em;
+  font-size: 4em;
+  font-weight: normal;
 }
 
 .ui.masthead#minigames{
-    padding: 7em 0em;
+  padding: 7em 0em;
 }
 
-#block-panel, #edit-panel, #overlay{
-    border: 2px solid;
+/***************** GAME *****************/
+
+#block-panel, #edit-panel, #overlay{    // For checking
+  /*border: 2px solid;*/
+}
+
+#game-body{
+  padding: 15px;
+
+  /*.ui.grid .column:not(.row) {
+    padding: 0.5rem;
+  }*/
+}
+
+svg-container{
+  border: 2px solid; 
+  border-color: @fgWhite;
+  border-radius: 10px;
+}
+
+.ui.grid {
+  height: 100%;
+}
+
+#block-div{
+  /*height: 10%;*/
+  /*padding-bottom: 0;*/
+
+  #block-container{
+    &:extend(svg-container);
+    display: inline-flex;
+    width: 100%;
+
+    /*.ui.attached.button {
+      font-size: 50px;
+      width: 10px;
+      padding-top: 0;
+      padding-bottom: 0;
+
+      &.left{
+        padding-left: 0;
+      }
+
+      &.right{
+        padding-right: 0;
+      }
+    }*/
+    .ui.attached.button{
+      padding:0;
+
+      i{
+        margin:0;
+      }
+    }
+
+    #scrollable-div{
+      overflow-y:auto;
+      
+      &::-webkit-scrollbar { 
+          display: none; 
+      }
+    }
+  }
+}
+
+
+#edit-div{
+  height: 100%;
+
+  #edit-container{
+    height: 100%;
+    &:extend(svg-container);
+    
+    #edit-bar{
+      background-color: @fgWhite;
+    }
+
+    .secondary.segment{
+      height: 90%;
+      background-color: transparent;
+    }
+  }
+}
+
+#display-div{
+  height: 85%;
+
+  #display-container{
+    height: 100%;
+    background-color: @fgWhite;
+    &:extend(svg-container);
+  }
 }
 
 #overlay{
-    position: absolute;
-    z-index:10;
-    /*background-color:green;*/
-    visibility:hidden;
+  position: absolute;
+  z-index:10;
+  /*background-color:green;*/
+  visibility:hidden;
+}
+
+svg text {
+  cursor: default;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }

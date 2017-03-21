@@ -1,80 +1,133 @@
+// Get SVG element
 var snapBlock = Snap("#block-panel");
 var snapEdit = Snap("#edit-panel");
 var snapOverlay = Snap("#overlay");
 
+// Get SVG id
 var blockPanel = $('#'+snapBlock.attr().id);
 var editPanel = $('#'+snapEdit.attr().id);
+var overlayPanel = $('#'+snapOverlay.attr().id);
 
-var tempElem;
+// Temporary Variables
+var tempElem, finalElem;
 
-var blueRect = snapBlock.rect(10,10,200,125);
-blueRect.attr({
-    fill: 'blue',
-    stroke: '#000',
-    strokeWidth: 2
+// var blueRect = snapBlock.rect(10,10,200,50);
+// blueRect.attr({
+//     fill: 'blue',
+//     stroke: '#000',
+//     strokeWidth: 2,
+//     class: "block"
+// });
+// var text = snapBlock.text(35,43,"IF [condition]");
+// text.attr({
+//   'font-size':25
+// });
+
+// var ifBlock = snapBlock.g(blueRect,text).attr({class: 'if-block'});
+
+// var redRect = snapBlock.rect(220,10,230,50);
+// redRect.attr({
+//     fill: 'red',
+//     stroke: '#000',
+//     strokeWidth: 2,
+//     class: "block"
+// });
+// var redtext = snapBlock.text(232,43,"WHILE [condition]");
+// redtext.attr({
+//   'font-size':25
+// });
+
+// var redBlock = snapBlock.g(redRect,redtext);
+
+var defaultBlock = snapBlock.rect(10,10,40,40,5);
+defaultBlock.attr({
+    'fill-opacity': 0,
+    stroke: '#FFFFFF',
+    strokeWidth: 2,
+    class: "block"
 });
 
 
-// blueRect.node.onclick = function(){
-//   console.log("Blue!");
-//   // $('#overlay').css('visibility', 'hidden');
-// };
+
+// var blueRect = snapBlock.rect(10,10,200,50);
+// blueRect.attr({
+//     fill: 'blue',
+//     stroke: '#000',
+//     strokeWidth: 2,
+//     class: "block"
+// });
+// var text = snapBlock.text(35,43,"IF [condition]");
+// text.attr({
+//   'font-size':25
+// });
+
+
+
+// Drag functions
 
 var move = function(dx, dy){
   tempElem.attr({
-    transform: this.data('origTransform') + (this.data('origTransform') ? "T" : "t") + [dx,dy]
+    transform: "t"+[blockPanel.position().left+dx, blockPanel.position().top+dy]
   });
   tempElem.data('shift',{dx:dx,dy:dy});
-  console.log(dx+","+dy);
+  // console.log(dx+","+dy);
 };
 
 var start = function(){
   $('#overlay').css('visibility', 'visible');
-  tempElem = this.use(); 
+  // console.log("t"+[this.getBBox().x + blockPanel.position().left, this.getBBox().y + blockPanel.position().top]);
+  tempElem = this.use();
+  tempElem.attr({
+    transform: "t"+[blockPanel.position().left, blockPanel.position().top]
+  });
+  tempElem.data('origin', { ox:tempElem.getBBox().x, oy: tempElem.getBBox().y });
+  tempElem.data('shift',{dx:0,dy:0});
   snapOverlay.add(tempElem);
-  this.data('origTransform', this.transform().local);
 };
 
 var end = function(e){
   $('#overlay').css('visibility', 'hidden');
-  console.log(this.attr('y'));
-  snapEdit.add(this.use().attr({
-    x: tempElem.data('shift').dx,
-    y: tempElem.data('shift').dy 
-    - this.attr('height') 
-    - ((editPanel.position().top-blockPanel.position().top) - blockPanel.height()) 
-    - (editPanel.position().top - (blockPanel.height()+blockPanel.position().top ))
-    - 17
-  }));
-  tempElem.remove(); 
-  // console.log("["+(editPanel.position().left - tempElem.data('shift').dx)+","
-  //   +(editPanel.position().top - tempElem.data('shift').dy)+"]");
+  var compData = {
+      blockPanelTop : blockPanel.position().top,
+      blockPanelHeight : blockPanel.height(),
+      editPanelTop : editPanel.position().top,
+      editPanelHeight : editPanel.height(),
+      x: this.attr('x'),
+      y: this.attr('y'),
+      dx: tempElem.data('shift').dx,
+      dy: tempElem.data('shift').dy,
+      height: this.attr('height')
+    };
+    // console.log(compData);
+    // console.log(blockPanel.css('border-width'));
+
+  // snapEdit.add(this.use().attr({
+  //   x: tempElem.data('shift').dx
+  //   - this.attr('width') 
+  //   - (blockPanel.width() - this.attr('width') - this.attr('x'))
+  //   - (editPanel.position().left + blockPanel.position().left - blockPanel.width())
+  //   + blockPanel.position().left
+  //   + blockPanel.position().left, // 4 px border from two panels and 2 stroke width of shape,
+  //   //+ 14
+  //   y: tempElem.data('shift').dy
+  //   - this.attr('height') 
+  //   - (blockPanel.height() - this.attr('height') - this.attr('y'))
+  //   - (editPanel.position().top + blockPanel.position().top - blockPanel.height())
+  //   + blockPanel.position().top
+  //   + blockPanel.position().top // 4 px border from two panels and 2 stroke width of shape
+  //   // +14
+  // }));
+
+  finalElem = this.use();
+  finalElem.getBBox().x = 0;
+  finalElem.getBBox().y = 0;
+  console.log(finalElem.getBBox());
+  snapEdit.add(finalElem);
+  tempElem.remove();
 
 };
 
 
-// var selectBlock = function(){
-//   $('#overlay').css('visibility', 'visible');
-//   // console.log(this.clone());
-//   tempElem = this.use().attr({x:10,y:20}); 
-//   snapOverlay.add(tempElem);
-//   // tempElem.node.ondragover = function(){
-//   //   tempElem.data('origTransform', tempElem.transform().local);
-//   //   // tempElem.move();
-//   //   console.log(this.data('origTransform'));
-//   // };
-//   console.log("selected");
-// }
-
-// var moveBlock = function(dx, dy){
-//   // tempElem.attr({
-//   //   transform: this.data('origTransform') + (this.data('origTransform') ? "T" : "t") + [dx,dy]
-//   // });
-// }
-
-// var releaseBlock = function(){
-//   $('#overlay').css('visibility', 'hidden');
-//   console.log("released");
-// }
-
-blueRect.drag(move,start,end);
+// Initialize Dragging
+// ifBlock.drag(move,start,end);
+// redBlock.drag(move,start,end);

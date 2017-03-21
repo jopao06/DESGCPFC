@@ -3,6 +3,9 @@
 <head>
   <title>Sample Game</title>
 
+  <link rel="stylesheet" type="text/css" href="css/vendor/semantic.css">
+  <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.8/components/icon.min.css'>
+  <link rel="stylesheet" type="text/css" href="css/custom.css">
   <script src="http://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
   <script src="js/vendor/snap.svg-min.js"></script>
   <script src="js/vendor/semantic.js"></script>
@@ -11,12 +14,47 @@
 </head>
 <body>
   <svg id="overlay" width="100%" height="100%"></svg>
-  <div id="">
-    <svg id="block-panel" width="500" height="150"></svg>
+
+  <div id="game-body" class="ui padded grid">
+    <div class="eleven wide stretched column">
+      <div class="ui equal height grid">
+        <!-- BLOCK PANEL -->
+        <div id="block-div" class="sixteen wide column">
+          <div id="block-container">
+            <button id="block-go-left" class="ui left attached inverted button">
+              <i class="big caret left icon"></i>
+            </button>
+            <div id="scrollable-div">
+              <svg id="block-panel" width="100%" height="56"></svg>
+            </div>
+            <button id="block-go-right" class="ui right attached inverted button">
+              <i class="big caret right icon"></i>
+            </button>
+          </div>
+        </div>
+        <!-- DISPLAY PANEL -->
+        <div id="display-div" class="sixteen wide column">
+          <div id="display-container" class="ui segment">
+            <p>Display Panel</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- EDIT PANEL -->
+    <div id="edit-div" class="five wide column">
+      <div id="edit-container" class="ui segments">
+        <div id="edit-bar" class="ui segment">
+          <p><strong>EDITOR</strong></p>
+        </div>
+        <div class="ui secondary segment">
+          <svg id="edit-panel" width="100%" height="100%"></svg>
+        </div>
+      </div>
+    </div>
+
   </div>
-  <!-- <div id=""> -->
-    <svg id="edit-panel" width="500" height="150"></svg>
-  <!-- </div> -->
-  <script src="js/game.js"></script>
+  <script src="js/colors.js"></script>
+  <script src="js/block-data.js"></script>
+  <script src="js/block.js"></script>
 </body>
 </html>

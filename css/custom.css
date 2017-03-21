@@ -16,6 +16,12 @@ h1{
     color: blue;
 }
 */
+html,
+body {
+  height: 100%;
+  background-color: #131923;
+}
+/***************** INDEX *****************/
 .masthead.segment {
   min-height: 700px;
   padding: 1em 0em;
@@ -32,14 +38,93 @@ h1{
 .ui.masthead#minigames {
   padding: 7em 0em;
 }
+/***************** GAME *****************/
 #block-panel,
 #edit-panel,
 #overlay {
+  /*border: 2px solid;*/
+}
+#game-body {
+  padding: 15px;
+  /*.ui.grid .column:not(.row) {
+    padding: 0.5rem;
+  }*/
+}
+svg-container,
+#block-div #block-container,
+#edit-div #edit-container,
+#display-div #display-container {
   border: 2px solid;
+  border-color: #F4F4F4;
+  border-radius: 10px;
+}
+.ui.grid {
+  height: 100%;
+}
+#block-div {
+  /*height: 10%;*/
+  /*padding-bottom: 0;*/
+}
+#block-div #block-container {
+  display: inline-flex;
+  width: 100%;
+  /*.ui.attached.button {
+      font-size: 50px;
+      width: 10px;
+      padding-top: 0;
+      padding-bottom: 0;
+
+      &.left{
+        padding-left: 0;
+      }
+
+      &.right{
+        padding-right: 0;
+      }
+    }*/
+}
+#block-div #block-container .ui.attached.button {
+  padding: 0;
+}
+#block-div #block-container .ui.attached.button i {
+  margin: 0;
+}
+#block-div #block-container #scrollable-div {
+  overflow-y: auto;
+}
+#block-div #block-container #scrollable-div::-webkit-scrollbar {
+  display: none;
+}
+#edit-div {
+  height: 100%;
+}
+#edit-div #edit-container {
+  height: 100%;
+}
+#edit-div #edit-container #edit-bar {
+  background-color: #F4F4F4;
+}
+#edit-div #edit-container .secondary.segment {
+  height: 90%;
+  background-color: transparent;
+}
+#display-div {
+  height: 85%;
+}
+#display-div #display-container {
+  height: 100%;
+  background-color: #F4F4F4;
 }
 #overlay {
   position: absolute;
   z-index: 10;
   /*background-color:green;*/
   visibility: hidden;
+}
+svg text {
+  cursor: default;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
