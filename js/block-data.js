@@ -2,89 +2,94 @@ var blocks = [
   {
     text: "type",
     color: red,
-    class: "type"
+    class: "block type"
+  },
+  {
+    text: "Array",
+    color: red,
+    class: "block array"
   },
   {
     text: "variable",
     color: orange,
-    class: "variable"
+    class: "block variable"
   },
   {
     text: "=",
     color: gray,
-    class: "equal"
+    class: "block equal"
   },
   {
     text: "value",
     color: gray,
-    class: "value"
+    class: "block value"
   },
 ////////////////////////////// Arithmetic
   {
     text: "+",
     color: yellow,
-    class: "add"
+    class: "block add"
   },
   {
     text: "-",
     color: yellow,
-    class: "subtract"
+    class: "block subtract"
   },
   {
     text: "*",
     color: yellow,
-    class: "mult"
+    class: "block mult"
   },
   {
     text: "/",
     color: yellow,
-    class: "division"
+    class: "block division"
   },
   {
     text: "mod",
     color: yellow,
-    class: "mod"
+    class: "block mod"
   },
 ////////////////////////////// Boolean
 	{
     text: "<",
     color: green,
-    class: "less"
+    class: "block less"
   },
   {
     text: ">",
     color: green,
-    class: "greater"
+    class: "block greater"
   },
   {
     text: "<=",
     color: green,
-    class: "less-equal"
+    class: "block less-equal"
   },
   {
     text: ">=",
     color: green,
-    class: "greater-equal"
+    class: "block greater-equal"
   },
   {
     text: "=",
     color: green,
-    class: "equal"
+    class: "block equal"
   },
   {
     text: "not=",
     color: green,
-    class: "not-equal"
+    class: "block not-equal"
   },
 ////////////////////////////// Control Flow
   {
     text: "if",
     color: aqua,
-    class: "if"
+    class: "block if"
   },
 	{
     text: "repeat",
     color: purple,
-    class: "repeat"
+    class: "block repeat"
   },
 ];

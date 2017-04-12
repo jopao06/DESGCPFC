@@ -97,6 +97,10 @@ svg-container,
 }
 #edit-div {
   height: 100%;
+  /*  rect.top { stroke-dasharray: 0,50,150 }
+  rect.left { stroke-dasharray: 150,50 }
+  rect.bottom { stroke-dasharray: 100,50 }
+  rect.right { stroke-dasharray: 50,50,100 }*/
 }
 #edit-div #edit-container {
   height: 100%;
