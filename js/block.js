@@ -23,6 +23,8 @@
     end: null
   };
 
+  var adjustBlocks;
+
 $(document).ready(function(){
   // Temporary Variables
   var tempElem, finalElem;
@@ -249,7 +251,7 @@ $(document).ready(function(){
         x = blockMargin;
         y = target.getBBox().y;
 
-        adjustBlocks(target, true);
+        adjustBlocks(target,true,true);
 
         finalElem.node.right = null;
         finalElem.node.left = null;
@@ -281,10 +283,10 @@ $(document).ready(function(){
           finalElem.node.prevLine = target;
           finalElem.node.nextLine = null;
           target.node.nextLine = finalElem;
-          compData.end = finalElem;
+          compData.tail = finalElem;
         }
         else{
-          adjustBlocks(target.node.nextLine, true);
+          adjustBlocks(target.node.nextLine,true,true);
           finalElem.node.prevLine = target;
           finalElem.node.nextLine = target.node.nextLine;
           target.node.nextLine.node.prevLine = finalElem;
@@ -306,7 +308,7 @@ $(document).ready(function(){
           target.node.right = finalElem;
         }
         else{
-          adjustBlocks(target.node.right, false, finalElem);
+          adjustBlocks(target.node.right,true,false,finalElem);
           finalElem.node.right = target.node.right;
           finalElem.node.left = target;
           target.node.right.node.left = finalElem;
@@ -318,7 +320,7 @@ $(document).ready(function(){
         x = target.getBBox().x;
         y = target.getBBox().y;
 
-        adjustBlocks(target, false, finalElem);
+        adjustBlocks(target,true,false,finalElem);
 
         // If dragged to FAR LEFT
         if(target.node.left === null){
@@ -334,7 +336,7 @@ $(document).ready(function(){
           }
           if(target.node.nextLine === null){
             console.log("Drag to Left of END");
-            compData.end = finalElem;
+            compData.tail = finalElem;
           }else{
             target.node.nextLine.node.prevLine = finalElem;
           }
@@ -369,7 +371,7 @@ $(document).ready(function(){
         finalElem.node.right = null;
         finalElem.node.left = null;
         compData.head = finalElem;
-        compData.end = finalElem;
+        compData.tail = finalElem;
         break;
       default:
         console.log("ERROR: Drag unknown");
@@ -413,62 +415,110 @@ $(document).ready(function(){
     }
   };
 
-  function adjustBlocks(targetBlock, isVerticalAdjust, newBlock){
+  adjustBlocks = function (targetBlock, isAdd, isVerticalAdjust, newBlock){
     var ptr = targetBlock;
-    var ptr1;
+    var ptr1, ptr2;
     var xOrig, yOrig;
     var xAdj, yAdj;
-    if(isVerticalAdjust){
-      // console.log("Vertical Adjust");
-      while(ptr !== null){
-        // console.log(ptr);
-        xAdj = ptr.getBBox().x;
-        yAdj = ptr.getBBox().y;
-        ptr.select('rect').animate({              // Update the x and y of the rectangle
-          x: xAdj ,
-          y: yAdj + blockHeight + blockMargin
-        }, 230);
-        ptr.select('text').animate({                // Update the x and y of the text
-          x: xAdj + textXPadding,
-          y: yAdj + blockHeight + textYPadding
-        }, 230);
 
-        ptr1 = ptr.node.right;
-        while(ptr1 !== null){                   // Adjust right blocks
-          xOrig = ptr1.getBBox().x;
-          ptr1.select('rect').animate({              // Update the x and y of the rectangle
-            x: xOrig ,
+    if(isAdd){
+      if(isVerticalAdjust){
+        // console.log("Vertical Adjust");
+        while(ptr !== null){
+          // console.log(ptr);
+          xAdj = ptr.getBBox().x;
+          yAdj = ptr.getBBox().y;
+          ptr.select('rect').animate({              // Update the x and y of the rectangle
+            x: xAdj ,
             y: yAdj + blockHeight + blockMargin
           }, 230);
-          ptr1.select('text').animate({              // Update the x and y of the text
-            x: xOrig + textXPadding,
+          ptr.select('text').animate({                // Update the x and y of the text
+            x: xAdj + textXPadding,
             y: yAdj + blockHeight + textYPadding
           }, 230);
 
-          ptr1 = ptr1.node.right;
-        }
+          ptr1 = ptr.node.right;
+          while(ptr1 !== null){                   // Adjust right blocks
+            xOrig = ptr1.getBBox().x;
+            ptr1.select('rect').animate({              // Update the x and y of the rectangle
+              x: xOrig ,
+              y: yAdj + blockHeight + blockMargin
+            }, 230);
+            ptr1.select('text').animate({              // Update the x and y of the text
+              x: xOrig + textXPadding,
+              y: yAdj + blockHeight + textYPadding
+            }, 230);
 
-        ptr = ptr.node.nextLine;
+            ptr1 = ptr1.node.right;
+          }
+
+          ptr = ptr.node.nextLine;
+        }
+      }
+      else{
+        // console.log("Horizontal Adjust");
+        while(ptr!==null){
+          xAdj = newBlock.getBBox().width;
+          yAdj = ptr.getBBox().y;
+
+          xOrig = ptr.getBBox().x;
+
+          ptr.select('rect').animate({              // Update the x and y of the rectangle
+            x: xOrig + xAdj + blockMargin,
+            y: yAdj
+          }, 230);
+          ptr.select('text').animate({                // Update the x and y of the text
+            x: xOrig + xAdj + blockMargin + textXPadding,
+            y: ptr.select('text').attr('y')
+          }, 230);
+
+          ptr = ptr.node.right;
+        }
       }
     }
     else{
-      // console.log("Horizontal Adjust");
-      while(ptr!==null){
-        xAdj = newBlock.getBBox().width;
-        yAdj = ptr.getBBox().y;
+      if(isVerticalAdjust){
+        ptr1 = targetBlock.node.nextLine;
+        while(ptr1 !== null){
+          ptr1.select('rect').animate({              // Update the x and y of the rectangle
+            y: ptr.getBBox().y
+          }, 230);
+          ptr1.select('text').animate({                // Update the x and y of the text
+            y: ptr.select('text').attr('y')
+          }, 230);
 
-        xOrig = ptr.getBBox().x;
+          ptr2 = ptr1.node.right;
+          while(ptr2 !== null){
+            ptr2.select('rect').animate({              // Update the x and y of the rectangle
+              y: ptr.getBBox().y
+            }, 230);
+            ptr2.select('text').animate({                // Update the x and y of the text
+              y: ptr.select('text').attr('y')
+            }, 230);
 
-        ptr.select('rect').animate({              // Update the x and y of the rectangle
-          x: xOrig + xAdj + blockMargin,
-          y: yAdj
-        }, 230);
-        ptr.select('text').animate({                // Update the x and y of the text
-          x: xOrig + xAdj + blockMargin + textXPadding,
-          y: ptr.select('text').attr('y')
-        }, 230);
+            ptr2 = ptr2.node.right;
+          }
 
-        ptr = ptr.node.right;
+          ptr = ptr1;
+          ptr1 = ptr1.node.nextLine;
+        }
+      }
+      else{
+        ptr1 = targetBlock.node.right;
+        xAdj = ptr.getBBox().x;
+        while(ptr1 !== null){
+          // xOrig = ptr1.getBBox().x;
+          ptr1.select('rect').animate({              // Update the x and y of the rectangle
+            x: xAdj
+          }, 230);
+          ptr1.select('text').animate({                // Update the x and y of the text
+            x: xAdj + textXPadding
+          }, 230);
+
+          xAdj = xAdj + ptr1.getBBox().width+ blockMargin;
+          ptr = ptr1;
+          ptr1 = ptr1.node.right;
+        }
       }
     }
   }
