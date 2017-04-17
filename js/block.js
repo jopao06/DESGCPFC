@@ -9,10 +9,12 @@
   var overlayPanel = $(snapOverlay.node);
 
   var compData = {
-    blockPanelTop : blockPanel.position().top,
-    blockPanelLeft : blockPanel.position().left,
-    editPanelTop : editPanel.position().top,
-    editPanelLeft : editPanel.position().left,
+    blockPanelTop : blockPanel.parent().offset().top,
+    blockPanelLeft : blockPanel.parent().offset().left,
+    editPanelTop : editPanel.parent().offset().top,
+    editPanelLeft : editPanel.parent().offset().left,
+    // editPanelTop : editPanel.position().top,
+    // editPanelLeft : editPanel.position().left,
 
     blockPanelHeight : blockPanel.height(),
     editPanelHeight : editPanel.height(),
@@ -22,6 +24,13 @@
     head: null,
     end: null
   };
+
+  $( window ).resize(function() {
+    compData.blockPanelTop = blockPanel.parent().offset().top;
+    compData.blockPanelLeft = blockPanel.parent().offset().left;
+    compData.editPanelTop = editPanel.parent().offset().top;
+    compData.editPanelLeft = editPanel.parent().offset().left;
+  });
 
   var adjustBlocks;
 
@@ -44,12 +53,59 @@ $(document).ready(function(){
   var targetBlock = null;
   var newTarget = null;
 
-  
+/////////////////////////////////////////////////////// DEFAULT BLOCK
+  var defaultBlock = snapBlock.rect(defaultX,defaultY,blockWidth,blockHeight,5);
+  defaultBlock.attr({
+      'fill-opacity': 0,
+      stroke: '#FFFFFF',
+      strokeWidth: 2
+      // class: "block"
+  });
+  var defaultText = snapBlock.text(defaultX+textXPadding,textYPadding);
+  defaultText.attr({
+    'font-size': textSize,
+    fill: fgWhite
+  });
+/////////////////////////////////////////////////////// NULL BLOCK
+  var nullBlock = snapEdit.rect(10,10,blockWidth/1.25,blockHeight,5);
+  nullBlock.attr({
+      'fill-opacity': 0,
+      stroke: black,
+      strokeWidth: 2,
+      'stroke-dasharray':'5, 5'
+  });
 
+  nullBlock = snapEdit.g(nullBlock);
+  nullBlock.attr({
+    class: "null block",
+    style: "display:none"
+  });
+  nullBlock.toDefs();
+  // nullBlock.remove();
+/////////////////////////////////////////////////////// END BLOCKS
+  var endText = snapEdit.text(defaultY+textXPadding,defaultY+textYPadding/1.5,'end');
+  endText.attr({
+    'font-size': textSize,
+    fill: fgWhite
+  });
+  var endRect = snapEdit.rect(defaultY,defaultY,endText.getBBox().width+textXPadding*2,blockHeight,5);
+  endRect.attr({
+      'fill-opacity': 0,
+      stroke: black,
+      strokeWidth: 2,
+  });
+
+  var endBlock = snapEdit.g(endRect, endText);
+  endBlock.attr({
+    class: "end block",
+    style: "display:none"
+  });
+  endBlock.toDefs();
+  // endBlock.remove();
+/////////////////////////////////////////////////////// GUIDES
   var verticalGuide = snapEdit.path("M10 10L50 10");
   verticalGuide.attr({
       'fill-opacity': 0,
-      stroke: grayActive,
       strokeWidth: 5,
       'stroke-linecap':'round'
   });
@@ -68,12 +124,10 @@ $(document).ready(function(){
   var compX, compY;
   var move = function(dx, dy, x, y, e){
     tempElem.attr({
-      transform: "t"+[blockPanel.offset().left+dx, blockPanel.offset().top+dy]
+      transform: "t"+[ tempElem.data('origin').ox+dx, tempElem.data('origin').oy+dy]
     });
     tempElem.data('shift',{dx:dx,dy:dy});
     tempElem.data('mouse', {x:x,y:y});
-
-    // console.log(compData.head)
 
     // Check if block is dragged within editor
     if( ( tempElem.data('mouse').x + dragAllowance > compData.editPanelLeft )                        
@@ -86,14 +140,20 @@ $(document).ready(function(){
 
         newTarget = findTarget(compX + (tempElem.getBBox().width / 2), compY + (tempElem.getBBox().height / 2), tempElem);
         
+
         // Reset CSS
         verticalGuide.remove();
         horizontalGuide.remove();
-        if(targetBlock !== null) $(targetBlock.node).find('rect').css({"stroke-width":2});
+        if(targetBlock !== null){
+          $(targetBlock.node).find('rect').css({"stroke-width":2});
+        }
         
         // Update target block on drag
         if(targetBlock !== newTarget){
           targetBlock = newTarget;
+          console.log("=======================");
+          console.log(targetBlock.node);
+          console.log("=======================");
         }
 
         // Show guide and save the case number for end of drag
@@ -157,6 +217,7 @@ $(document).ready(function(){
     // Dragged to ON TOP of block
     else{
       $(target.node).find('rect').css({"stroke-width":4});
+      console.log(cx-target.getBBox().cx)
       if(target.node.left === null){
         caseNum = 0;
       }
@@ -175,27 +236,24 @@ $(document).ready(function(){
     var isFirst; // If block is first block of the line
     var ptr, ptr1;
 
-    // console.log("-------FIND TARGET-------");
-
     if(y < 0 + blockMargin){
       return compData.head;
     }
     else{
-      // target = compData.head;
       shortest = Number.POSITIVE_INFINITY;
       var i = 0;
       ptr = compData.head;
       while(ptr !== null){
+        // console.log(ptr.node);
         temp = Math.sqrt(Math.pow(ptr.getBBox().cx-cx,2) + Math.pow(ptr.getBBox().cy-cy,2));
-        // console.log(ptr);
-
+        // console.log("["+cx+","+cy+"]");
+        // console.log("["+ptr.getBBox().cx+","+ptr.getBBox().cy+"]");
+        // console.log(temp);
         final = temp <= shortest ? ptr : final;
         shortest = temp <= shortest ? temp : shortest;
         ptr1 = ptr.node.right;
         while(ptr1 !== null){
           temp = Math.sqrt(Math.pow(ptr1.getBBox().cx-cx,2) + Math.pow(ptr1.getBBox().cy-cy,2));
-
-          // console.log(ptr1);
 
           if(!(cy < ptr1.getBBox().y || cy > ptr1.getBBox().y2)){
             final = temp <= shortest ? ptr1 : final;
@@ -214,12 +272,15 @@ $(document).ready(function(){
   };
 /////////////////////////////////////////////////////// START
   var start = function(){
+    var endClone;
+
     $('#overlay').css('visibility', 'visible');
     tempElem = this.clone();
+
     tempElem.attr({
-      transform: "t"+[compData.blockPanelLeft, compData.blockPanelTop]
+      transform: "t"+[blockPanel.offset().left, blockPanel.offset().top]
     });
-    tempElem.data('origin', { ox:tempElem.getBBox().x, oy: tempElem.getBBox().y });
+    tempElem.data('origin', { ox:blockPanel.offset().left, oy: blockPanel.offset().top });
     tempElem.data('shift',{dx:0,dy:0});
     tempElem.data('caseNum', null);
     snapOverlay.add(tempElem);
@@ -231,23 +292,25 @@ $(document).ready(function(){
   var lastBlock;
   var finalRect;
   
-
-  $( window ).resize(function() {
-    compData.blockPanelTop = blockPanel.position().top;
-    compData.blockPanelLeft = blockPanel.position().left;
-    compData.editPanelTop = editPanel.position().top;
-    compData.editPanelLeft = editPanel.position().left;
-  });
 /////////////////////////////////////////////////////// END
+  var nullClone, endClone, codeLine;
+
   var end = function(e){
     $('#overlay').css('visibility', 'hidden');
     var target = tempElem.data('target');
     var caseNum = tempElem.data('caseNum');
     finalElem = this.clone();
 
+    if($(finalElem.node).hasClass("block if")){
+      nullClone = nullBlock.clone();
+      endClone = endBlock.clone();
+
+      finalElem.node.endBlock = endClone;
+    }
+
     // DRAG CASES
     switch(caseNum){
-      case 0: // TOP
+      case 0: //////////////////////////////////////// TOP
         x = blockMargin;
         y = target.getBBox().y;
 
@@ -271,7 +334,7 @@ $(document).ready(function(){
           target.node.prevLine = finalElem;
         }
         break;
-      case 1: // BOTTOM
+      case 1: //////////////////////////////////////// BOTTOM
         console.log("Drag to BOTTOM");
         x = blockMargin;
         y = target.getBBox().y2 + blockMargin;
@@ -293,7 +356,7 @@ $(document).ready(function(){
           target.node.nextLine = finalElem;
         }
         break;
-      case 2: // RIGHT
+      case 2: //////////////////////////////////////// RIGHT
         console.log("Drag to RIGHT");
         x = target.getBBox().x2 + blockMargin;
         y = target.getBBox().y;
@@ -315,7 +378,7 @@ $(document).ready(function(){
           target.node.right = finalElem;
         }
         break;
-      case 3: // LEFT
+      case 3: //////////////////////////////////////// LEFT
         console.log("Drag to LEFT");
         x = target.getBBox().x;
         y = target.getBBox().y;
@@ -354,24 +417,43 @@ $(document).ready(function(){
         }
         console.log(finalElem);
         break;
-      case 4: // ON BLOCK
+      case 4: //////////////////////////////////////// ON BLOCK
 
 
         break;
-      case 5: // FIRST DRAG
+      case 5: //////////////////////////////////////// FIRST DRAG
         console.log("First Drag");
         x = blockMargin;
         y = this.getBBox().y;
 
-        console.log(x+", "+y);
+        // console.log(x+", "+y);
 
         // Update Link List
         finalElem.node.prevLine = null;
-        finalElem.node.nextLine = null;
         finalElem.node.right = null;
         finalElem.node.left = null;
         compData.head = finalElem;
-        compData.tail = finalElem;
+
+        if($(finalElem.node).hasClass("block if")){
+          // console.log("BLOCK IF");
+          finalElem.node.nextLine = endClone;
+
+          // nullClone.node.prevLine = finalElem;
+          // nullClone.node.nextLine = endClone;
+          // nullClone.node.right = null;
+          // nullClone.node.left = null;
+
+          endClone.node.prevLine = finalElem;
+          endClone.node.nextLine = null;
+          endClone.node.right = null;
+          endClone.node.left = null;
+
+          compData.tail = endClone;
+        }
+        else{
+          finalElem.node.nextLine = null;
+          compData.tail = finalElem;
+        }
         break;
       default:
         console.log("ERROR: Drag unknown");
@@ -381,24 +463,56 @@ $(document).ready(function(){
     finalRect.attr({            // Update the x and y of the rectangle
       x: x,
       y: y
-    })
-    .next().attr({              // Update the x and y of the text
+    }).next().attr({              // Update the x and y of the text
       x: x + textXPadding,
       y: (y - $(this.node).find("rect").attr('y')) + textYPadding
     });
 
-    // console.log(compData);
-    // Bind a hover CSS
-    $(finalElem.node).hover(function(){
-      // console.log($(this));
-      $(this).find('rect').css({"stroke-width":4});
-    }, function(){
-      // console.log("Mouse leave");
-      $(this).find('rect').css({"stroke-width":2});
-    });
+////////////////////////////////////////////////////////// IF "IF-BLOCK"
+    if($(finalElem.node).hasClass("block if")){
+
+      // endClone = endBlock.clone();
+      $(endClone.node).removeAttr("style");
+      endClone.select('rect').attr({
+        x: x,
+        y: y + finalElem.getBBox().height + blockMargin,
+        stroke: finalElem.select('rect').attr('stroke')
+      });
+      endClone.select('text').attr({
+        x: x + textXPadding,
+        y: y + finalElem.getBBox().height + blockMargin + textYPadding/1.5
+      });
+      finalElem.node.endBlock = endClone;
+      
+      var my = (y+y+finalElem.getBBox().width)/2;
+      var ly = (endClone.getBBox().y2+endClone.getBBox().y)/2;
+      codeLine = snapEdit.path("M"+x+","+my+"L"+x+","+ly);
+      codeLine.attr({
+        stroke: finalElem.select('rect').attr('stroke'),
+        strokeWidth: 2,
+        'stroke-linejoin': 'round'
+      });
+      finalElem.node.codeLine = codeLine;
+
+      $(finalElem.node).hover(function(){
+        $(this).find('rect').css({"stroke-width":4});
+      }, function(){
+        $(this).find('rect').css({"stroke-width":2});
+      });
+
+      addHover(finalElem.node);
+      addHover(endClone.node);
+
+      snapEdit.add(finalElem);
+      snapEdit.add(endClone);
+      snapEdit.add(codeLine);
+    }else{
+      // Bind a hover CSS
+      addHover(finalElem.node);
+      snapEdit.add(finalElem);
+    }
 
     // Add final block to edit panel
-    snapEdit.add(finalElem);
 
     // Reset objects and elements
     tempElem.remove();
@@ -415,6 +529,27 @@ $(document).ready(function(){
     }
   };
 
+  addHover = function(elem){
+    if($(elem).hasClass('block if')){
+      $(elem).hover(function(){
+        $(this).find('rect').css({"stroke-width":4});
+        $(this.endBlock.node).find('rect').css({"stroke-width":4});
+        $(this.codeLine.node).css({"stroke-width":4});
+      }, function(){
+        $(this).find('rect').css({"stroke-width":2});
+        $(this.endBlock.node).find('rect').css({"stroke-width":2});
+        $(this.codeLine.node).css({"stroke-width":2});
+      });
+    }
+    else{
+      $(elem).hover(function(){
+        $(this).find('rect').css({"stroke-width":4});
+      }, function(){
+        $(this).find('rect').css({"stroke-width":2});
+      });
+    }
+  }
+
   adjustBlocks = function (targetBlock, isAdd, isVerticalAdjust, newBlock){
     var ptr = targetBlock;
     var ptr1, ptr2;
@@ -426,14 +561,14 @@ $(document).ready(function(){
         // console.log("Vertical Adjust");
         while(ptr !== null){
           // console.log(ptr);
-          xAdj = ptr.getBBox().x;
+          // xAdj = ptr.getBBox().x;
           yAdj = ptr.getBBox().y;
           ptr.select('rect').animate({              // Update the x and y of the rectangle
-            x: xAdj ,
+            // x: xAdj ,
             y: yAdj + blockHeight + blockMargin
           }, 230);
           ptr.select('text').animate({                // Update the x and y of the text
-            x: xAdj + textXPadding,
+            // x: xAdj + textXPadding,
             y: yAdj + blockHeight + textYPadding
           }, 230);
 
@@ -441,11 +576,11 @@ $(document).ready(function(){
           while(ptr1 !== null){                   // Adjust right blocks
             xOrig = ptr1.getBBox().x;
             ptr1.select('rect').animate({              // Update the x and y of the rectangle
-              x: xOrig ,
+              // x: xOrig ,
               y: yAdj + blockHeight + blockMargin
             }, 230);
             ptr1.select('text').animate({              // Update the x and y of the text
-              x: xOrig + textXPadding,
+              // x: xOrig + textXPadding,
               y: yAdj + blockHeight + textYPadding
             }, 230);
 
@@ -524,19 +659,6 @@ $(document).ready(function(){
   }
 
 /////////////////////////////////////////////////////////// INITIALIZE BLOCK PANEL
-  var defaultBlock = snapBlock.rect(defaultX,defaultY,blockWidth,blockHeight,5);
-  defaultBlock.attr({
-      'fill-opacity': 0,
-      stroke: '#FFFFFF',
-      strokeWidth: 2
-      // class: "block"
-  });
-  var defaultText = snapBlock.text(defaultX+textXPadding,textYPadding);
-  defaultText.attr({
-    'font-size': textSize,
-    fill: fgWhite
-  });
-
   var prevBlock = defaultBlock;
   var tempText;
   var groupedBlock;
@@ -554,7 +676,7 @@ $(document).ready(function(){
     // Clone text
     tempText = defaultText.clone();
     tempText.attr({
-      x: parseInt(tempElem.attr('x')) + textXPadding,
+      x: tempElem.getBBox().x + textXPadding,
       text: blocks[i].text
     });
 
@@ -588,4 +710,21 @@ $(document).ready(function(){
   $('#block-go-right').click(function(){
     $('#scrollable-div').animate({scrollLeft:'+=350px'});
   });
+
+  // var test = $('.block.type');
+  var test = blockPanel;
+  
+  $('#offset').click(function() {
+    var top = test.offset().top;
+    var left = test.offset().left;
+    var left = test.scrollLeft()
+    console.log('top: ' + top + ', left: ' + left);
+  });
+
+  $('#position').click(function() {
+      var top = test.position().top;
+      var left = test.position().left;
+      console.log('top: ' + top + ', left: ' + left);
+  });
+
 });

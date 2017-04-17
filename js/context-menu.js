@@ -65,7 +65,7 @@ var deleteBlock = function(key, options){
     }
 
     triggerBlock.remove();
-}
+};
 
 $(function() {
 $.contextMenu({
