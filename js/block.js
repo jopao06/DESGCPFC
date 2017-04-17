@@ -9,10 +9,10 @@
   var overlayPanel = $(snapOverlay.node);
 
   var compData = {
-    blockPanelTop : blockPanel.parent().offset().top,
-    blockPanelLeft : blockPanel.parent().offset().left,
-    editPanelTop : editPanel.parent().offset().top,
-    editPanelLeft : editPanel.parent().offset().left,
+    blockPanelTop : blockPanel.offset().top,
+    blockPanelLeft : blockPanel.offset().left,
+    editPanelTop : editPanel.offset().top,
+    editPanelLeft : editPanel.offset().left,
     // editPanelTop : editPanel.position().top,
     // editPanelLeft : editPanel.position().left,
 
@@ -26,10 +26,10 @@
   };
 
   $( window ).resize(function() {
-    compData.blockPanelTop = blockPanel.parent().offset().top;
-    compData.blockPanelLeft = blockPanel.parent().offset().left;
-    compData.editPanelTop = editPanel.parent().offset().top;
-    compData.editPanelLeft = editPanel.parent().offset().left;
+    compData.blockPanelTop = blockPanel.offset().top;
+    compData.blockPanelLeft = blockPanel.offset().left;
+    compData.editPanelTop = editPanel.offset().top;
+    compData.editPanelLeft = editPanel.offset().left;
   });
 
   var adjustBlocks;
@@ -124,20 +124,22 @@ $(document).ready(function(){
   var compX, compY;
   var move = function(dx, dy, x, y, e){
     tempElem.attr({
-      transform: "t"+[ tempElem.data('origin').ox+dx, tempElem.data('origin').oy+dy]
+      transform: "t"+[ blockPanel.offset().left+dx, blockPanel.offset().top+dy]
     });
     tempElem.data('shift',{dx:dx,dy:dy});
     tempElem.data('mouse', {x:x,y:y});
 
-    // Check if block is dragged within editor
-    if( ( tempElem.data('mouse').x + dragAllowance > compData.editPanelLeft )                        
-        &&
-        ( tempElem.data('mouse').y + dragAllowance > compData.editPanelTop )
-      ){
-        // console.log(editPanel.parent().scrollTop());
-        compX = dx - compData.editPanelLeft + compData.blockPanelLeft + this.getBBox().x;
-        compY = dy - compData.editPanelTop + compData.blockPanelTop + defaultY + editPanel.parent().scrollTop();
+    // console.log(tempElem.data('shift').dx);
 
+    // Check if block is dragged within editor
+    if( ( x + dragAllowance > compData.editPanelLeft )                        
+        &&
+        ( y + dragAllowance > compData.editPanelTop )
+      ){
+        compX = tempElem.data('shift').dx + tempElem.data('origin').ox - editPanel.parent().offset().left;    // EXPLANATION: Parent of edit panel instead of edit panel becausee parent is fixed and cannot be scrolled
+        compY = tempElem.data('shift').dy + tempElem.data('origin').oy - compData.editPanelTop + editPanel.parent().scrollTop()
+
+        // console.log("compX: "+ compX + ", compY: "+compY);
         newTarget = findTarget(compX + (tempElem.getBBox().width / 2), compY + (tempElem.getBBox().height / 2), tempElem);
         
 
@@ -280,7 +282,7 @@ $(document).ready(function(){
     tempElem.attr({
       transform: "t"+[blockPanel.offset().left, blockPanel.offset().top]
     });
-    tempElem.data('origin', { ox:blockPanel.offset().left, oy: blockPanel.offset().top });
+    tempElem.data('origin', { ox:$(this.node).offset().left, oy: $(this.node).offset().top });
     tempElem.data('shift',{dx:0,dy:0});
     tempElem.data('caseNum', null);
     snapOverlay.add(tempElem);
@@ -712,13 +714,13 @@ $(document).ready(function(){
   });
 
   // var test = $('.block.type');
-  var test = blockPanel;
+  var test = blockPanel.parent();
   
   $('#offset').click(function() {
     var top = test.offset().top;
     var left = test.offset().left;
-    var left = test.scrollLeft()
-    console.log('top: ' + top + ', left: ' + left);
+    var sleft = test.scrollLeft();
+    console.log('top: ' + top + ', left: ' + left + ', scrollLeft:' + sleft);
   });
 
   $('#position').click(function() {
