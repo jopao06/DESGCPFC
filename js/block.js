@@ -197,21 +197,29 @@ $(document).ready(function(){
     }
     // Dragged to RIGHT of block
     else if(cx > target.getBBox().x2 && (target.getBBox().y < cy && cy < target.getBBox().y2)){
-      horizontalGuide.attr({
-        d: "M"+target.getBBox().x2+" "+(target.getBBox().y+guideMargin)+"L"+target.getBBox().x2+" "+(target.getBBox().y2-guideMargin),
-        stroke: target.select('rect').attr('stroke')
-      });
-      snapEdit.add(horizontalGuide);
-      caseNum = 2;
+      if(!$(target.node).hasClass("block end")){
+        horizontalGuide.attr({
+          d: "M"+target.getBBox().x2+" "+(target.getBBox().y+guideMargin)+"L"+target.getBBox().x2+" "+(target.getBBox().y2-guideMargin),
+          stroke: target.select('rect').attr('stroke')
+        });
+        snapEdit.add(horizontalGuide);
+        caseNum = 2;
+      }else{
+        caseNum = -1;
+      }
     }
     // Dragged to LEFT of block
     else if(cx < target.getBBox().x && (target.getBBox().y < cy && cy < target.getBBox().y2)){
-      horizontalGuide.attr({
-        d: "M"+target.getBBox().x+" "+(target.getBBox().y+guideMargin)+"L"+target.getBBox().x+" "+(target.getBBox().y2-guideMargin),
-        stroke: target.select('rect').attr('stroke')
-      });
-      snapEdit.add(horizontalGuide);
-      caseNum = 3;
+      if(!$(target.node).hasClass("block end") && !$(target.node).hasClass("block if")){
+        horizontalGuide.attr({
+          d: "M"+target.getBBox().x+" "+(target.getBBox().y+guideMargin)+"L"+target.getBBox().x+" "+(target.getBBox().y2-guideMargin),
+          stroke: target.select('rect').attr('stroke')
+        });
+        snapEdit.add(horizontalGuide);
+        caseNum = 3;
+      }else{
+        caseNum = -1;
+      }
     }
     // Dragged to ON TOP of block
     else{
@@ -265,7 +273,7 @@ $(document).ready(function(){
         ptr = ptr.node.nextLine;
       }
 
-      finalBlock = finalBlock!==null && $(finalBlock.node).hasClass("block end") ? null : finalBlock;
+      // finalBlock = finalBlock!==null && $(finalBlock.node).hasClass("block end") ? null : finalBlock;
 
       return finalBlock;
     }
@@ -321,7 +329,7 @@ $(document).ready(function(){
     // DRAG CASES
     switch(caseNum){
       case 0: //////////////////////////////////////// TOP
-        x = blockMargin;
+        x = $(target.node).hasClass("block end") ? target.getBBox().x + blockMargin : target.getBBox().x;
         y = target.getBBox().y;
 
         adjustBlocks(target,true,true, finalElem);
@@ -332,16 +340,30 @@ $(document).ready(function(){
         if(target.node.prevLine === null){
           console.log("Drag to HEAD");
           finalElem.node.prevLine = null;
-          finalElem.node.nextLine = target;
-          target.node.prevLine = finalElem;
           compData.head = finalElem;
+
+          if($(finalElem.node).hasClass("block if")){
+            finalElem.node.endBlock.node.nextLine = target;
+            target.node.prevLine = finalElem.node.endBlock;
+          }
+          else{
+            finalElem.node.nextLine = target;
+            target.node.prevLine = finalElem;
+          }
         }
         else{
           console.log("Drag to TOP of target");
           finalElem.node.prevLine = target.node.prevLine;
-          finalElem.node.nextLine = target;
           target.node.prevLine.node.nextLine = finalElem;
-          target.node.prevLine = finalElem;
+
+          if($(finalElem.node).hasClass("block if")){
+            finalElem.node.endBlock.node.nextLine = target;
+            target.node.prevLine = finalElem.node.endBlock;
+          }
+          else{
+            finalElem.node.nextLine = target;
+            target.node.prevLine = finalElem;
+          }
         }
         break;
       case 1: //////////////////////////////////////// BOTTOM
@@ -354,9 +376,14 @@ $(document).ready(function(){
         // If dragged to END
         if(target.node.nextLine === null){
           finalElem.node.prevLine = target;
-          finalElem.node.nextLine = null;
           target.node.nextLine = finalElem;
-          compData.tail = finalElem;
+          
+          if($(finalElem.node).hasClass("block if")){
+            compData.tail =  finalElem.node.endBlock;
+          }else{
+            compData.tail = finalElem;
+            finalElem.node.nextLine = null;
+          }
         }
         else{
           adjustBlocks(target.node.nextLine,true,true, finalElem);
@@ -567,7 +594,7 @@ $(document).ready(function(){
     }
   };
 
-  adjustBlocks = function (targetBlock, isAdd, isVerticalAdjust, newBlock){
+  adjustBlocks = function(targetBlock, isAdd, isVerticalAdjust, newBlock){
     var ptr = targetBlock;
     var ptr1, ptr2;
     var xOrig, yOrig;
@@ -589,38 +616,7 @@ $(document).ready(function(){
             y: yAdj + blockHeight + textYPadding
           }, 230);
 
-          if($(ptr.node).hasClass("block if")){
-            console.log("ANIMATE LINE HEAD");
-            // var ifBlock = ptr.node.ifBlock;
-            // var my = yAdj + (blockHeight/2);
-            var x = ptr.getBBox().x;
-            // console.log("M"+x+","+my+"L"+x+","+ly);
-            ptr.node.codeLine.animate({
-              x1: x,
-              y1: yAdj + blockHeight + blockMargin + (blockHeight/2),
-            },230);
-          }
-
-          if($(ptr.node).hasClass("block end")){
-            console.log("ANIMATE LINE END");
-            var ifBlock = ptr.node.ifBlock;
-            // console.log(my);
-            // var my = ifBlock.getBBox().y + (blockHeight/2);
-            var ly = yAdj + blockHeight + (blockHeight/2);
-            var x = ifBlock.getBBox().x;
-            // console.log("M"+x+","+my+"L"+x+","+ly);
-
-            // console.log(ifBlock.node.codeLine);
-            // ifBlock.node.codeLine.animate({
-            //   x1: x,
-            //   y1: my
-            // },230);
-            ifBlock.node.codeLine.animate({
-              x2: x,
-              y2: ly + blockMargin
-            },230);
-            console.log(ifBlock.node.codeLine.node);
-          }
+          updateCodeLines(ptr, xAdj, yAdj + blockHeight + blockMargin + (blockHeight/2));
 
           ptr1 = ptr.node.right;
           while(ptr1 !== null){                   // Adjust right blocks
@@ -672,6 +668,8 @@ $(document).ready(function(){
             y: ptr.select('text').attr('y')
           }, 230);
 
+          updateCodeLines(ptr1, ptr1.getBBox().x, ptr1.getBBox().y - blockMargin - (blockHeight/2));
+
           ptr2 = ptr1.node.right;
           while(ptr2 !== null){
             ptr2.select('rect').animate({              // Update the x and y of the rectangle
@@ -708,6 +706,25 @@ $(document).ready(function(){
     }
   };
 
+  updateCodeLines = function(ptr, xAdj, yAdj){
+      var ifBlock = ptr.node.ifBlock;
+    if($(ptr.node).hasClass("block if")){
+      console.log("ANIMATE LINE HEAD");
+      ptr.node.codeLine.animate({
+        x1: xAdj,
+        y1: yAdj
+      },230);
+    }
+
+    if($(ptr.node).hasClass("block end")){
+      console.log("ANIMATE LINE END");
+      // var ifBlock = ptr.node.ifBlock;
+      ifBlock.node.codeLine.animate({
+        x2: xAdj,
+        y2: yAdj
+      },230);
+    }
+  }
 /////////////////////////////////////////////////////////// INITIALIZE BLOCK PANEL
   var prevBlock = defaultBlock;
   var tempText;
