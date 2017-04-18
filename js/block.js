@@ -97,7 +97,7 @@ $(document).ready(function(){
 
   var endBlock = snapEdit.g(endRect, endText);
   endBlock.attr({
-    class: "end block",
+    class: "block end",
     style: "display:none"
   });
   endBlock.toDefs();
@@ -137,7 +137,7 @@ $(document).ready(function(){
         ( y + dragAllowance > compData.editPanelTop )
       ){
         compX = tempElem.data('shift').dx + tempElem.data('origin').ox - editPanel.parent().offset().left;    // EXPLANATION: Parent of edit panel instead of edit panel becausee parent is fixed and cannot be scrolled
-        compY = tempElem.data('shift').dy + tempElem.data('origin').oy - compData.editPanelTop + editPanel.parent().scrollTop()
+        compY = tempElem.data('shift').dy + tempElem.data('origin').oy - compData.editPanelTop + editPanel.parent().scrollTop();
 
         // console.log("compX: "+ compX + ", compY: "+compY);
         newTarget = findTarget(compX + (tempElem.getBBox().width / 2), compY + (tempElem.getBBox().height / 2), tempElem);
@@ -153,9 +153,6 @@ $(document).ready(function(){
         // Update target block on drag
         if(targetBlock !== newTarget){
           targetBlock = newTarget;
-          console.log("=======================");
-          console.log(targetBlock.node);
-          console.log("=======================");
         }
 
         // Show guide and save the case number for end of drag
@@ -219,7 +216,7 @@ $(document).ready(function(){
     // Dragged to ON TOP of block
     else{
       $(target.node).find('rect').css({"stroke-width":4});
-      console.log(cx-target.getBBox().cx)
+      // console.log(cx-target.getBBox().cx);
       if(target.node.left === null){
         caseNum = 0;
       }
@@ -229,10 +226,10 @@ $(document).ready(function(){
     }
 
     return caseNum;
-  };
+  }
 
   function findTarget(cx, cy, block){
-    var target = final = compData.head;
+    var target = finalBlock = compData.head;
     var shortest;
     var temp;
     var isFirst; // If block is first block of the line
@@ -251,14 +248,14 @@ $(document).ready(function(){
         // console.log("["+cx+","+cy+"]");
         // console.log("["+ptr.getBBox().cx+","+ptr.getBBox().cy+"]");
         // console.log(temp);
-        final = temp <= shortest ? ptr : final;
+        finalBlock = temp <= shortest ? ptr : finalBlock;
         shortest = temp <= shortest ? temp : shortest;
         ptr1 = ptr.node.right;
         while(ptr1 !== null){
           temp = Math.sqrt(Math.pow(ptr1.getBBox().cx-cx,2) + Math.pow(ptr1.getBBox().cy-cy,2));
 
           if(!(cy < ptr1.getBBox().y || cy > ptr1.getBBox().y2)){
-            final = temp <= shortest ? ptr1 : final;
+            finalBlock = temp <= shortest ? ptr1 : finalBlock;
             shortest = temp <= shortest ? temp : shortest;
           }
 
@@ -268,10 +265,12 @@ $(document).ready(function(){
         ptr = ptr.node.nextLine;
       }
 
-      return final;
+      finalBlock = finalBlock!==null && $(finalBlock.node).hasClass("block end") ? null : finalBlock;
+
+      return finalBlock;
     }
     return null;
-  };
+  }
 /////////////////////////////////////////////////////// START
   var start = function(){
     var endClone;
@@ -301,13 +300,22 @@ $(document).ready(function(){
     $('#overlay').css('visibility', 'hidden');
     var target = tempElem.data('target');
     var caseNum = tempElem.data('caseNum');
+    var validDrag = true;
     finalElem = this.clone();
 
     if($(finalElem.node).hasClass("block if")){
-      nullClone = nullBlock.clone();
       endClone = endBlock.clone();
 
+      finalElem.node.nextLine = endClone;
+
+      endClone.node.prevLine = finalElem;
+      endClone.node.nextLine = null;
+      endClone.node.right = null;
+      endClone.node.left = null;
+
+
       finalElem.node.endBlock = endClone;
+      endClone.node.ifBlock = finalElem;
     }
 
     // DRAG CASES
@@ -316,7 +324,7 @@ $(document).ready(function(){
         x = blockMargin;
         y = target.getBBox().y;
 
-        adjustBlocks(target,true,true);
+        adjustBlocks(target,true,true, finalElem);
 
         finalElem.node.right = null;
         finalElem.node.left = null;
@@ -338,7 +346,7 @@ $(document).ready(function(){
         break;
       case 1: //////////////////////////////////////// BOTTOM
         console.log("Drag to BOTTOM");
-        x = blockMargin;
+        x = $(target.node).hasClass("block if") ? target.getBBox().x + blockMargin : target.getBBox().x;
         y = target.getBBox().y2 + blockMargin;
 
         finalElem.node.right = null;
@@ -351,15 +359,26 @@ $(document).ready(function(){
           compData.tail = finalElem;
         }
         else{
-          adjustBlocks(target.node.nextLine,true,true);
+          adjustBlocks(target.node.nextLine,true,true, finalElem);
           finalElem.node.prevLine = target;
-          finalElem.node.nextLine = target.node.nextLine;
-          target.node.nextLine.node.prevLine = finalElem;
+
+          if($(finalElem.node).hasClass("block if")){
+            finalElem.node.endBlock.node.nextLine = target.node.nextLine;
+            target.node.nextLine.node.prevLine = finalElem.node.endBlock.node.nextLine;
+          }else{
+            finalElem.node.nextLine = target.node.nextLine;
+            target.node.nextLine.node.prevLine = finalElem;
+          }
           target.node.nextLine = finalElem;
         }
         break;
       case 2: //////////////////////////////////////// RIGHT
         console.log("Drag to RIGHT");
+        if($(finalElem.node).hasClass("block if")){
+          validDrag = false;
+          break;
+        }
+
         x = target.getBBox().x2 + blockMargin;
         y = target.getBBox().y;
 
@@ -437,19 +456,6 @@ $(document).ready(function(){
         compData.head = finalElem;
 
         if($(finalElem.node).hasClass("block if")){
-          // console.log("BLOCK IF");
-          finalElem.node.nextLine = endClone;
-
-          // nullClone.node.prevLine = finalElem;
-          // nullClone.node.nextLine = endClone;
-          // nullClone.node.right = null;
-          // nullClone.node.left = null;
-
-          endClone.node.prevLine = finalElem;
-          endClone.node.nextLine = null;
-          endClone.node.right = null;
-          endClone.node.left = null;
-
           compData.tail = endClone;
         }
         else{
@@ -458,65 +464,74 @@ $(document).ready(function(){
         }
         break;
       default:
+        validDrag = false;
         console.log("ERROR: Drag unknown");
     }
 
-    finalRect = $(finalElem.node).find("rect");
-    finalRect.attr({            // Update the x and y of the rectangle
-      x: x,
-      y: y
-    }).next().attr({              // Update the x and y of the text
-      x: x + textXPadding,
-      y: (y - $(this.node).find("rect").attr('y')) + textYPadding
-    });
+    if(validDrag){
+      finalRect = $(finalElem.node).find("rect");
+      finalRect.attr({            // Update the x and y of the rectangle
+        x: x,
+        y: y
+      }).next().attr({              // Update the x and y of the text
+        x: x + textXPadding,
+        y: (y - $(this.node).find("rect").attr('y')) + textYPadding
+      });
 
 ////////////////////////////////////////////////////////// IF "IF-BLOCK"
-    if($(finalElem.node).hasClass("block if")){
+      if($(finalElem.node).hasClass("block if")){
 
-      // endClone = endBlock.clone();
-      $(endClone.node).removeAttr("style");
-      endClone.select('rect').attr({
-        x: x,
-        y: y + finalElem.getBBox().height + blockMargin,
-        stroke: finalElem.select('rect').attr('stroke')
-      });
-      endClone.select('text').attr({
-        x: x + textXPadding,
-        y: y + finalElem.getBBox().height + blockMargin + textYPadding/1.5
-      });
-      finalElem.node.endBlock = endClone;
-      
-      var my = (y+y+finalElem.getBBox().width)/2;
-      var ly = (endClone.getBBox().y2+endClone.getBBox().y)/2;
-      codeLine = snapEdit.path("M"+x+","+my+"L"+x+","+ly);
-      codeLine.attr({
-        stroke: finalElem.select('rect').attr('stroke'),
-        strokeWidth: 2,
-        'stroke-linejoin': 'round'
-      });
-      finalElem.node.codeLine = codeLine;
+        // endClone = endBlock.clone();
+        $(endClone.node).removeAttr("style");
+        endClone.select('rect').attr({
+          x: x,
+          y: y + finalElem.getBBox().height + blockMargin,
+          stroke: finalElem.select('rect').attr('stroke')
+        });
+        endClone.select('text').attr({
+          x: x + textXPadding,
+          y: y + finalElem.getBBox().height + blockMargin + textYPadding/1.5
+        });
+        finalElem.node.endBlock = endClone;
+        
+        var my = y+(finalElem.getBBox().height/2);
+        var ly = (endClone.getBBox().y2+endClone.getBBox().y)/2;
+        codeLine = snapEdit.line(x,my,x,ly);
+        codeLine.attr({
+          stroke: finalElem.select('rect').attr('stroke'),
+          strokeWidth: 5,
+          'stroke-linejoin': 'round'
+        });
+        finalElem.node.codeLine = codeLine;
+        codeLine.node.ifBlock = finalElem;
 
-      $(finalElem.node).hover(function(){
-        $(this).find('rect').css({"stroke-width":4});
-      }, function(){
-        $(this).find('rect').css({"stroke-width":2});
-      });
+        $(finalElem.node).hover(function(){
+          $(this).find('rect').css({"stroke-width":4});
+        }, function(){
+          $(this).find('rect').css({"stroke-width":2});
+        });
 
-      addHover(finalElem.node);
-      addHover(endClone.node);
+        addHover(finalElem.node);
+        addHover(endClone.node);
 
-      snapEdit.add(finalElem);
-      snapEdit.add(endClone);
-      snapEdit.add(codeLine);
+        snapEdit.add(finalElem);
+        snapEdit.add(endClone);
+        snapEdit.add(codeLine);
+      }else{
+        // Bind a hover CSS
+        addHover(finalElem.node);
+        snapEdit.add(finalElem);
+      }
     }else{
-      // Bind a hover CSS
-      addHover(finalElem.node);
-      snapEdit.add(finalElem);
+      finalElem.remove();
+      endBlock.remove();
+      // codeLine.remove();
     }
 
-    // Add final block to edit panel
 
-    // Reset objects and elements
+    // Add finalBlock block to edit panel
+
+///////////////////////////////////////////////////////// Reset objects and elements
     tempElem.remove();
     verticalGuide.remove();
     horizontalGuide.remove();
@@ -540,7 +555,7 @@ $(document).ready(function(){
       }, function(){
         $(this).find('rect').css({"stroke-width":2});
         $(this.endBlock.node).find('rect').css({"stroke-width":2});
-        $(this.codeLine.node).css({"stroke-width":2});
+        $(this.codeLine.node).css({"stroke-width":5});
       });
     }
     else{
@@ -550,7 +565,7 @@ $(document).ready(function(){
         $(this).find('rect').css({"stroke-width":2});
       });
     }
-  }
+  };
 
   adjustBlocks = function (targetBlock, isAdd, isVerticalAdjust, newBlock){
     var ptr = targetBlock;
@@ -562,27 +577,60 @@ $(document).ready(function(){
       if(isVerticalAdjust){
         // console.log("Vertical Adjust");
         while(ptr !== null){
-          // console.log(ptr);
-          // xAdj = ptr.getBBox().x;
-          yAdj = ptr.getBBox().y;
+          xAdj = ptr.getBBox().x;
+          // console.log($(newBlock.node).hasClass("block if"));
+          yAdj = $(newBlock.node).hasClass("block if") ? ptr.getBBox().y + blockHeight + blockMargin : ptr.getBBox().y;
           ptr.select('rect').animate({              // Update the x and y of the rectangle
-            // x: xAdj ,
+            x: xAdj ,
             y: yAdj + blockHeight + blockMargin
           }, 230);
           ptr.select('text').animate({                // Update the x and y of the text
-            // x: xAdj + textXPadding,
+            x: xAdj + textXPadding,
             y: yAdj + blockHeight + textYPadding
           }, 230);
+
+          if($(ptr.node).hasClass("block if")){
+            console.log("ANIMATE LINE HEAD");
+            // var ifBlock = ptr.node.ifBlock;
+            // var my = yAdj + (blockHeight/2);
+            var x = ptr.getBBox().x;
+            // console.log("M"+x+","+my+"L"+x+","+ly);
+            ptr.node.codeLine.animate({
+              x1: x,
+              y1: yAdj + blockHeight + blockMargin + (blockHeight/2),
+            },230);
+          }
+
+          if($(ptr.node).hasClass("block end")){
+            console.log("ANIMATE LINE END");
+            var ifBlock = ptr.node.ifBlock;
+            // console.log(my);
+            // var my = ifBlock.getBBox().y + (blockHeight/2);
+            var ly = yAdj + blockHeight + (blockHeight/2);
+            var x = ifBlock.getBBox().x;
+            // console.log("M"+x+","+my+"L"+x+","+ly);
+
+            // console.log(ifBlock.node.codeLine);
+            // ifBlock.node.codeLine.animate({
+            //   x1: x,
+            //   y1: my
+            // },230);
+            ifBlock.node.codeLine.animate({
+              x2: x,
+              y2: ly + blockMargin
+            },230);
+            console.log(ifBlock.node.codeLine.node);
+          }
 
           ptr1 = ptr.node.right;
           while(ptr1 !== null){                   // Adjust right blocks
             xOrig = ptr1.getBBox().x;
             ptr1.select('rect').animate({              // Update the x and y of the rectangle
-              // x: xOrig ,
+              x: xOrig ,
               y: yAdj + blockHeight + blockMargin
             }, 230);
             ptr1.select('text').animate({              // Update the x and y of the text
-              // x: xOrig + textXPadding,
+              x: xOrig + textXPadding,
               y: yAdj + blockHeight + textYPadding
             }, 230);
 
@@ -658,7 +706,7 @@ $(document).ready(function(){
         }
       }
     }
-  }
+  };
 
 /////////////////////////////////////////////////////////// INITIALIZE BLOCK PANEL
   var prevBlock = defaultBlock;
