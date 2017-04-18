@@ -31,13 +31,7 @@
     compData.editPanelTop = editPanel.offset().top;
     compData.editPanelLeft = editPanel.offset().left;
   });
-
-  var adjustBlocks;
-
-$(document).ready(function(){
-  // Temporary Variables
-  var tempElem, finalElem;
-
+  
   // Block Attributes
   var textXPadding = 15;
   var textYPadding = 30;
@@ -49,6 +43,13 @@ $(document).ready(function(){
   var defaultY =  10;
   var guideMargin = 8;    // Space between end of guide and corner of block
   var dragAllowance = 50; // Space around edit panel that is a acceptable 
+
+  var adjustBlocks;
+
+$(document).ready(function(){
+  // Temporary Variables
+  var tempElem, finalElem;
+
 
   var targetBlock = null;
   var newTarget = null;
@@ -311,6 +312,10 @@ $(document).ready(function(){
     var validDrag = true;
     finalElem = this.clone();
 
+    // CHECK TYPE OF BLOCK AND DO APPROPRIATE UPDATES
+    // if($(finalElem.node).hasClass("block type")){
+
+    // }
     if($(finalElem.node).hasClass("block if")){
       endClone = endBlock.clone();
 
@@ -377,7 +382,7 @@ $(document).ready(function(){
         if(target.node.nextLine === null){
           finalElem.node.prevLine = target;
           target.node.nextLine = finalElem;
-          
+
           if($(finalElem.node).hasClass("block if")){
             compData.tail =  finalElem.node.endBlock;
           }else{
