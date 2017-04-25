@@ -230,6 +230,7 @@ $(document).ready(function(){
         timesClone.node.headBlock = finalElem;
       }else if(isIfBlock){
         finalElem.node.elseBlock = null;
+        finalElem.node.elseIfBlocks = [];
       }
     }
 
@@ -492,6 +493,9 @@ $(document).ready(function(){
 
           addHover(timesClone.node);
           snapEdit.add(timesClone);
+        }else if(isIfBlock){
+          endClone.node.prevIf = finalElem;
+          finalElem.node.nextIf = endClone;
         }
         
         snapEdit.add(finalElem);
@@ -622,6 +626,7 @@ $(document).ready(function(){
     }
     else{
       if(isVerticalAdjust){
+        console.log("Others are being moved");
         ptr1 = targetBlock.node.nextLine;
         xOrig = targetBlock.getBBox().x;
         var foundEnd = false;
@@ -637,7 +642,7 @@ $(document).ready(function(){
           xAdj = blockMargin * (parseInt(ptr1.attr('code-level'))+1);
           yAdj = ptr.getBBox().y;
 
-          var duration = isTargetElseBlock ? 0 : 230;
+          var duration = (isTargetElseBlock || isTargetElseIfBlock) ? 0 : 230;
           ptr1.select('rect').animate({              // Update the x and y of the rectangle
             x: xAdj,
             y: yAdj

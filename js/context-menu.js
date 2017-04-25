@@ -18,11 +18,16 @@ var deleteRightBlocks = function(triggerBlock){
 };
 
 var deleteHead = function(triggerBlock){
+  console.log("DELETE HEAD");
+  var isIfBlock = $(triggerBlock.node).hasClass("block if");
+  var isRepeatBlock = $(triggerBlock.node).hasClass("block repeat");
+  var isEndBlock = $(triggerBlock.node).hasClass("block end");
   deleteRightBlocks(triggerBlock);
 
   // CASE 1.1: If has no right node, adjust next line blocks
   if(triggerBlock.node.right === null){
-    adjustBlocks(triggerBlock,false,true);
+    if(!isIfBlock && !isRepeatBlock && !isEndBlock)
+      adjustBlocks(triggerBlock,false,true);
 
     // if(isIfBlock) triggerBlock.node.nextLine = null;
     if(triggerBlock.node.nextLine !== null){
@@ -33,7 +38,8 @@ var deleteHead = function(triggerBlock){
   }
   // CASE 1.2: If has right nodes, adjust right blocks
   else{
-    adjustBlocks(triggerBlock,false,false);
+    if(!isIfBlock && !isRepeatBlock && !isEndBlock)
+      adjustBlocks(triggerBlock,false,false);
     triggerBlock.node.right.node.nextLine = triggerBlock.node.nextLine;
     if(triggerBlock.node.nextLine !== null) triggerBlock.node.nextLine.node.prevLine = triggerBlock.node.right;
     compData.head = triggerBlock.node.right;
@@ -41,17 +47,23 @@ var deleteHead = function(triggerBlock){
 };
 
 var deleteEnd = function(triggerBlock){
+  console.log("DELETE TAIL");
+  var isIfBlock = $(triggerBlock.node).hasClass("block if");
+  var isRepeatBlock = $(triggerBlock.node).hasClass("block repeat");
+  var isEndBlock = $(triggerBlock.node).hasClass("block end");
   deleteRightBlocks(triggerBlock);
 
   // CASE 2.1: If has no right node, adjust next line blocks
   if(triggerBlock.node.right === null){
-    adjustBlocks(triggerBlock,false,true);
+    if(!isIfBlock && !isRepeatBlock && !isEndBlock)
+      adjustBlocks(triggerBlock,false,true);
     if(triggerBlock.node.prevLine !== null) triggerBlock.node.prevLine.node.nextLine = null;
     compData.tail = triggerBlock.node.prevLine;
   }
   // CASE 2.2: If has right nodes, adjust right blocks
   else{
-    adjustBlocks(triggerBlock,false,false);
+    if(!isIfBlock && !isRepeatBlock && !isEndBlock)
+      adjustBlocks(triggerBlock,false,false);
     triggerBlock.node.right.node.prevLine = triggerBlock.node.prevLine;
     if(triggerBlock.node.prevLine !== null) triggerBlock.node.prevLine.node.nextLine = triggerBlock.node.right;
     compData.tail = triggerBlock.node.right;
@@ -59,16 +71,27 @@ var deleteEnd = function(triggerBlock){
 };
 
 var deleteVerticalMid = function(triggerBlock){
+  console.log("DELETE VERTICAL MID");
+  var isIfBlock = $(triggerBlock.node).hasClass("block if");
+  var isRepeatBlock = $(triggerBlock.node).hasClass("block repeat");
+  var isEndBlock = $(triggerBlock.node).hasClass("block end");
   deleteRightBlocks(triggerBlock);
+
+  if($(triggerBlock.node).hasClass("block elseif")){
+    var elseIfArray = triggerBlock.node.ifBlock.node.elseIfBlocks;
+    elseIfArray.splice(elseIfArray.indexOf(triggerBlock));
+  }
   // CASE 3.1: If has no right node, adjust next line blocks
   if(triggerBlock.node.right === null){
-    adjustBlocks(triggerBlock,false,true);
+    if(!isIfBlock && !isRepeatBlock && !isEndBlock)
+      adjustBlocks(triggerBlock,false,true);
     triggerBlock.node.nextLine.node.prevLine = triggerBlock.node.prevLine;
     triggerBlock.node.prevLine.node.nextLine = triggerBlock.node.nextLine;
   }
   // CASE 3.2: If has right nodes, adjust right blocks
   else{
-    adjustBlocks(triggerBlock,false,false);
+    if(!isIfBlock && !isRepeatBlock && !isEndBlock)
+      adjustBlocks(triggerBlock,false,false);
     triggerBlock.node.right.node.nextLine = triggerBlock.node.nextLine;
     triggerBlock.node.right.node.prevLine = triggerBlock.node.prevLine;
     triggerBlock.node.right.node.left = null;
@@ -89,53 +112,117 @@ var removeBlock = function(triggerBlock){
   triggerBlock.remove();
 };
 
+var adjustBlocks
+
 // Delete function for IF and REPEAT blocks
 var removeSpecialBlock = function(triggerBlock){
   $(triggerBlock.node).css({"display":"none"});
   $(triggerBlock.node.endBlock.node).css({"display":"none"});
   $(triggerBlock.node.codeLine.node).css({"display":"none"});
 
-  if(triggerBlock.node.elseBlock!==null){
+  var isIfBlock = $(triggerBlock.node).hasClass("block if");
+  var isElseBlock = $(triggerBlock.node).hasClass("block else");
+  var isEndBlock = $(triggerBlock.node).hasClass("block end");
+  
+  var triggerEnd = isEndBlock ? triggerBlock : triggerBlock.node.endBlock;
+  var triggerIf = isIfBlock ? triggerBlock : triggerBlock.node.ifBlock;
+
+  var ifData = {
+    x: triggerIf.getBBox().x,
+    y: triggerIf.getBBox().y,
+    x2: triggerIf.getBBox().x2,
+    y2: triggerIf.getBBox().y2
+  };
+
+  var ptr = triggerEnd;
+  var firstAdjust = ptr.node.nextLine;
+  while(ptr !== triggerIf){
+    ptr.attr({ 'code-level' : "-=1"});
+    if(!$(ptr.node).hasClass("block if") && !$(ptr.node).hasClass("block elseif") && !$(ptr.node).hasClass("block else") && !$(ptr.node).hasClass("block end"))
+      firstAdjust = ptr;
+    ptr = ptr.node.prevLine;
+  }
+
+  // ptr = triggerIf.node.nextLine;
+
+  // Remove ELSE Block
+  if(triggerIf.node.elseBlock!==null){
     deleteVerticalMid(triggerBlock.node.elseBlock);
     removeBlock(triggerBlock.node.elseBlock);
   }
-  // DELETE IF OR REPEAT BLOCK FIRST
-  Promise.resolve(triggerBlock)
-    .then(function(block){
-      return new Promise(function(resolve, rejectc){
-        setTimeout(function(){
-          if(block === compData.head){
-            deleteHead(block);
-          }
-          else if(block === compData.tail){
-            deleteEnd(block);
-          }
-          else{
-            deleteVerticalMid(block);
-          }
-          resolve(block.node.endBlock);
-        }, 0);
-      });
-    })
-    .then(function(block){
-      return new Promise(function(resolve, reject){
-        setTimeout(function(){
-          if(compData.head === block){
-            deleteHead(block);
-          }
-          else if(compData.tail === block){
-            deleteEnd(block);
-          }
-          else{
-            deleteVerticalMid(block);
-          }
-          resolve(block);
-        }, 230);
-      });
-    })
-    .then(function(block){
-      removeBlock(block);
-    });
+  // Remove ELSEIF Blocks
+  if(triggerIf.node.elseIfBlocks.length > 0){
+    var delPtr;
+    var ptr = triggerIf.node.nextIf;
+    while(ptr !== triggerIf.node.endBlock){
+      delPtr = ptr;
+      ptr = ptr.node.nextIf;
+      deleteVerticalMid(delPtr);
+      removeBlock(delPtr);
+    }
+  }
+  // Remove IF Block
+  if(triggerIf === compData.head){
+    deleteHead(triggerIf);
+  }
+  else if(triggerIf === compData.tail){
+    deleteEnd(triggerIf);
+  }
+  else{
+    deleteVerticalMid(triggerIf);
+  }
+  // Remove END Block
+  if(compData.head === triggerEnd){
+    deleteHead(triggerEnd);
+  }
+  else if(compData.tail === triggerEnd){
+    deleteEnd(triggerEnd);
+  }
+  else{
+    deleteVerticalMid(triggerEnd);
+  }
+  removeBlock(triggerBlock.node.endBlock);
+  removeBlock(triggerBlock);
+
+  var ptr1;
+  var yAdj = 0;
+  var xAdj = 0;
+  var x, y;
+  ptr = firstAdjust;
+  while(ptr !== null){
+    x = blockMargin * (parseInt(ptr.attr('code-level'))+1);
+    y = ifData.y + yAdj;
+
+    ptr.select('rect').animate({              // Update the x and y of the rectangle
+      x: x,
+      y: y
+    }, 230);
+    ptr.select('text').animate({                // Update the x and y of the text
+      x: x + textXPadding,
+      y: y + textYPadding
+    }, 230);
+
+    updateCodeLines(ptr, x, y + (blockHeight/2) );
+
+    ptr1 = ptr.node.right;
+    xAdj = 0;
+    while(ptr1 !== null){
+      ptr1.select('rect').animate({              // Update the x and y of the rectangle
+        x: x + ptr1.node.left.getBBox().width + blockMargin + xAdj,
+        y: y
+      }, 230);
+      ptr1.select('text').animate({                // Update the x and y of the text
+        x: x + ptr1.node.left.getBBox().width + blockMargin + xAdj + textXPadding,
+        y: y + textYPadding
+      }, 230);
+
+      xAdj += (blockMargin + ptr1.node.left.getBBox().width);
+      ptr1 = ptr1.node.right;
+    }
+
+    ptr = ptr.node.nextLine;
+    yAdj += (blockMargin + blockHeight);
+  }
 };
 
 var deleteBlock = function(key, options){
@@ -148,7 +235,6 @@ var deleteBlock = function(key, options){
 
   // CASE 1: DELETE HEAD
   if(triggerBlock === compData.head){
-    console.log("Delete Head");
     if(isIfBlock || isRepeatBlock || isEndBlock){
       removeSpecialBlock(triggerBlock);
     }else{
@@ -286,15 +372,89 @@ var insertElse = function(key, options){
   elseClone.node.left = null;
   elseClone.node.prevLine = triggerEnd.node.prevLine;
   elseClone.node.nextLine = triggerEnd;
+  elseClone.node.ifBlock = triggerBlock;
+  elseClone.node.endBlock = triggerBlock.node.endBlock;
 
   triggerEnd.node.prevLine.node.nextLine = elseClone;
   triggerEnd.node.prevLine = elseClone;
-  triggerBlock.node.elseBlock = elseClone;
-  elseClone.node.ifBlock = triggerBlock;
+  if($(triggerBlock.node).hasClass("block elseif"))
+    triggerBlock.node.ifBlock.node.elseBlock =  elseClone;
+  else
+    triggerBlock.node.elseBlock =  elseClone;
+  // Update IFs-link list
+  elseClone.node.prevIf = triggerBlock.node.endBlock.node.prevIf;
+  elseClone.node.nextIf = triggerBlock.node.endBlock;
+  triggerBlock.node.endBlock.node.prevIf.node.nextIf = elseClone;
+  triggerBlock.node.endBlock.node.prevIf = elseClone;
 
   snapEdit.add(elseClone);
   addHover(elseClone.node);
 };
+
+var insertElseIf = function(key, options){
+  var triggerBlock = Snap(options.$trigger[0]);
+  
+  var isIfBlock = $(triggerBlock.node).hasClass("block if");
+  var isElseIfBlock = $(triggerBlock.node).hasClass("block elseif");
+  var isElseBlock = $(triggerBlock.node).hasClass("block else");
+  
+  // var triggerEnd = isEndBlock ? triggerBlock : triggerBlock.node.endBlock;
+  var triggerIf = isIfBlock ? triggerBlock : triggerBlock.node.ifBlock;
+
+  var elseIfClone = elseIfBlock.clone();
+
+  if(!isIfBlock)
+    console.log(triggerBlock.node.prevIf.node);
+  var x = triggerBlock.getBBox().x;
+  var y = isElseBlock ? 
+            triggerBlock.node.prevIf.getBBox().y2 + blockMargin : 
+            triggerBlock.node.nextIf.node.prevLine.getBBox().y2 + blockMargin;
+  elseIfClone.select('rect').attr({
+    x: x,
+    y: y
+  });
+  elseIfClone.select('text').attr({
+    x: x + textXPadding,
+    y: y + textYPadding
+  });
+  elseIfClone.attr({ 'code-level' : + triggerBlock.attr('code-level')});
+
+  adjustBlocks(isElseBlock ? triggerBlock : triggerBlock.node.nextIf, true, true, elseIfClone);
+
+  elseIfClone.node.right = null;
+  elseIfClone.node.left = null;
+  if(isElseBlock){
+    elseIfClone.node.prevLine = triggerBlock.node.prevIf;
+    elseIfClone.node.nextLine = triggerBlock;
+
+    elseIfClone.node.ifBlock = triggerBlock.node.ifBlock;
+    elseIfClone.node.endBlock = triggerBlock.node.endBlock;
+    elseIfClone.node.nextIf = triggerBlock;
+    elseIfClone.node.prevIf = triggerBlock.node.prevIf;
+    
+    triggerBlock.node.prevLine.node.nextLine = elseIfClone;
+    triggerBlock.node.prevLine = elseIfClone;
+    triggerBlock.node.prevIf.node.nextIf = elseIfClone;
+    triggerBlock.node.prevIf = elseIfClone;
+  }else{
+    elseIfClone.node.prevLine = triggerBlock.node.nextIf.node.prevLine;
+    elseIfClone.node.nextLine = triggerBlock.node.nextIf;
+
+    elseIfClone.node.ifBlock = isIfBlock ? triggerBlock : triggerBlock.node.ifBlock;
+    elseIfClone.node.endBlock = triggerBlock.node.endBlock;
+    elseIfClone.node.nextIf = triggerBlock.node.nextIf;
+    elseIfClone.node.prevIf = triggerBlock;
+    
+    triggerBlock.node.nextIf.node.prevLine.node.nextLine = elseIfClone;
+    triggerBlock.node.nextIf.node.prevLine = elseIfClone;
+    triggerBlock.node.nextIf.node.prevIf = elseIfClone;
+    triggerBlock.node.nextIf = elseIfClone;
+  }
+
+  snapEdit.add(elseIfClone);
+  addHover(elseIfClone.node);
+  triggerIf.node.elseIfBlocks.push(elseIfClone);
+}
 
 var variableArray = [];
 var showVariableInput = function(key, options){
@@ -366,7 +526,7 @@ $.contextMenu({
       },
       addElseIf: {
         name: "Add elseif",
-        // callback: insertElseIf,
+        callback: insertElseIf,
         visible: false
       },
       addElse:{
@@ -411,6 +571,14 @@ $.contextMenu({
         options.items.addElseIf.visible = true;
         if(triggerBlock.node.elseBlock === null)
           options.items.addElse.visible = true;
+      }
+      else if($(this).hasClass("elseif")){
+        options.items.addElseIf.visible = true;
+        if(triggerBlock.node.ifBlock.node.elseBlock === null)
+          options.items.addElse.visible = true;
+      }
+      else if($(this).hasClass("else")){
+        options.items.addElseIf.visible = true;
       }
       else if($(this).hasClass("repeat")){
         options.items.repeatTimes.visible = true;
