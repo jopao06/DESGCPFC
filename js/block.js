@@ -86,7 +86,7 @@ $(document).ready(function(){
     }
     // Dragged to RIGHT of block
     else if(cx > target.getBBox().x2 && (target.getBBox().y < cy && cy < target.getBBox().y2)){
-      if(!isEndBlock && !isTimesBlock && isElseBlock){
+      if(!isEndBlock && !isTimesBlock && !isElseBlock){
         horizontalGuide.attr({
           d: "M"+target.getBBox().x2+" "+(target.getBBox().y+guideMargin)+"L"+target.getBBox().x2+" "+(target.getBBox().y2-guideMargin),
           stroke: target.select('rect').attr('stroke')

@@ -99,15 +99,6 @@ var removeSpecialBlock = function(triggerBlock){
     deleteVerticalMid(triggerBlock.node.elseBlock);
     removeBlock(triggerBlock.node.elseBlock);
   }
-  // if(triggerBlock === compData.head){
-  //   deleteHead(triggerBlock);
-  // }
-  // else if(triggerBlock === compData.tail){
-  //   deleteEnd(triggerBlock);
-  // }
-  // else{
-  //   deleteVerticalMid(triggerBlock);
-  // }
   // DELETE IF OR REPEAT BLOCK FIRST
   Promise.resolve(triggerBlock)
     .then(function(block){
@@ -287,7 +278,8 @@ var insertElse = function(key, options){
     x: x + textXPadding,
     y: y + textYPadding
   });
-  
+  elseClone.attr({ 'code-level' : + triggerBlock.attr('code-level')});
+
   adjustBlocks(triggerEnd, true, true, elseClone);
 
   elseClone.node.right = null;
