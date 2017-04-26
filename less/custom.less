@@ -20,7 +20,7 @@ h1{
 @import "colors.less";
 
 
-html, body {
+html, body.game {
   height: 100%;
   background-color: @bgBlue;
 }
@@ -102,11 +102,11 @@ svg-container{
     }
 
     #scrollable-div{
-      overflow-y:auto;
+      overflow:hidden;
       
-      &::-webkit-scrollbar { 
+      /*&::-webkit-scrollbar { 
           display: none; 
-      }
+      }*/
     }
   }
 }

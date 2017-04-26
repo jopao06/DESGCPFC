@@ -126,11 +126,12 @@ var removeSpecialBlock = function(triggerBlock){
   var triggerEnd = isEndBlock ? triggerBlock : triggerBlock.node.endBlock;
   var triggerIf = (isIfBlock || isRepeatBlock)? triggerBlock : triggerBlock.node.ifBlock;
 
+  console.log(triggerIf.select('rect').getBBox());
   var ifData = {
-    x: triggerIf.getBBox().x,
-    y: triggerIf.getBBox().y,
-    x2: triggerIf.getBBox().x2,
-    y2: triggerIf.getBBox().y2
+    x: triggerIf.select('rect').getBBox().x,
+    y: triggerIf.select('rect').getBBox().y,
+    x2: triggerIf.select('rect').getBBox().x2,
+    y2: triggerIf.select('rect').getBBox().y2
   };
 
   var ptr = triggerEnd;
@@ -196,6 +197,8 @@ var removeSpecialBlock = function(triggerBlock){
   var xAdj = 0;
   var x, y;
   ptr = firstAdjust;
+
+  console.log(ifData);
   while(ptr !== null){
     // console.log(ptr.node);
     x = blockMargin * (parseInt(ptr.attr('code-level'))+1);

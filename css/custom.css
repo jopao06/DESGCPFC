@@ -17,7 +17,7 @@ h1{
 }
 */
 html,
-body {
+body.game {
   height: 100%;
   background-color: #131923;
 }
@@ -90,10 +90,10 @@ svg-container,
   margin: 0;
 }
 #block-div #block-container #scrollable-div {
-  overflow-y: auto;
-}
-#block-div #block-container #scrollable-div::-webkit-scrollbar {
-  display: none;
+  overflow: hidden;
+  /*&::-webkit-scrollbar { 
+          display: none; 
+      }*/
 }
 #edit-div {
   height: 100%;

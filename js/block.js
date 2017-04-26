@@ -436,22 +436,26 @@ $(document).ready(function(){
 ////////////////////////////////////////////////////////// IF "IF-BLOCK"
       if(isIfBlock || isRepeatBlock){
         $(endClone.node).removeAttr("style");
+        var endCloneY =y + finalElem.getBBox().height + blockMargin
         endClone.attr({
           'code-level': + finalElem.attr('code-level')
         });
         endClone.select('rect').attr({
           x: x,
-          y: y + finalElem.getBBox().height + blockMargin,
+          y: endCloneY,
           stroke: finalElem.select('rect').attr('stroke')
         });
         endClone.select('text').attr({
           x: x + textXPadding,
-          y: y + finalElem.getBBox().height + blockMargin + textYPadding
+          y: endCloneY + textYPadding
         });
         finalElem.node.endBlock = endClone;
         
-        var my = y+(finalElem.getBBox().height/2);
-        var ly = (endClone.getBBox().y2+endClone.getBBox().y)/2;
+        console.log(y);
+        console.log(endCloneY);
+        var my = y+(blockHeight/2);
+        // var ly = (endClone.getBBox().y2+endClone.getBBox().y)/2;
+        var ly = endCloneY + (blockHeight/2); // Updated for Mozill compatibility
         codeLine = snapEdit.line(x,my,x,ly);
         codeLine.attr({
           stroke: finalElem.select('rect').attr('stroke'),
