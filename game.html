@@ -38,22 +38,24 @@
           </div>
         </div>
         <!-- DISPLAY PANEL -->
-        <script type="text/javascript">
-           function printDate(){
-              console.log("Hello");
-              console.log($("#in-date").val());
-           } 
-        </script>
         <div id="display-div" class="sixteen wide column">
           <div id="display-container" class="ui segment">
-            <p>Display Panel</p>
-            <button id="offset" class="ui button">.offset()</button>
-            <button id="position" class="ui button">.position()</button>
-            <form action="printDate()">
-              Birthday (date and time):
-              <input id="in-date" type="date" name="bdaytime">
-              <input type="button" value="Send" onclick="printDate()">
-            </form>
+            <div id="display-svg">
+              <svg style="height: 100%; width: 100%"></svg>
+            </div>
+            <div id="console" class="ui segments">
+              <i id="close-console" class="close icon" style=""></i>
+              <div id="console-title" class="ui segment">
+                <strong><i class="terminal icon"></i> Console</strong>
+              </div>
+              <div id="console-body" class="ui secondary segment">
+                <p>Error: Something is wrong</p>
+                <p>Error: Something is wrong</p>
+              </div>
+            </div>
+            <button id="open-console" class=" ui icon right floated large button" data-content="Open Console" data-position="top center" data-variation="tiny">
+              <i class="icon terminal"> </i>
+            </button>
           </div>
         </div>
       </div>
@@ -61,8 +63,9 @@
     <!-- EDIT PANEL -->
     <div id="edit-div" class="six wide column">
       <div id="edit-container" class="ui segments">
-        <div id="edit-bar" class="ui segment">
-          <p><strong>EDITOR</strong></p>
+        <div id="edit-bar" class="ui clearing segment">
+          <div id="edit-title" class="ui left floated segment" style=""><strong>EDITOR</strong></div>
+          <div class="ui right floated mini button"><i class="play icon"></i>Run</div>
         </div>
         <div id="scrollable-div" class="ui secondary segment">
           <svg id="edit-panel" width="100%" height="95%"></svg>
@@ -76,5 +79,6 @@
   <script src="js/block-data.js"></script>
   <script src="js/block.js"></script>
   <script src="js/context-menu.js"></script>
+  <script src="js/game.js"></script>
 </body>
 </html>

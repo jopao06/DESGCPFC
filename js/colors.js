@@ -26,4 +26,3 @@ var gray=          "#CCD1D9";
 var grayActive=    "#AAB2BD";
 var black=         "#656D78";
 var blackActive=   "#434A5A";
-var blackActive=   "#434A5A";

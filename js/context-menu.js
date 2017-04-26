@@ -128,7 +128,7 @@ var removeSpecialBlock = function(triggerBlock){
 
   console.log(triggerIf.select('rect').getBBox());
   var ifData = {
-    x: triggerIf.select('rect').getBBox().x,
+    x: triggerIf.select('rect').getBBox().x,    // .select('rect') needed for Mozilla compatibility
     y: triggerIf.select('rect').getBBox().y,
     x2: triggerIf.select('rect').getBBox().x2,
     y2: triggerIf.select('rect').getBBox().y2
