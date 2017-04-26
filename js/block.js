@@ -284,7 +284,8 @@ $(document).ready(function(){
         break;
       case 1: //////////////////////////////////////// BOTTOM
         console.log("Drag to BOTTOM");
-        x = (isTargetIfBlock || isTargetRepeatBlock || isTargetElseIfBlock || isTargetElseBlock) ? target.getBBox().x + blockMargin : target.getBBox().x;
+        x = (isTargetIfBlock || isTargetRepeatBlock || isTargetElseIfBlock || isTargetElseBlock) ? 
+              target.getBBox().x + blockMargin : target.getBBox().x;
         y = target.getBBox().y2 + blockMargin;
 
         if(isTargetIfBlock || isTargetRepeatBlock || isTargetElseIfBlock || isTargetElseBlock){
@@ -478,8 +479,8 @@ $(document).ready(function(){
             'code-level': + finalElem.attr('code-level')
           });
 
-          var x = finalElem.getBBox().x2 + blockMargin;
-          var y = finalElem.getBBox().y;
+          x = finalElem.getBBox().x2 + blockMargin;
+          y = finalElem.getBBox().y;
 
           timesClone.select('rect').attr({
             x: x,
@@ -524,6 +525,8 @@ $(document).ready(function(){
         height: (blockHeight  + blockMargin) * $('svg#edit-panel').find('g').length + 5
       });
     }
+
+    // console.log(compData.head);
   };
 
   addHover = function(elem){
@@ -534,7 +537,7 @@ $(document).ready(function(){
         $(this.codeLine.node).css({"stroke-width":4});
         if($(this).hasClass('block repeat'))
           $(this.timesBlock.node).find('rect').css({"stroke-width":4});
-        if(this.elseBlock !== null)
+        if(!$(elem).hasClass('block repeat') && this.elseBlock !== null)
           $(this.elseBlock.node).find('rect').css({"stroke-width":4});
       }, function(){
         $(this).find('rect').css({"stroke-width":2});
@@ -542,7 +545,7 @@ $(document).ready(function(){
         $(this.codeLine.node).css({"stroke-width":5});
         if($(this).hasClass('block repeat'))
           $(this.timesBlock.node).find('rect').css({"stroke-width":2});
-        if(this.elseBlock !== null)
+        if(!$(elem).hasClass('block repeat') && this.elseBlock !== null)
           $(this.elseBlock.node).find('rect').css({"stroke-width":2});
       });
     }

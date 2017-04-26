@@ -112,8 +112,6 @@ var removeBlock = function(triggerBlock){
   triggerBlock.remove();
 };
 
-var adjustBlocks
-
 // Delete function for IF and REPEAT blocks
 var removeSpecialBlock = function(triggerBlock){
   $(triggerBlock.node).css({"display":"none"});
@@ -121,11 +119,12 @@ var removeSpecialBlock = function(triggerBlock){
   $(triggerBlock.node.codeLine.node).css({"display":"none"});
 
   var isIfBlock = $(triggerBlock.node).hasClass("block if");
+  var isRepeatBlock = $(triggerBlock.node).hasClass("block repeat");
   var isElseBlock = $(triggerBlock.node).hasClass("block else");
   var isEndBlock = $(triggerBlock.node).hasClass("block end");
   
   var triggerEnd = isEndBlock ? triggerBlock : triggerBlock.node.endBlock;
-  var triggerIf = isIfBlock ? triggerBlock : triggerBlock.node.ifBlock;
+  var triggerIf = (isIfBlock || isRepeatBlock)? triggerBlock : triggerBlock.node.ifBlock;
 
   var ifData = {
     x: triggerIf.getBBox().x,
@@ -138,29 +137,37 @@ var removeSpecialBlock = function(triggerBlock){
   var firstAdjust = ptr.node.nextLine;
   while(ptr !== triggerIf){
     ptr.attr({ 'code-level' : "-=1"});
-    if(!$(ptr.node).hasClass("block if") && !$(ptr.node).hasClass("block elseif") && !$(ptr.node).hasClass("block else") && !$(ptr.node).hasClass("block end"))
+    if((ptr !== triggerEnd) && 
+      (!isRepeatBlock && (ptr !== triggerIf.node.elseBlock) && 
+      (triggerIf.node.elseIfBlocks.indexOf(ptr) === -1) ))
       firstAdjust = ptr;
     ptr = ptr.node.prevLine;
   }
 
-  // ptr = triggerIf.node.nextLine;
-
-  // Remove ELSE Block
-  if(triggerIf.node.elseBlock!==null){
-    deleteVerticalMid(triggerBlock.node.elseBlock);
-    removeBlock(triggerBlock.node.elseBlock);
+  if(isRepeatBlock || (isEndBlock && $(triggerEnd.node.ifBlock.node).hasClass("block repeat"))){
+    firstAdjust = triggerIf.node.nextLine;
   }
-  // Remove ELSEIF Blocks
-  if(triggerIf.node.elseIfBlocks.length > 0){
-    var delPtr;
-    var ptr = triggerIf.node.nextIf;
-    while(ptr !== triggerIf.node.endBlock){
-      delPtr = ptr;
-      ptr = ptr.node.nextIf;
-      deleteVerticalMid(delPtr);
-      removeBlock(delPtr);
+
+  // ptr = triggerIf.node.nextLine;
+  if(!isRepeatBlock && !$(triggerEnd.node.ifBlock.node).hasClass("block repeat")){
+    // Remove ELSE Block
+    if(triggerIf.node.elseBlock!==null){
+      deleteVerticalMid(triggerBlock.node.elseBlock);
+      removeBlock(triggerBlock.node.elseBlock);
+    }
+    // Remove ELSEIF Blocks
+    if(triggerIf.node.elseIfBlocks.length > 0){
+      var delPtr;
+      ptr = triggerIf.node.nextIf;
+      while(ptr !== triggerIf.node.endBlock){
+        delPtr = ptr;
+        ptr = ptr.node.nextIf;
+        deleteVerticalMid(delPtr);
+        removeBlock(delPtr);
+      }
     }
   }
+
   // Remove IF Block
   if(triggerIf === compData.head){
     deleteHead(triggerIf);
@@ -190,6 +197,7 @@ var removeSpecialBlock = function(triggerBlock){
   var x, y;
   ptr = firstAdjust;
   while(ptr !== null){
+    // console.log(ptr.node);
     x = blockMargin * (parseInt(ptr.attr('code-level'))+1);
     y = ifData.y + yAdj;
 
@@ -454,7 +462,7 @@ var insertElseIf = function(key, options){
   snapEdit.add(elseIfClone);
   addHover(elseIfClone.node);
   triggerIf.node.elseIfBlocks.push(elseIfClone);
-}
+};
 
 var variableArray = [];
 var showVariableInput = function(key, options){
