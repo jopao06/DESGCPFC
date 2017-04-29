@@ -9,3 +9,7 @@ Semantic-UI Docs
 	http://semantic-ui.com/introduction/getting-started.html
 jQuery contextMenu docs
 	https://swisnl.github.io/jQuery-contextMenu/demo.html
+Jison auto compile
+	http://stackoverflow.com/questions/34330846/auto-compile-jison-file-with-node
+Gulp Exec
+	https://www.npmjs.com/package/gulp-exec

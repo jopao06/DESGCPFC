@@ -15,7 +15,9 @@
   "devDependencies": {
     "browser-sync": "^2.18.5",
     "gulp": "^3.9.1",
-    "gulp-util": "^3.0.8"
+    "gulp-exec": "^2.1.3",
+    "gulp-util": "^3.0.8",
+    "jison": "^0.4.17"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
