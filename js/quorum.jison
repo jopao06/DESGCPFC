@@ -2,6 +2,16 @@
 
 /* lexical grammar */
 %lex
+%options flex
+
+%{
+ yy.varArray;
+ yy.isInitialized;
+ yy.terms;
+ yy.isVarDec;
+ yy.isRepeatTimes;
+%}
+
 %%
 
 \n\s*                     return 'newline';
@@ -14,17 +24,19 @@
 "times"\b                 return 'times'
 "repeatwhile"\b           return 'repeatwhile'
 
-"if"  return 'if'
-"elseif" return 'elseif'
-"else"\b return 'else'
-
+"if"                      return 'if'
+"elseif"                  return 'elseif'
+"else"\b                  return 'else'
 "end"\b                   return 'end'
+
+"output"                  return 'output'
 
 "mod"                     return 'mod'
 "not="                    return 'not='
 ("true"|"false")\b        return 'boolean'
 [a-zA-Z][a-zA-Z0-9]*\b    return 'variable'
 
+\"[\S\s]*\" return 'string'
 [0-9]+\.[0-9]+\b          return 'number'
 [0-9]+\b                  return 'integer'
 
@@ -65,8 +77,16 @@
 %% /* language grammar */
 
 program
-  : EOF { return ""}
-  | sourceElement EOF {return $1}
+  : EOF { return {code: "", message: ""} }
+  | sourceElement EOF {{
+      return {
+        code: $1, 
+        variables: yy.varArray,
+        terms: yy.terms,
+        isVarDec: yy.isVarDec,
+        isRepeatTimes: yy.isRepeatTimes
+      } 
+    }}
 ;
 
 sourceElement
@@ -79,11 +99,17 @@ statement
   | repeatStatement
   | ifStatement
   | end { $$ = "}";}
+  | outputStatement
 ;
 
+outputStatement
+  : output string {$$ = "console.log("+$2+");";}
+  | output relational_expr {$$ = "console.log("+$2+");";}
+;
+
+
 repeatStatement
-  : repeat integer times { $$ = "for(var=gT7oHN3a4G; gT7oHN3a4G < "+$2+"; gT7oHN3a4G++){";}
-  | repeat variable times { $$ = "for(var=gT7oHN3a4G; gT7oHN3a4G < "+$2+"; gT7oHN3a4G++){";}
+  : repeat expression times { $$ = "for(var=gT7oHN3a4G; gT7oHN3a4G < "+$2+"; gT7oHN3a4G++){"; yy.isRepeatTimes = true;}
   | repeatwhile relational_expr {$$ = "while "+$2;}
 ;
 
@@ -95,33 +121,74 @@ ifStatement
 
 variableStatement
  : variableDeclaration {$$ = $1+";"}
- | variableDeclaration initializer {$$= $1 + $2+";"}
- | variable initializer {$$= $1 + $2+";"}
+ | variableDeclaration initializer {$$ = $1 + $2+";"}
+ | variable initializer {{
+      yy.isVarDec = false; 
+      if(yy.varArray === undefined){ yy.varArray = [] } 
+      var varType = yy.data[$1] ? yy.data[$1].type : undefined;
+      yy.varArray.push({type: varType, name: $1});
+
+      $$= $1 + $2+";";
+    }}
  | arrayDeclaration {$$=$1+";"}
- | arrayVariable initializer {$$=$1+$2+";"}
+ | arrayVariable initializer { $$=$1+$2+";";}
 ;
 
 variableDeclaration
- : int_type variable {$$ = "var "+$2}
- | num_type variable {$$ = "var "+$2}
- | bool_type variable {$$ = "var " +$2}
+ : int_type variable {{ 
+      yy.isVarDec = true; 
+      if(yy.varArray === undefined){ yy.varArray = [] } 
+      yy.varArray.push({type: "integer", name: $2, isArray: false});
+      $$ = "var "+$2; 
+    }}
+ | num_type variable {{ 
+      yy.isVarDec = true; 
+      if(yy.varArray === undefined){ yy.varArray = [] } 
+      yy.varArray.push({type: "number", name: $2, isArray: false});
+      $$ = "var "+$2; 
+    }}
+ | bool_type variable {{ 
+      yy.isVarDec = true; 
+      if(yy.varArray === undefined){ yy.varArray = [] }
+      yy.varArray.push({type: "boolean", name: $2, isArray: false});
+      $$ = "var "+$2; 
+  }}
 ;
 
 arrayVariable
-  : variable indexInitializer {$$ = $1 + $2}
+  : variable indexInitializer {{
+      yy.isVarDec = false;
+      if(yy.varArray === undefined){ yy.varArray = [] }
+      var varType = yy.data[$1] ? yy.data[$1].type : undefined;
+      yy.varArray.push({type: varType, name: $1, isArray: true, arraySize: $2});
+      $$ = $1 + $2
+    }}
 ;
 
 arrayDeclaration
-  : int_type variable indexInitializer {$$ = "var "+$2+$3}
-  | num_type variable indexInitializer {$$ = "var "+$2+$3}
-  | bool_type variable indexInitializer {$$ = "var "+$2+$3}
+  : int_type variable indexInitializer {{
+      yy.isVarDec = true;
+      if(yy.varArray === undefined){ yy.varArray = [] } 
+      yy.varArray.push({type: "integer", name: $2, isArray: true, arraySize: $3});
+      $$ = "var "+$2+$3;
+    }}
+  | num_type variable indexInitializer {{
+      yy.isVarDec = true;
+      if(yy.varArray === undefined){ yy.varArray = [] } 
+      yy.varArray.push({type: "number", name: $2, isArray: true, arraySize: $3});
+      $$ = "var "+$2+$3;
+    }}
+  | bool_type variable indexInitializer {{
+      yy.isVarDec = true;
+      if(yy.varArray === undefined){ yy.varArray = [] } 
+      yy.varArray.push({type: "boolean", name: $2, isArray: true, arraySize: $3});
+      $$ = "var "+$2+$3;
+    }}
 ;
 
 indexInitializer
-  : '[' integer ']' {$$ = "["+$2+"]"}
-  | '[' integer ']' indexInitializer {$$ = "["+$2+"]" + $4}
-  | '[' variable ']' {$$ = "["+$2+"]"}
-  | '[' variable ']' indexInitializer {$$ = "["+$2+"]" + $4}
+  : '[' expression ']' indexInitializer { $$ = "["+ $2 +"]" + $4; }
+  | '[' expression ']' { $$ = "["+$2+"]"; }
 ;
 
 initializer
@@ -133,13 +200,28 @@ expression
   | expression '-' expression             { $$ = $1+ "-" +$3; }
   | expression '*' expression             { $$ = $1+ "*" +$3; }
   | expression '/' expression             { $$ = $1+ "/" +$3; }
-  | expression 'mod' expression             { $$ = $1+ "%" +$3; }
-  | '-' expression %prec UMINUS           { $$ = "(" + $2 + ")"; }
-  | '(' expression ')'                     { $$ = $2; }
+  | expression 'mod' expression           { $$ = $1+ "%" +$3; }
+  | '-' expression %prec UMINUS           { $$ = "-" + $2; }
+  | '(' expression ')'                    { $$ = "(" + $2 + ")"; }
+  | integer {{
+      $$ = ""+parseInt($1)+"";
+      if(yy.terms === undefined){ yy.terms = [] } 
+      yy.terms.push({value: $1, type: "integer" });
+    }}
+  | number {{ 
+      $$ = ""+Number($1)+""; 
+      if(yy.terms === undefined){ yy.terms = [] } 
+      yy.terms.push({value: $1, type: "number" });
+    }}
+  | variable {{
+      $$ = $1;
+      if(yy.varArray === undefined){ yy.varArray = [] }
+      var varType = yy.data[$1] ? yy.data[$1].type : undefined;
+      yy.varArray.push({type: varType, name: $1});
 
-  | integer                               { $$ = ""+parseInt($1)+""; }
-  | number                                { $$ = ""+Number($1)+""; }
-  | variable
+      if(yy.terms === undefined){ yy.terms = [] } 
+      yy.terms.push({value: $1, type: varType });
+  }}
 ;
 
 relational_expr

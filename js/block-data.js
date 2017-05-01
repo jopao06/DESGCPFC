@@ -5,14 +5,19 @@ var blocks = [
     class: "block type"
   },
   {
-    text: "Array",
-    color: red,
-    class: "block array"
-  },
-  {
     text: "variable",
     color: orange,
     class: "block variable"
+  },
+  {
+    text: "[",
+    color: orange,
+    class: "block open-bracket"
+  },
+  {
+    text: "]",
+    color: orange,
+    class: "block close-bracket"
   },
   {
     text: "=",
@@ -49,6 +54,16 @@ var blocks = [
     text: "mod",
     color: yellow,
     class: "block mod"
+  },
+  {
+    text: "(",
+    color: yellow,
+    class: "block open-parenthesis"
+  },
+  {
+    text: ")",
+    color: yellow,
+    class: "block close-parenthesis"
   },
 ////////////////////////////// Boolean
 	{
