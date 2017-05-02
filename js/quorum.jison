@@ -10,6 +10,7 @@
  yy.terms;
  yy.isVarDec;
  yy.isRepeatTimes;
+ yy.tempVar;
 %}
 
 %%
@@ -20,7 +21,7 @@
 "number"                  return 'num_type'
 "boolean"                 return 'bool_type'
 
-"repeat"\b                return 'repeat'
+"repeat"                  return 'repeat'
 "times"\b                 return 'times'
 "repeatwhile"\b           return 'repeatwhile'
 
@@ -36,7 +37,8 @@
 ("true"|"false")\b        return 'boolean'
 [a-zA-Z][a-zA-Z0-9]*\b    return 'variable'
 
-\"[\S\s]*\" return 'string'
+\"[\S\s]*\"               return 'string'
+\'[\S\s]*\'               return 'string'
 [0-9]+\.[0-9]+\b          return 'number'
 [0-9]+\b                  return 'integer'
 
@@ -109,7 +111,10 @@ outputStatement
 
 
 repeatStatement
-  : repeat expression times { $$ = "for(var=gT7oHN3a4G; gT7oHN3a4G < "+$2+"; gT7oHN3a4G++){"; yy.isRepeatTimes = true;}
+  : repeat expression times {{
+    yy.tempVar = makeid();
+    $$ = "for(var "+yy.tempVar+"=0; "+yy.tempVar+" < "+$2+"; "+yy.tempVar+"++){"; yy.isRepeatTimes = true;
+  }}
   | repeatwhile relational_expr {$$ = "while "+$2;}
 ;
 
@@ -235,3 +240,18 @@ relational_expr
   | boolean { $$ = "" + yytext==="true" + ""; }
   | expression
 ;
+
+%%
+
+function makeid(){
+  var text = "";
+  var possibleChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  var possibleNum = "0123456789";
+
+  for( var i=0; i < 5; i++ ){
+    text += possibleChar.charAt(Math.floor(Math.random() * possibleChar.length));
+    text += possibleNum.charAt(Math.floor(Math.random() * possibleNum.length));
+  }
+
+  return text;
+}

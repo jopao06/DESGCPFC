@@ -18,7 +18,7 @@ var deleteRightBlocks = function(triggerBlock){
 };
 
 var deleteHead = function(triggerBlock){
-  console.log("DELETE HEAD");
+  // console.log("DELETE HEAD");
   var isIfBlock = $(triggerBlock.node).hasClass("block if");
   var isRepeatBlock = $(triggerBlock.node).hasClass("block repeat");
   var isEndBlock = $(triggerBlock.node).hasClass("block end");
@@ -47,7 +47,7 @@ var deleteHead = function(triggerBlock){
 };
 
 var deleteEnd = function(triggerBlock){
-  console.log("DELETE TAIL");
+  // console.log("DELETE TAIL");
   var isIfBlock = $(triggerBlock.node).hasClass("block if");
   var isRepeatBlock = $(triggerBlock.node).hasClass("block repeat");
   var isEndBlock = $(triggerBlock.node).hasClass("block end");
@@ -71,7 +71,7 @@ var deleteEnd = function(triggerBlock){
 };
 
 var deleteVerticalMid = function(triggerBlock){
-  console.log("DELETE VERTICAL MID");
+  // console.log("DELETE VERTICAL MID");
   var isIfBlock = $(triggerBlock.node).hasClass("block if");
   var isRepeatBlock = $(triggerBlock.node).hasClass("block repeat");
   var isEndBlock = $(triggerBlock.node).hasClass("block end");
@@ -126,7 +126,7 @@ var removeSpecialBlock = function(triggerBlock){
   var triggerEnd = isEndBlock ? triggerBlock : triggerBlock.node.endBlock;
   var triggerIf = (isIfBlock || isRepeatBlock)? triggerBlock : triggerBlock.node.ifBlock;
 
-  console.log(triggerIf.select('rect').getBBox());
+  // console.log(triggerIf.select('rect').getBBox());
   var ifData = {
     x: triggerIf.select('rect').getBBox().x,    // .select('rect') needed for Mozilla compatibility
     y: triggerIf.select('rect').getBBox().y,
@@ -134,19 +134,25 @@ var removeSpecialBlock = function(triggerBlock){
     y2: triggerIf.select('rect').getBBox().y2
   };
 
+  // console.log(triggerEnd.node);
   var ptr = triggerEnd;
   var firstAdjust = ptr.node.nextLine;
+  // console.log(firstAdjust.node);
+  // Find the first block to adjust to IF or REPEAT block
   while(ptr !== triggerIf){
     ptr.attr({ 'code-level' : "-=1"});
-    if((ptr !== triggerEnd) && 
-      (!isRepeatBlock && (ptr !== triggerIf.node.elseBlock) && 
-      (triggerIf.node.elseIfBlocks.indexOf(ptr) === -1) ))
-      firstAdjust = ptr;
-    ptr = ptr.node.prevLine;
-  }
+    if(ptr !== triggerEnd){                                                            // Should not be END block
+      if(isIfBlock){
+        if((ptr !== triggerIf.node.elseBlock) &&                  // Should not be ELSE block
+          (triggerIf.node.elseIfBlocks.indexOf(ptr) === -1))   // Should not be ELSEIF block      ){ 
+          firstAdjust = ptr;
+      }else{
+        firstAdjust = ptr;
+      }
+      // console.log(firstAdjust.node);
+    }
 
-  if(isRepeatBlock || (isEndBlock && $(triggerEnd.node.ifBlock.node).hasClass("block repeat"))){
-    firstAdjust = triggerIf.node.nextLine;
+    ptr = ptr.node.prevLine;
   }
 
   // ptr = triggerIf.node.nextLine;
@@ -240,13 +246,14 @@ var deleteBlock = function(key, options){
   var triggerBlock = Snap(options.$trigger[0]);
   var isIfBlock = $(triggerBlock.node).hasClass("block if");
   var isRepeatBlock = $(triggerBlock.node).hasClass("block repeat");
+  var isTimesBlock = $(triggerBlock.node).hasClass("block times");
   var isEndBlock = $(triggerBlock.node).hasClass("block end");
 
   triggerBlock = isEndBlock ? triggerBlock.node.ifBlock : triggerBlock;
 
   // CASE 1: DELETE HEAD
   if(triggerBlock === compData.head){
-    if(isIfBlock || isRepeatBlock || isEndBlock){
+    if(isIfBlock || isRepeatBlock || isEndBlock || isTimesBlock){
       removeSpecialBlock(triggerBlock);
     }else{
       deleteHead(triggerBlock);
@@ -265,7 +272,7 @@ var deleteBlock = function(key, options){
   }
   // CASE 3: VERTICAL MID
   else if(triggerBlock.node.left === null){
-    console.log("Delete vertical mid");
+    // console.log("Delete vertical mid");
     if(isIfBlock || isRepeatBlock || isEndBlock){
         removeSpecialBlock(triggerBlock);
     }else{
@@ -275,11 +282,17 @@ var deleteBlock = function(key, options){
   }
   // CASE 4: HORIZONTAL MID
   else if(triggerBlock.node.left !== null){
-    console.log("Delete horizontall mid");
-    adjustBlocks(triggerBlock,false,false);
-    triggerBlock.node.left.node.right = triggerBlock.node.right;
-    if(triggerBlock.node.right !== null) triggerBlock.node.right.node.left = triggerBlock.node.left;
-    removeBlock(triggerBlock);
+    // console.log("Delete horizontall mid");
+    if(isTimesBlock){
+      console.log(triggerBlock);
+      removeSpecialBlock(triggerBlock.node.headBlock);
+    }else{
+      adjustBlocks(triggerBlock,false,false);
+      triggerBlock.node.left.node.right = triggerBlock.node.right;
+      if(triggerBlock.node.right !== null) triggerBlock.node.right.node.left = triggerBlock.node.left;
+      removeBlock(triggerBlock);
+      
+    }
   }
   else{
     console.log("ERROR: Deletion unknown");
@@ -468,25 +481,23 @@ var insertElseIf = function(key, options){
 };
 
 var variableArray = [];
-var showVariableInput = function(key, options){
-  var triggerBlock = Snap(options.$trigger[0]);
-  options.items.input.visible = true;
+var changeVariable = function(e){
+  // var triggerBlock = Snap(e.data.$trigger[0]);
+  // var inputText = e.target;
+  var menu = e.data.$menu;
 
-  $('.input-variable').find('input').keyup(function(e){
-    if(e.keyCode == 13){
-      variableArray.push($(this).val());
-      updateBlock(triggerBlock,$(this).val());
-      options.$menu.trigger("contextmenu:hide");
-    }
-  });
+  if(e.keyCode == 13){
+    menu.trigger("contextmenu:hide");
+    // console.log("FROM CONTEXT MENU");
+  }
 
   return false;
 };
 
 var changeValue = function(e){
-  var triggerBlock = Snap(e.data.$trigger[0]);
+  // var triggerBlock = Snap(e.data.$trigger[0]);
     if(e.keyCode == 13){
-      updateBlock(triggerBlock,$(e.target).val());
+      // updateBlock(triggerBlock,$(e.target).val());
       e.data.$menu.trigger("contextmenu:hide");
     }
 };
@@ -515,16 +526,14 @@ $.contextMenu({
           }
         }
       },
-      addVar: {
-        name: "Enter Variable",
-        icon: "fa-plus",
-        visible: false,
-        callback: showVariableInput
-      },
       input: {
+        name: "Variable Name",
         type: "text",
         className: "input-variable",
         visible: false,
+        events: {
+          keyup: changeVariable
+        }
       },
       editValue: {
         name: "Edit Value",
@@ -561,7 +570,7 @@ $.contextMenu({
     show : function(options){
       var triggerBlock = Snap(options.$trigger[0]);
       options.items.select.visible = false;
-      options.items.addVar.visible = false;
+      // options.items.addVar.visible = false;
       options.items.editValue.visible = false;
       options.items.input.visible = false;
       options.items.repeatTimes.visible = false;
@@ -573,7 +582,8 @@ $.contextMenu({
         options.items.select.visible = true;
       }
       else if($(this).hasClass("variable")){
-        options.items.addVar.visible = true;
+        options.items.input.visible = true;
+        // options.items.addVar.visible = true;
       }
       else if($(this).hasClass("value")){
         options.items.editValue.visible = true;
@@ -599,6 +609,21 @@ $.contextMenu({
       $.contextMenu.setInputValues(options, this.data());
     },
     hide: function(options) {
+      var triggerBlock = Snap(options.$trigger[0]);
+      var menu = options.$menu;
+      
+      if(options.items.input.visible || options.items.editValue.visible){
+        var inputText = $(menu).find("li.context-menu-input:visible").find("input");
+        // console.log(inputText);
+
+        if(options.items.input.visible) variableArray.push($(inputText).val());
+        updateBlock(triggerBlock,$(inputText).val());
+        
+        // console.log(options);
+      }
+      // else if(options.items.editValue){
+      //   updateBlock(triggerBlock,$(e.target).val());
+      // }
       $.contextMenu.getInputValues(options, this.data());
     }
   }

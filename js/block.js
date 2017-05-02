@@ -9,7 +9,7 @@ $(document).ready(function(){
 /////////////////////////////////////////////////////////// DRAG FUNCTIONS
 /////////////////////////////////////////////////////// MOVE
   var compX, compY;
-  var move = function(dx, dy, x, y, e){
+  move = function(dx, dy, x, y, e){
     tempElem.attr({
       transform: "t"+[ blockPanel.offset().left+dx, blockPanel.offset().top+dy]
     });
@@ -50,6 +50,9 @@ $(document).ready(function(){
     else{
       verticalGuide.remove();
       horizontalGuide.remove();
+
+      tempElem.data('caseNum', -1);
+      tempElem.data('target', null);
     }
   };
 
@@ -163,7 +166,7 @@ $(document).ready(function(){
     return null;
   }
 /////////////////////////////////////////////////////// START
-  var start = function(){
+  start = function(){
     var endClone;
 
     $('#overlay').css('visibility', 'visible');
@@ -183,8 +186,7 @@ $(document).ready(function(){
   
 /////////////////////////////////////////////////////// END
   var nullClone, endClone, codeLine, timesClone;
-
-  var end = function(e){
+  end = function(e){
     var x, y;
     $('#overlay').css('visibility', 'hidden');
     var target = tempElem.data('target');
@@ -197,13 +199,14 @@ $(document).ready(function(){
     var isEndBlock = $(finalElem.node).hasClass("block end");
     var isTimesBlock = $(finalElem.node).hasClass("block times");
 
-    var isTargetIfBlock = target === null ? false : $(target.node).hasClass("block if");
-    var isTargetElseIfBlock = target === null ? false : $(target.node).hasClass("block elseif");
-    var isTargetElseBlock = target === null ? false : $(target.node).hasClass("block else");
-    var isTargetRepeatBlock = target === null ? false : $(target.node).hasClass("block repeat");
-    var isTargetEndBlock = target === null ? false : $(target.node).hasClass("block end");
+    var isTargetIfBlock = target ? $(target.node).hasClass("block if") : false;
+    var isTargetElseIfBlock = target ? $(target.node).hasClass("block elseif") : false;
+    var isTargetElseBlock = target ? $(target.node).hasClass("block else") : false;
+    var isTargetRepeatBlock = target ? $(target.node).hasClass("block repeat") : false;
+    var isTargetEndBlock = target ? $(target.node).hasClass("block end") : false;
 
-    if(isIfBlock || isRepeatBlock){
+    console.log(caseNum + " " + target);
+    if(~caseNum && (isIfBlock || isRepeatBlock)){
       endClone = endBlock.clone();
 
       finalElem.node.nextLine = endClone;
@@ -254,7 +257,7 @@ $(document).ready(function(){
         }
         // If dragged to HEAD
         if(target.node.prevLine === null){
-          console.log("Drag to HEAD");
+          // console.log("Drag to HEAD");
           finalElem.node.prevLine = null;
           compData.head = finalElem;
 
@@ -268,7 +271,7 @@ $(document).ready(function(){
           }
         }
         else{
-          console.log("Drag to TOP of target");
+          // console.log("Drag to TOP of target");
           finalElem.node.prevLine = target.node.prevLine;
           target.node.prevLine.node.nextLine = finalElem;
 
@@ -283,7 +286,7 @@ $(document).ready(function(){
         }
         break;
       case 1: //////////////////////////////////////// BOTTOM
-        console.log("Drag to BOTTOM");
+        // console.log("Drag to BOTTOM");
         x = (isTargetIfBlock || isTargetRepeatBlock || isTargetElseIfBlock || isTargetElseBlock) ? 
               target.getBBox().x + blockMargin : target.getBBox().x;
         y = target.getBBox().y2 + blockMargin;
@@ -326,7 +329,7 @@ $(document).ready(function(){
         }
         break;
       case 2: //////////////////////////////////////// RIGHT
-        console.log("Drag to RIGHT");
+        // console.log("Drag to RIGHT");
         if(isIfBlock || isRepeatBlock){
           validDrag = false;
           break;
@@ -345,7 +348,7 @@ $(document).ready(function(){
           target.node.right = finalElem;
         }
         else{
-          console.log("DRAGGED in between");
+          // console.log("DRAGGED in between");
           adjustBlocks(target.node.right,true,false,finalElem);
           finalElem.node.right = target.node.right;
           finalElem.node.left = target;
@@ -354,7 +357,7 @@ $(document).ready(function(){
         }
         break;
       case 3: //////////////////////////////////////// LEFT
-        console.log("Drag to LEFT");
+        // console.log("Drag to LEFT");
         x = target.getBBox().x;
         y = target.getBBox().y;
 
@@ -367,13 +370,13 @@ $(document).ready(function(){
           finalElem.node.prevLine = target.node.prevLine;
           finalElem.node.nextLine = target.node.nextLine;
           if(target.node.prevLine === null){
-            console.log("Drag to Left of HEAD");
+            // console.log("Drag to Left of HEAD");
             compData.head = finalElem;
           }else{
             target.node.prevLine.node.nextLine = finalElem;
           }
           if(target.node.nextLine === null){
-            console.log("Drag to Left of END");
+            // console.log("Drag to Left of END");
             compData.tail = finalElem;
           }else{
             target.node.nextLine.node.prevLine = finalElem;
@@ -396,7 +399,7 @@ $(document).ready(function(){
 
         break;
       case 5: //////////////////////////////////////// FIRST DRAG
-        console.log("First Drag");
+        // console.log("First Drag");
         x = blockMargin;
         y = this.getBBox().y;
 
@@ -419,7 +422,7 @@ $(document).ready(function(){
         break;
       default:
         validDrag = false;
-        console.log("ERROR: Drag unknown");
+        // console.log("ERROR: Drag unknown");
     }
 
     if(validDrag){
@@ -451,15 +454,13 @@ $(document).ready(function(){
         });
         finalElem.node.endBlock = endClone;
         
-        console.log(y);
-        console.log(endCloneY);
         var my = y+(blockHeight/2);
         // var ly = (endClone.getBBox().y2+endClone.getBBox().y)/2;
         var ly = endCloneY + (blockHeight/2); // Updated for Mozill compatibility
         codeLine = snapEdit.line(x,my,x,ly);
         codeLine.attr({
           stroke: finalElem.select('rect').attr('stroke'),
-          strokeWidth: 5,
+          strokeWidth: 2,
           'stroke-linejoin': 'round'
         });
         finalElem.node.codeLine = codeLine;
@@ -529,8 +530,6 @@ $(document).ready(function(){
         height: (blockHeight  + blockMargin) * $('svg#edit-panel').find('g').length + 5
       });
     }
-
-    // console.log(compData.head);
   };
 
   addHover = function(elem){
@@ -546,7 +545,7 @@ $(document).ready(function(){
       }, function(){
         $(this).find('rect').css({"stroke-width":2});
         $(this.endBlock.node).find('rect').css({"stroke-width":2});
-        $(this.codeLine.node).css({"stroke-width":5});
+        $(this.codeLine.node).css({"stroke-width":2});
         if($(this).hasClass('block repeat'))
           $(this.timesBlock.node).find('rect').css({"stroke-width":2});
         if(!$(elem).hasClass('block repeat') && this.elseBlock !== null)
@@ -633,7 +632,7 @@ $(document).ready(function(){
     }
     else{
       if(isVerticalAdjust){
-        console.log("Others are being moved");
+        // console.log("Others are being moved");
         ptr1 = targetBlock.node.nextLine;
         xOrig = targetBlock.getBBox().x;
         var foundEnd = false;
@@ -712,74 +711,21 @@ $(document).ready(function(){
       },230);
     }
   };
-/////////////////////////////////////////////////////////// INITIALIZE BLOCK PANEL
-  var prevBlock = defaultBlock;
-  var tempText;
-  var groupedBlock;
-  var w;
-
-  // Populate blocks
-  for(var i=0; i<blocks.length; i++){
-    // Clone rectangle block
-    tempElem = prevBlock.clone();
-    tempElem.attr({
-      x: parseInt(prevBlock.attr('x')) + parseInt(prevBlock.attr('width')) + blockMargin,
-      stroke: blocks[i].color
-    });
-
-    // Clone text
-    tempText = defaultText.clone();
-    tempText.attr({
-      x: tempElem.getBBox().x + textXPadding,
-      text: blocks[i].text
-    });
-
-    // Compute padding of rectangle relative to text width
-    w = tempText.getBBox().width + (textXPadding*2);
-    w = w > 40 ? w : 40;
-    tempElem.attr({
-      width: w
-    });
-
-    // Group and add drag
-    groupedBlock = snapBlock.g(tempElem, tempText);
-    groupedBlock.attr({
-      class: blocks[i].class,
-      "code-level": 0
-    });
-    groupedBlock.drag(move,start,end);
-    prevBlock = tempElem;
-  }
-
-  // Update blockpanel dimensions
-  blockPanel.attr({
-    width: parseInt(prevBlock.attr('x')) + parseInt(prevBlock.attr('width')) + blockMargin,
-    height: blockMargin + blockMargin + blockHeight
-  });
-
-  // Scroll Button Click functions for Block Panel
-  $('#block-go-left').click(function(){
-    $('#scrollable-div').animate({scrollLeft:'-=350px'});
-  });
-  
-  $('#block-go-right').click(function(){
-    $('#scrollable-div').animate({scrollLeft:'+=350px'});
-  });
 
   // var test = $('.block.type');
-  var test = blockPanel.parent();
+  // var test = blockPanel.parent();
   
-  $('#offset').click(function() {
-    var top = test.offset().top;
-    var left = test.offset().left;
-    var sleft = test.scrollLeft();
-    console.log('top: ' + top + ', left: ' + left + ', scrollLeft:' + sleft);
-  });
+  // $('#offset').click(function() {
+  //   var top = test.offset().top;
+  //   var left = test.offset().left;
+  //   var sleft = test.scrollLeft();
+  //   console.log('top: ' + top + ', left: ' + left + ', scrollLeft:' + sleft);
+  // });
 
-  $('#position').click(function() {
-      var top = test.position().top;
-      var left = test.position().left;
-      console.log('top: ' + top + ', left: ' + left);
-  });
+  // $('#position').click(function() {
+  //     var top = test.position().top;
+  //     var left = test.position().left;
+  //     console.log('top: ' + top + ', left: ' + left);
+  // });
 
 });

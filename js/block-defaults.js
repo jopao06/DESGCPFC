@@ -8,6 +8,8 @@ var blockPanel = $(snapBlock.node);
 var editPanel = $(snapEdit.node);
 var overlayPanel = $(snapOverlay.node);
 
+var start, move, end;
+
 var compData = {
   blockPanelTop : blockPanel.offset().top,
   blockPanelLeft : blockPanel.offset().left,
