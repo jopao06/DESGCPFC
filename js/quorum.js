@@ -116,7 +116,7 @@ case 12:
   
 break;
 case 13:
-this.$ = "while "+$$[$0];
+this.$ = "while( "+$$[$0]+"){";
 break;
 case 14:
  this.$ = "if("+ $$[$0] +"){"; 

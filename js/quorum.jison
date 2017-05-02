@@ -115,7 +115,7 @@ repeatStatement
     yy.tempVar = makeid();
     $$ = "for(var "+yy.tempVar+"=0; "+yy.tempVar+" < "+$2+"; "+yy.tempVar+"++){"; yy.isRepeatTimes = true;
   }}
-  | repeatwhile relational_expr {$$ = "while "+$2;}
+  | repeatwhile relational_expr {$$ = "while( "+$2+"){";}
 ;
 
 ifStatement

@@ -291,7 +291,6 @@ var deleteBlock = function(key, options){
       triggerBlock.node.left.node.right = triggerBlock.node.right;
       if(triggerBlock.node.right !== null) triggerBlock.node.right.node.left = triggerBlock.node.left;
       removeBlock(triggerBlock);
-      
     }
   }
   else{
@@ -369,7 +368,7 @@ var updateRepeat = function(key, options){
     // $(triggerBlock.node.timesBlock).css("display","none");
     triggerBlock.node.timesBlock.remove();
     triggerBlock.node.right = null;
-    updateBlock(triggerBlock, "repeat while");
+    updateBlock(triggerBlock, "repeatwhile");
   }
 };
 
@@ -617,7 +616,7 @@ $.contextMenu({
         // console.log(inputText);
 
         if(options.items.input.visible) variableArray.push($(inputText).val());
-        updateBlock(triggerBlock,$(inputText).val());
+        if($(inputText).val()) updateBlock(triggerBlock,$(inputText).val());
         
         // console.log(options);
       }

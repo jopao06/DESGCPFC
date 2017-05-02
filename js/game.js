@@ -19,6 +19,12 @@ $(document).ready(function(){
     $("#open-console").css("display","block");
   });
 
+  $('#clear-code').click(function(event){
+    $('svg#edit-panel').empty();
+    compData.head = null;
+    compData.tail = null;
+  });
+
   $('#run-code').click(function(event){
     console.log("RUN CODE!");
     var ptr = compData.head;
@@ -68,7 +74,9 @@ $(document).ready(function(){
         parser.yy = {data:varArray};
         var output = parser.parse(line);
         var outputVarArray = output.variables;
-        outputCode += output.code;
+        outputCode += (output.isVarDec && outputVarArray[0].isArray) ? 
+              ("var "+ outputVarArray[0].name + " = "+getArraySize(outputVarArray[0].arraySize)+";") :
+              output.code;
         // If VARIABLE DECLARAION: Save to array of variables and check if it exists 
         if(output.isVarDec){
           var varName = outputVarArray[0].name;
@@ -141,8 +149,20 @@ $(document).ready(function(){
       console.log(outputCode);
       eval(outputCode);
     }
-    // console.log(outputCode);
+    console.log(outputCode);
   });
+
+  var getArraySize = function(arrSize){
+    output = "";
+    for(var i=0; i < arrSize.length; i++){
+      if(arrSize[i] !== "["){
+        output += "";
+      }else{
+        output = "[" + output + "]";
+      }
+    }
+    return output;
+  }
   
   var blocksNeeded = ["type","variable","equal","value","output",
                       "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
