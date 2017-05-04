@@ -11,6 +11,8 @@
  yy.isVarDec;
  yy.isRepeatTimes;
  yy.tempVar;
+ yy.lineCount;
+ yy.isOutput;
 %}
 
 %%
@@ -86,7 +88,8 @@ program
         variables: yy.varArray,
         terms: yy.terms,
         isVarDec: yy.isVarDec,
-        isRepeatTimes: yy.isRepeatTimes
+        isRepeatTimes: yy.isRepeatTimes,
+        isOutput: yy.isOutput
       } 
     }}
 ;
@@ -105,8 +108,8 @@ statement
 ;
 
 outputStatement
-  : output string {$$ = "console.log("+$2+");";}
-  | output relational_expr {$$ = "console.log("+$2+");";}
+  : output string {$$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$2+").attr({'font-size': 20, fill: blackActive, class:'display output'});"; yy.isOutput = true;}
+  | output relational_expr {$$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$2+").attr({'font-size': 20, fill: blackActive, class:'display output'});" ; yy.isOutput = true}
 ;
 
 
@@ -173,7 +176,7 @@ arrayVariable
 arrayDeclaration
   : int_type variable indexInitializer {{
       yy.isVarDec = true;
-      if(yy.varArray === undefined){ yy.varArray = [] } 
+      if(yy.varArray === undefined){ yy.varArray = []; console.log("array name"); } 
       yy.varArray.push({type: "integer", name: $2, isArray: true, arraySize: $3});
       $$ = "var "+$2+$3;
     }}
@@ -193,7 +196,7 @@ arrayDeclaration
 
 indexInitializer
   : '[' expression ']' indexInitializer { $$ = "["+ $2 +"]" + $4; }
-  | '[' expression ']' { $$ = "["+$2+"]"; }
+  | '[' expression ']' { $$ = "["+$2+"]"; console.log("array index"); }
 ;
 
 initializer

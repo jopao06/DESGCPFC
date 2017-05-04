@@ -1,114 +1,114 @@
 var blocks = [];
-blocks["type"] = {
+blocks.type = {
     text: "type",
     color: red,
     class: "block type"
-  }
-blocks["variable"] = {
+  };
+blocks.variable = {
     text: "variable",
     color: orange,
     class: "block variable"
-  }
-blocks["open_bracket"] = {
+  };
+blocks.open_bracket = {
     text: "[",
     color: orange,
     class: "block open-bracket"
-  }
-blocks["close_bracket"] = {
+  };
+blocks.close_bracket = {
     text: "]",
     color: orange,
     class: "block close-bracket"
-  }
-blocks["equal"] = {
+  };
+blocks.equal = {
     text: "=",
     color: gray,
     class: "block equal"
-  }
-blocks["value"] = {
+  };
+blocks.value = {
     text: "value",
     color: gray,
     class: "block value"
-  }
-blocks["output"] = {
+  };
+blocks.output = {
     text: "output",
     color: gray,
     class: "block output"
-  }
+  };
 ////////////////////////////// Arithmetic
-blocks["addition"] = {
+blocks.addition = {
     text: "+",
     color: yellow,
     class: "block add"
-  }
-blocks["subtraction"] = {
+  };
+blocks.subtraction = {
     text: "-",
     color: yellow,
     class: "block subtract"
-  }
-blocks["multiplication"] = {
+  };
+blocks.multiplication = {
     text: "*",
     color: yellow,
     class: "block mult"
-  }
-blocks["division"] = {
+  };
+blocks.division = {
     text: "/",
     color: yellow,
     class: "block division"
-  }
-blocks["modulo"] = {
+  };
+blocks.modulo = {
     text: "mod",
     color: yellow,
     class: "block mod"
-  }
-blocks["open_par"] = {
+  };
+blocks.open_par = {
     text: "(",
     color: yellow,
     class: "block open-parenthesis"
-  }
-blocks["close_par"] = {
+  };
+blocks.close_par = {
     text: ")",
     color: yellow,
     class: "block close-parenthesis"
-  }
+  };
 ////////////////////////////// Relational
-blocks["less"] = {
+blocks.less = {
     text: "<",
     color: green,
     class: "block less"
-  }
-blocks["greater"] = {
+  };
+blocks.greater = {
     text: ">",
     color: green,
     class: "block greater"
-  }
-blocks["less_equal"] = {
+  };
+blocks.less_equal = {
     text: "<=",
     color: green,
     class: "block less-equal"
-  }
-blocks["greater_equal"] = {
+  };
+blocks.greater_equal = {
     text: ">=",
     color: green,
     class: "block greater-equal"
-  }
-blocks["equal_equal"] = {
+  };
+blocks.equal_equal = {
     text: "=",
     color: green,
     class: "block equal"
-  }
-blocks["not_equal"] = {
+  };
+blocks.not_equal = {
     text: "not=",
     color: green,
     class: "block not-equal"
-  }
+  };
 ////////////////////////////// Control Flow
-blocks["if"] = {
+blocks.if = {
     text: "if",
     color: aqua,
     class: "block if"
-  }
-blocks["repeat"] = {
+  };
+blocks.repeat = {
     text: "repeat",
     color: purple,
     class: "block repeat"
-  }
+  };

@@ -93,7 +93,8 @@ case 2:
         variables: yy.varArray,
         terms: yy.terms,
         isVarDec: yy.isVarDec,
-        isRepeatTimes: yy.isRepeatTimes
+        isRepeatTimes: yy.isRepeatTimes,
+        isOutput: yy.isOutput
       } 
     
 break;
@@ -106,8 +107,11 @@ break;
 case 8:
  this.$ = "}";
 break;
-case 10: case 11:
-this.$ = "console.log("+$$[$0]+");";
+case 10:
+this.$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$$[$0]+").attr({'font-size': 20, fill: blackActive, class:'display output'});"; yy.isOutput = true;
+break;
+case 11:
+this.$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$$[$0]+").attr({'font-size': 20, fill: blackActive, class:'display output'});" ; yy.isOutput = true
 break;
 case 12:
 
@@ -185,7 +189,7 @@ break;
 case 26:
 
       yy.isVarDec = true;
-      if(yy.varArray === undefined){ yy.varArray = [] } 
+      if(yy.varArray === undefined){ yy.varArray = []; console.log("array name"); } 
       yy.varArray.push({type: "integer", name: $$[$0-1], isArray: true, arraySize: $$[$0]});
       this.$ = "var "+$$[$0-1]+$$[$0];
     
@@ -210,7 +214,7 @@ case 29:
  this.$ = "["+ $$[$0-2] +"]" + $$[$0]; 
 break;
 case 30:
- this.$ = "["+$$[$0-1]+"]"; 
+ this.$ = "["+$$[$0-1]+"]"; console.log("array index"); 
 break;
 case 31:
 this.$ = "=" + $$[$0]
@@ -781,6 +785,8 @@ performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
  yy.isVarDec;
  yy.isRepeatTimes;
  yy.tempVar;
+ yy.lineCount;
+ yy.isOutput;
 
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {

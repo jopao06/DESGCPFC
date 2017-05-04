@@ -1,6 +1,11 @@
+var url = document.location.toString();
+var level = ~url.indexOf("#") ? url.slice(0,url.indexOf("#")) : url;
+level = level.slice(level.indexOf("=") - level.length + 1);
+
 // Get SVG element
 var snapBlock = Snap("#block-panel");
 var snapEdit = Snap("#edit-panel");
+var snapDisplay = Snap("#display-panel");
 var snapOverlay = Snap("#overlay");
 
 // Get SVG id

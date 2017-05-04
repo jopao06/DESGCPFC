@@ -33856,7 +33856,7 @@ a.ui.nag {
 /* Whole Page */
 
 body.pushable {
-  background: #545454 !important;
+  /*background: #545454 !important;*/
 }
 
 /* Page Context */
@@ -33906,7 +33906,7 @@ body.pushable {
 }
 
 body.pushable > .pusher {
-  background: #FFFFFF;
+  /*background: #FFFFFF;*/
 }
 
 /* Pusher should inherit background from context */

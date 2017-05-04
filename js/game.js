@@ -1,13 +1,21 @@
+/* jshint ignore:start */
+$.ajax({
+  beforeSend: function() {
+    console.log("Page loading");
+    // $(body).hide(); 
+    $(".ui.dimmer .content").hide(); 
+    $("#block-panel-desc").hide();
+    $(".ui.dimmer .ui.loader").show();
+  },
+  complete: function(){
+    console.log("Page done loading");
+     $(".ui.dimmer .ui.loader").hide();
+    $(".ui.dimmer .content").show(); 
+  },
+  success: function() {}
+});
+
 $(document).ready(function(){
-  var url = document.location.toString();
-  var level = url.slice(url.indexOf("=") - url.length + 1);
-
-  $('#introduction #level1').click(function(event){
-    // console.log("Hello");
-    // whatlevel = "level1";
-  });
-
-  // Open and close of console click functions
   $('#open-console').popup()
     .click(function(event){
       $("#console").fadeToggle("slow");
@@ -19,76 +27,76 @@ $(document).ready(function(){
     $("#open-console").css("display","block");
   });
 
+  $('.launch.fixed.button').click(function(){
+    $('.ui.labeled.icon.sidebar').sidebar({
+      dimPage: false,
+    }).sidebar('toggle');
+  });
+
+  // Click function to clear all blocks in the edit panel
   $('#clear-code').click(function(event){
     $('svg#edit-panel').empty();
     compData.head = null;
     compData.tail = null;
   });
 
+  // Click function to run code. Get strings from edit panel then interpret then evalueate
   $('#run-code').click(function(event){
+    var parser = quorum;
     console.log("RUN CODE!");
     var ptr = compData.head;
     var ptr1;
     var code = "";
-    while(ptr!=null){
-      code += $(ptr.node).is(".block.value") ? "'"+ptr.select("text").attr("text")+"'": ptr.select("text").attr("text");
+    // while(ptr !== null){
+    //   code += $(ptr.node).is(".block.value") ? "'"+ptr.select("text").attr("text")+"'": ptr.select("text").attr("text");
 
-      ptr1 = ptr.node.right;
-      while(ptr1!==null){
-        code += " " + ptr1.select("text").attr("text");
-        ptr1 = ptr1.node.right;
-      }
+    //   ptr1 = ptr.node.right;
+    //   while(ptr1!==null){
+    //     code += " " + ptr1.select("text").attr("text");
+    //     ptr1 = ptr1.node.right;
+    //   }
 
-      code += "\n";
-      ptr = ptr.node.nextLine;
-    }
+    //   code += "\n";
+    //   ptr = ptr.node.nextLine;
+    // }
     $("#console-body").empty();
+    $(".display.output").remove();
     console.log(code);
     var varArray = [];
-    // var code = 
-    //   "integer i = 0=true\n"+
-    //   "number j = 1.5 + i\n"+
-    //   "boolean b = true\n"+
-    //   "integer ar[2.5][3]\n"+
-    //   "ar[1][j] = i + 1\n"+
-    //   "i = 2.5 mod 10\n"+
-    //   "repeat j+1 times\n"+
-    //   "end\n"+
-    //   "repeatwhile i not= 6\n"+
-    //   "end\n"+
-    //   "if i>0\n"+
-    //   "i = 3 * 10 mod 2\n"+
-    //   "elseif i>10\n"+
-    //   "i = 3*3 / 2\n"+
-    //   "else\n"+
-    //   "boolean m = 10 > i\n"+
-    //   "end\n"+
-    //   "i = i + 2";
+    var code = 
+      "integer i = 5\n"+
+      "integer k = i + i\n"+
+      "integer j[i][k]\n"+
+      "j[0][i] = 52";
     var lines = code.split('\n');
-    var parser = quorum;
     var isError = false;
     var outputCode = "";
+    var lineCount = 0;
     // console.log(code);
-    $.each( lines, function( index, line){
+    $.each( lines, function(index, line){
       try{
-        parser.yy = {data:varArray};
+        parser.yy.data = varArray;
+        parser.yy.lineCount = lineCount;
         var output = parser.parse(line);
         var outputVarArray = output.variables;
-        outputCode += (output.isVarDec && outputVarArray[0].isArray) ? 
-              ("var "+ outputVarArray[0].name + " = "+getArraySize(outputVarArray[0].arraySize)+";") :
+        outputCode += (output.isVarDec && outputVarArray[outputVarArray.length-1].isArray) ? 
+              ("var "+ outputVarArray[outputVarArray.length-1].name + " = "+getArraySize(outputVarArray[outputVarArray.length-1].arraySize)+";") :
               output.code;
+        if(output.isOutput) lineCount+=1;
+        console.log(outputVarArray);
+
         // If VARIABLE DECLARAION: Save to array of variables and check if it exists 
         if(output.isVarDec){
-          var varName = outputVarArray[0].name;
+          var varName = outputVarArray[outputVarArray.length-1].isArray ? outputVarArray[outputVarArray.length-1].name : outputVarArray[0].name;
           if(!(varName in varArray)){
             varArray[varName] = {
               type: outputVarArray[0].type,
               value: null
             };
-            if(outputVarArray[0].isArray){
-              varArray[varName].arraySize = outputVarArray[0].arraySize;
+            if(outputVarArray[outputVarArray.length-1].isArray){
+              varArray[varName].arraySize = outputVarArray[outputVarArray.length-1].arraySize;
             }
-            varArray[varName].isArray = outputVarArray[0].isArray;
+            varArray[varName].isArray = outputVarArray[outputVarArray.length-1].isArray;
           }
           else{
             isError = true;
@@ -144,14 +152,19 @@ $(document).ready(function(){
       }
     });
 
-    if(isError && $('#open-console').css('display') === "block") $('#open-console').click();
+    if(isError && $('#open-console').css('display') === "block"){
+      $('#open-console').click();
+      EventManager.publish("unsuccessfulRun");
+    }
     else{
       console.log(outputCode);
       eval(outputCode);
+      EventManager.publish("successfulRun");
     }
     console.log(outputCode);
   });
-
+  
+  // Get the array dimension of the declared variable
   var getArraySize = function(arrSize){
     output = "";
     for(var i=0; i < arrSize.length; i++){
@@ -164,16 +177,219 @@ $(document).ready(function(){
     return output;
   }
   
+  // Default list of blocks
   var blocksNeeded = ["type","variable","equal","value","output",
                       "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
                       "less", "greater", "less_equal","greater_equal", "equal_equal","not_equal",
                       "if","repeat"];
   switch(level){
     case "1_1":
-      blocksNeeded = ["type","variable","equal","value","output",
-                      "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
-                      "less", "greater", "less_equal","greater_equal", "equal_equal","not_equal",
-                      "if","repeat"];
+      // Initialize Sidebar
+      $("a#side-prev").remove();
+      $("a#side-next").attr({href:'game.html?level=1_2'});
+      // Initialize Popups
+      $("#dimmer-message .content .center").append(gameTexts['1_1'].tutorial.start_tutorial);
+      $("#block-div .custom.popup").append(gameTexts['1_1'].tutorial.block);
+      $("#edit-div .custom.popup").append(gameTexts['1_1'].tutorial.edit);
+      $("#display-div #display-panel-pop.custom.popup").append(gameTexts['1_1'].tutorial.display);
+      $("#display-div #console-pop.custom.popup").append(gameTexts['1_1'].tutorial.console);
+
+      // Initialize Display SVG
+      snapDisplay.rect(10,10,$(snapDisplay.node).width()/1.04,$(snapDisplay.node).height()/2,9).attr({'fill-opacity': 0, stroke: black, strokeWidth: 2,});
+      snapDisplay.line(20,45,($(snapDisplay.node).width()/1.04)-4,45).attr({stroke: black, strokeWidth: 2,});
+      snapDisplay.text(20,35,'Output >>').attr({'font-size': 15, fill: black});
+      // snapDisplay.text(20,70,'HELLO WORLD!').attr({'font-size': 20, fill: blackActive});
+      // snapDisplay.text(20,90,'HELLO WORLD!').attr({'font-size': 20, fill: blackActive});
+      // snapDisplay.text(20,110,'HELLO WORLD!').attr({'font-size': 20, fill: blackActive});
+      $('#open-console').click();
+      // Show welcome message
+      $('div#dimmer-message').dimmer({
+        onShow: function(){
+          $('div#block-panel-pop').hide();
+        },
+        onHide: function(){
+          $('#block-container')
+            .popup({
+              position: "bottom left",
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'manual',
+              popup : $('#block-panel-pop'),
+              variation: "very wide"
+            }).popup('toggle');
+        }
+      }).dimmer('show');
+      // Trigger Edit popup
+      $('button#open-edit').click(function(){
+        $('#block-container').popup('toggle').popup({
+            hoverable : false,
+            closable: false,
+            exclusive:false,
+            on: 'manual',
+            onHide: function(){
+              $('button#open-edit').hide();
+            }
+          });
+
+        $('#edit-div').popup({
+          position: "bottom center",
+          hoverable : false,
+          closable: false,
+          exclusive: true,
+          on: 'manual',
+          boundary: 'html',
+          popup : $('#edit-panel-pop'),
+          variation: "very wide"
+        }).popup('show');
+      });
+      // Trigger Display popup
+      $('button#open-display').click(function(){
+        $('#edit-div').popup('toggle').popup({
+          hoverable : true,
+          closable: true,
+          exclusive:false,
+          onHide: function(){
+            $('button#open-display').hide();
+          }
+        });
+
+        $('#display-svg svg').popup({
+          position: "top center",
+          hoverable : false,
+          closable: false,
+          exclusive: true,
+          on: 'manual',
+          popup : $('#display-panel-pop'),
+          variation: "very wide"
+        }).popup('show');
+      });
+      // Trigger Console popup
+      $('button#pop-console').click(function(){
+        $('#display-svg svg').popup('toggle').popup({
+          hoverable : true,
+          closable: true,
+          exclusive:false,
+          onHide: function(){
+            $('button#pop-console').hide();
+          }
+        });
+
+        $('#console-title').popup({
+          position: "top center",
+          hoverable : false,
+          closable: false,
+          exclusive: true,
+          on: 'click',
+          popup : $('#console-pop'),
+          variation: "very wide",
+          offset: 20
+        }).popup('show');
+      });
+      // Trigger Finish dimmer
+      $('button#finish-tutorial').click(function(){
+        $('#console-title').popup('toggle').popup({
+          hoverable : true,
+          closable: true,
+          exclusive:false,
+          onHide: function(){
+            $('button#finish-tutorial').hide();
+          }
+        });
+        // Destroy popup events
+        $('#block-container').popup('destroy');
+        $('#edit-div').popup('destroy');
+        $('#display-svg svg').popup('destroy');
+        $('#console-title').popup('destroy');
+        // Remove custom popup contents
+        $('#block-panel-pop').remove();
+        $('#edit-panel-pop').remove();
+        $('#display-panel-pop').remove();
+        $('#console-pop').remove();
+
+        $('div#dimmer-message .content .center')
+          .empty()
+          .append(gameTexts['1_1'].tutorial.end_tutorial);
+        $('#close-console').click();
+        $('div#dimmer-message')
+          .dimmer('destroy')
+          .dimmer({
+            onHide: function(){
+              $('#block-container')
+                .popup({
+                  position : 'bottom left',
+                  offset : $("#block-container .block.output").offset().left - $("#block-container").offset().left,
+                  content  : 'First, drag the "output" block to the edit panel then the "value" block at right side of the "output"',
+                  onHide : function(){
+                    $('#block-container').popup('destroy');
+                  }
+                }).popup('show');
+            }
+          })
+          .dimmer('toggle');
+
+        var outputValueListener = EventManager;
+        var isOutputDragged = false;
+        var isValueDragged = false;
+        outputValueListener.subscribe('blockDragged', function(e, param){
+          var block = param.block;
+          if($(block.node).is(".block.output")){
+            isOutputDragged = true;
+            // if()
+          }else if($(block.node).is(".block.value")){
+            isValueDragged = true;
+            $("#edit-div")
+              .popup({
+                position : 'top left',
+                offset : -(compData.editPanelHeight / 2) + $(block.node).offset().top -2,
+                content  : 'Now right click the "value" block and type "Hello World" (quotes included). If done, hit enter or click anywhere outside the menu.',
+                on: 'click',
+              }).popup('show');
+          }
+        });
+        outputValueListener.subscribe('valueChanged', function(e, param){
+          $("#edit-div").popup('destroy');
+          $("#run-code")
+            .popup({
+              position : 'bottom center',
+              content  : 'Click "Run" to execute your code',
+              on: 'manual',
+            }).popup('show');
+        });
+        outputValueListener.subscribe('successfulRun', function(e, param){
+          $("#run-code").popup('hide').popup('destroy');
+          $("#console-title").popup('hide').popup('destroy');
+          $("#display-svg svg")
+            .popup({
+              position : 'top left',
+              content  : 'See your output message here',
+              on: 'click',
+              onHide: function(){
+                $("#dimmer-message .content .center")
+                  .empty()
+                  .append(gameTexts['1_1'].tutorial.experiment);
+                $("#dimmer-message")
+                  .dimmer('destroy')
+                  .dimmer('show');
+
+                $("#display-svg svg").popup('destroy');
+                outputValueListener.unsubscribe('valueChanged');
+                outputValueListener.unsubscribe('blockDragged');
+                outputValueListener.unsubscribe('successfulRun');
+                outputValueListener.unsubscribe('unsuccessfulRun');
+              }
+            }).popup('show');
+        });
+        outputValueListener.subscribe('unsuccessfulRun', function(e, param){
+          $("#edit-div").popup('destroy');
+          $("#console-title")
+            .popup({
+              position : 'top center',
+              content  : 'Whenever there is an error, the console will be toggled and will list all errors. Use these error messages to debug your code.',
+              on: 'click',
+            }).popup('show');
+        });
+      });
       break;
     case "1_2":
       blocksNeeded = ["type","variable","equal","value","output",
@@ -252,3 +468,5 @@ $(document).ready(function(){
     $('#scrollable-div').animate({scrollLeft:'+=350px'});
   });
 });
+
+/* jshint ignore:end */

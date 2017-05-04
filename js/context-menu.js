@@ -499,6 +499,7 @@ var changeValue = function(e){
       // updateBlock(triggerBlock,$(e.target).val());
       e.data.$menu.trigger("contextmenu:hide");
     }
+
 };
 
 $(document).ready(function() {
@@ -618,11 +619,12 @@ $.contextMenu({
         if(options.items.input.visible) variableArray.push($(inputText).val());
         if($(inputText).val()) updateBlock(triggerBlock,$(inputText).val());
         
-        // console.log(options);
+        if(options.items.editValue.visible){
+          if(level === "1_1"){
+            EventManager.publish("valueChanged", {newText: $(inputText).val()});
+          }
+        }
       }
-      // else if(options.items.editValue){
-      //   updateBlock(triggerBlock,$(e.target).val());
-      // }
       $.contextMenu.getInputValues(options, this.data());
     }
   }

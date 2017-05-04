@@ -17,9 +17,7 @@ $(document).ready(function(){
     tempElem.data('mouse', {x:x,y:y});
 
     // Check if block is dragged within editor
-    if( ( x + dragAllowance > compData.editPanelLeft )                        
-        &&
-        ( y + dragAllowance > compData.editPanelTop )
+    if( ( x + dragAllowance > compData.editPanelLeft ) && ( y + dragAllowance > compData.editPanelTop )
       ){
         compX = tempElem.data('shift').dx + tempElem.data('origin').ox - editPanel.parent().offset().left;    // EXPLANATION: Parent of edit panel instead of edit panel becausee parent is fixed and cannot be scrolled
         compY = tempElem.data('shift').dy + tempElem.data('origin').oy - compData.editPanelTop + editPanel.parent().scrollTop();
@@ -236,7 +234,7 @@ $(document).ready(function(){
     var isTargetRepeatBlock = target ? $(target.node).hasClass("block repeat") : false;
     var isTargetEndBlock = target ? $(target.node).hasClass("block end") : false;
 
-    console.log(validDrag+" "+caseNum + " " + target);
+    // console.log(validDrag+" "+caseNum + " " + target);
     if(validDrag && ~caseNum && (isIfBlock || isRepeatBlock)){
       console.log("UY! Si IF/REPEAT BLOCK oh~!");
       endClone = endBlock.clone();
@@ -468,6 +466,7 @@ $(document).ready(function(){
         y: y + textYPadding
       });
 
+    if(level === "1_1") EventManager.publish('blockDragged', { block: finalElem});
 ////////////////////////////////////////////////////////// IF "IF-BLOCK"
       if(isIfBlock || isRepeatBlock){
         // compData.tail = endClone;
@@ -565,7 +564,7 @@ $(document).ready(function(){
       });
     }
 
-    console.log(compData);
+    // console.log(compData);
   };
 
   addHover = function(elem){

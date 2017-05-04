@@ -59,6 +59,35 @@ body.game {
   /*.ui.grid .column:not(.row) {
     padding: 0.5rem;
   }*/
+  .ui.basic.grey.label{
+    background-color: @fgWhite !important;
+  }
+}
+
+.custom.popup {
+  h3{
+    margin-top: 12px !important;
+  }
+
+  .button.next { 
+    box-shadow: none; 
+    float: right;
+  }
+}
+
+.dimmer{
+  h1.header{
+    i.icon{
+      font-size: 6em !important;
+    }
+    p{
+      font-size: 1.5em;
+    }
+  }
+
+  p{
+    font-size: 1.25em;
+  }
 }
 
 svg-container{
@@ -77,20 +106,6 @@ svg-container{
     display: inline-flex;
     width: 100%;
 
-    /*.ui.attached.button {
-      font-size: 50px;
-      width: 10px;
-      padding-top: 0;
-      padding-bottom: 0;
-
-      &.left{
-        padding-left: 0;
-      }
-
-      &.right{
-        padding-right: 0;
-      }
-    }*/
     .ui.attached.button{
       padding:0;
 
@@ -152,6 +167,7 @@ svg-container{
     #display-svg{
       height: 100%; 
       display: block;
+      font-family: "lato";
     }
 
     #console{
@@ -221,4 +237,38 @@ svg text {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.fixed.launch.button {
+    position: fixed;
+    top: 31.5em;
+    left: 0px;
+    width: 43px;
+    height: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    -webkit-transition: 0.3s width ease, 0.5s transform ease;
+    -moz-transition: 0.3s width ease, 0.5s transform ease;
+    -o-transition: 0.3s width ease, 0.5s transform ease;
+    -ms-transition: 0.3s width ease, 0.5s transform ease;
+    transition: 0.3s width ease, 0.5s transform ease;
+    background-color: @bgBlue;
+    /*color: @blackActive; */
+    color: @fgWhite;
+}
+
+.fixed.launch.button:hover {
+  width: 100px;
+  background-color: @bgBlueActive;
+  /*color: @blackActive; */
+  color: @fgWhite; 
+}
+
+.launch.button {
+    display: block;
+}
+
+.sidebar {
+  background-color: @bgBlue !important;
+  color: @fgWhite !important; 
 }
