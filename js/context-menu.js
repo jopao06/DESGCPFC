@@ -282,9 +282,7 @@ var deleteBlock = function(key, options){
   }
   // CASE 4: HORIZONTAL MID
   else if(triggerBlock.node.left !== null){
-    // console.log("Delete horizontall mid");
     if(isTimesBlock){
-      console.log(triggerBlock);
       removeSpecialBlock(triggerBlock.node.headBlock);
     }else{
       adjustBlocks(triggerBlock,false,false);
@@ -298,16 +296,20 @@ var deleteBlock = function(key, options){
   }
 };
 
-var updateBlock = function(block, newText){
-  block.select("text").attr({
-    text: newText
-  });
-
+var updateRect = function(block){
   var w = block.select("text").getBBox().width + (textXPadding*2);
   w = w > 40 ? w : 40;
   block.select("rect").attr({
     width: w
   });
+}
+
+var updateBlock = function(block, newText){
+  block.select("text").attr({
+    text: newText
+  });
+
+  updateRect(block);
 
   if(block.node.right!==null){
     var ptr = block.node.right;
@@ -564,7 +566,7 @@ $.contextMenu({
         callback: updateRepeat,
         visible: false,
       },
-      delete: { name: "Delete", icon: "delete", visible:true, callback: deleteBlock},
+      delete: { name: "Delete", icon: "delete", visible:true, disabled: false, callback: deleteBlock},
   },
   events: {
     show : function(options){
@@ -577,35 +579,61 @@ $.contextMenu({
       options.items.repeatWhile.visible = false;
       options.items.addElseIf.visible = false;
       options.items.addElse.visible = false;
-      
+      if($(this).is(".undeletable"))
+        options.items.delete.disabled = true;
+      else
+        options.items.delete.disabled = false;
+
       if($(this).hasClass("type")){
         options.items.select.visible = true;
+        if($(this).is(".uneditable"))
+          options.items.select.disabled = true;
       }
       else if($(this).hasClass("variable")){
         options.items.input.visible = true;
-        // options.items.addVar.visible = true;
+        if($(this).is(".uneditable"))
+          options.items.input.disabled = true;
       }
       else if($(this).hasClass("value")){
         options.items.editValue.visible = true;
+        if($(this).is(".uneditable"))
+          options.items.editValue.disabled = true;
       }
       else if($(this).hasClass("if")){
         options.items.addElseIf.visible = true;
         if(triggerBlock.node.elseBlock === null)
           options.items.addElse.visible = true;
+
+        if($(this).is(".uneditable")){
+          options.items.addElseIf.disabled = true;
+          options.items.addElse.disabled = true;
+        }
       }
       else if($(this).hasClass("elseif")){
         options.items.addElseIf.visible = true;
         if(triggerBlock.node.ifBlock.node.elseBlock === null)
           options.items.addElse.visible = true;
+        if($(this).is(".uneditable")){
+          options.items.addElseIf.disabled = true;
+          options.items.addElse.disabled = true;
+        }
       }
       else if($(this).hasClass("else")){
         options.items.addElseIf.visible = true;
+        if($(this).is(".uneditable")){
+          options.items.addElseIf.disabled = true;
+        }
       }
       else if($(this).hasClass("repeat")){
         options.items.repeatTimes.visible = true;
         options.items.repeatWhile.visible = true;
+        if($(this).is(".uneditable")){
+          options.items.repeatTimes.disabled = true;
+          options.items.repeatWhile.disabled = true;
+        }
       }
 
+      this.data().input = ""+triggerBlock.select('text').attr('text')+"";
       $.contextMenu.setInputValues(options, this.data());
     },
     hide: function(options) {
@@ -625,7 +653,9 @@ $.contextMenu({
           }
         }
       }
+      this.data().input = ""+triggerBlock.select('text').attr('text')+"";
       $.contextMenu.getInputValues(options, this.data());
+      // console.log(this.data());
     }
   }
 });

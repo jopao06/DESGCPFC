@@ -33853,12 +33853,6 @@ a.ui.nag {
   padding: 0em !important;
 }
 
-/* Whole Page */
-
-body.pushable {
-  /*background: #545454 !important;*/
-}
-
 /* Page Context */
 
 .pushable:not(body) {
@@ -33903,16 +33897,6 @@ body.pushable {
   transition: transform 500ms ease;
   transition: transform 500ms ease, -webkit-transform 500ms ease;
   z-index: 2;
-}
-
-body.pushable > .pusher {
-  /*background: #FFFFFF;*/
-}
-
-/* Pusher should inherit background from context */
-
-.pushable > .pusher {
-  background: inherit;
 }
 
 /*--------------

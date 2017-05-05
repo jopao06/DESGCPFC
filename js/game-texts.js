@@ -51,5 +51,13 @@ var gameTexts = {
         '</button>'
     }
   
+  },
+  "1_2" : {
+    arrays: 
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive block layout icon"></i>' +
+        "<p>Arrays, Ifs, and Repeats</p>" +
+      '</h1>'+
+      "<p>On this level, we're going to learn about arrays, conditional statements,<br>and loops. First we need to know how to declare and manipulate an array.</p>"
   }
 };

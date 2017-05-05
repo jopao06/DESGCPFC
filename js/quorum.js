@@ -72,12 +72,12 @@
   }
 */
 var quorum = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,8],$V1=[1,19],$V2=[1,14],$V3=[1,15],$V4=[1,16],$V5=[1,17],$V6=[1,18],$V7=[1,11],$V8=[1,20],$V9=[1,21],$Va=[1,22],$Vb=[4,7],$Vc=[1,26],$Vd=[1,29],$Ve=[1,36],$Vf=[1,32],$Vg=[1,33],$Vh=[1,34],$Vi=[1,35],$Vj=[1,39],$Vk=[1,51],$Vl=[1,52],$Vm=[1,53],$Vn=[1,54],$Vo=[1,55],$Vp=[4,7,18,33,34,35,36,37,38,39,41,44,45,46,47,48],$Vq=[1,59],$Vr=[1,58],$Vs=[4,7,34,48],$Vt=[4,7,34],$Vu=[4,7,18,33,34,35,36,41,44,45,46,47,48];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,8],$V1=[1,19],$V2=[1,14],$V3=[1,15],$V4=[1,16],$V5=[1,17],$V6=[1,18],$V7=[1,11],$V8=[1,20],$V9=[1,21],$Va=[1,22],$Vb=[4,7],$Vc=[1,26],$Vd=[1,29],$Ve=[1,36],$Vf=[1,32],$Vg=[1,33],$Vh=[1,34],$Vi=[1,35],$Vj=[1,39],$Vk=[4,7,34],$Vl=[1,53],$Vm=[1,54],$Vn=[1,55],$Vo=[1,56],$Vp=[1,57],$Vq=[4,7,19,33,34,35,36,37,38,39,41,44,45,46,47,48],$Vr=[2,42],$Vs=[1,61],$Vt=[1,60],$Vu=[4,7,34,48],$Vv=[4,7,19,33,34,35,36,41,44,45,46,47,48];
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"program":3,"EOF":4,"sourceElement":5,"statement":6,"newline":7,"variableStatement":8,"repeatStatement":9,"ifStatement":10,"end":11,"outputStatement":12,"output":13,"string":14,"relational_expr":15,"repeat":16,"expression":17,"times":18,"repeatwhile":19,"if":20,"elseif":21,"else":22,"variableDeclaration":23,"initializer":24,"variable":25,"arrayDeclaration":26,"arrayVariable":27,"int_type":28,"num_type":29,"bool_type":30,"indexInitializer":31,"[":32,"]":33,"=":34,"+":35,"-":36,"*":37,"/":38,"mod":39,"(":40,")":41,"integer":42,"number":43,"<":44,"<=":45,">":46,">=":47,"not=":48,"boolean":49,"$accept":0,"$end":1},
-terminals_: {2:"error",4:"EOF",7:"newline",11:"end",13:"output",14:"string",16:"repeat",18:"times",19:"repeatwhile",20:"if",21:"elseif",22:"else",25:"variable",28:"int_type",29:"num_type",30:"bool_type",32:"[",33:"]",34:"=",35:"+",36:"-",37:"*",38:"/",39:"mod",40:"(",41:")",42:"integer",43:"number",44:"<",45:"<=",46:">",47:">=",48:"not=",49:"boolean"},
-productions_: [0,[3,1],[3,2],[5,1],[5,3],[6,1],[6,1],[6,1],[6,1],[6,1],[12,2],[12,2],[9,3],[9,2],[10,2],[10,2],[10,1],[8,1],[8,2],[8,2],[8,1],[8,2],[23,2],[23,2],[23,2],[27,2],[26,3],[26,3],[26,3],[31,4],[31,3],[24,2],[17,3],[17,3],[17,3],[17,3],[17,3],[17,2],[17,3],[17,1],[17,1],[17,1],[15,3],[15,3],[15,3],[15,3],[15,3],[15,3],[15,1],[15,1]],
+symbols_: {"error":2,"program":3,"EOF":4,"sourceElement":5,"statement":6,"newline":7,"variableStatement":8,"repeatStatement":9,"ifStatement":10,"end":11,"outputStatement":12,"output":13,"string":14,"arrayVariable":15,"relational_expr":16,"repeat":17,"expression":18,"times":19,"repeatwhile":20,"if":21,"elseif":22,"else":23,"variableDeclaration":24,"initializer":25,"variable":26,"arrayDeclaration":27,"int_type":28,"num_type":29,"bool_type":30,"indexInitializer":31,"[":32,"]":33,"=":34,"+":35,"-":36,"*":37,"/":38,"mod":39,"(":40,")":41,"integer":42,"number":43,"<":44,"<=":45,">":46,">=":47,"not=":48,"boolean":49,"$accept":0,"$end":1},
+terminals_: {2:"error",4:"EOF",7:"newline",11:"end",13:"output",14:"string",17:"repeat",19:"times",20:"repeatwhile",21:"if",22:"elseif",23:"else",26:"variable",28:"int_type",29:"num_type",30:"bool_type",32:"[",33:"]",34:"=",35:"+",36:"-",37:"*",38:"/",39:"mod",40:"(",41:")",42:"integer",43:"number",44:"<",45:"<=",46:">",47:">=",48:"not=",49:"boolean"},
+productions_: [0,[3,1],[3,2],[5,1],[5,3],[6,1],[6,1],[6,1],[6,1],[6,1],[12,2],[12,2],[12,2],[9,3],[9,2],[10,2],[10,2],[10,1],[8,1],[8,2],[8,2],[8,1],[8,2],[24,2],[24,2],[24,2],[15,2],[27,3],[27,3],[27,3],[31,4],[31,3],[25,2],[18,3],[18,3],[18,3],[18,3],[18,3],[18,2],[18,3],[18,1],[18,1],[18,1],[16,3],[16,3],[16,3],[16,3],[16,3],[16,3],[16,1],[16,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -111,33 +111,36 @@ case 10:
 this.$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$$[$0]+").attr({'font-size': 20, fill: blackActive, class:'display output'});"; yy.isOutput = true;
 break;
 case 11:
-this.$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$$[$0]+").attr({'font-size': 20, fill: blackActive, class:'display output'});" ; yy.isOutput = true
+ this.$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$$[$0]+").attr({'font-size': 20, fill: blackActive, class:'display output'});"; yy.isOutput = true;
 break;
 case 12:
+this.$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$$[$0]+").attr({'font-size': 20, fill: blackActive, class:'display output'});"; yy.isOutput = true
+break;
+case 13:
 
     yy.tempVar = makeid();
     this.$ = "for(var "+yy.tempVar+"=0; "+yy.tempVar+" < "+$$[$0-1]+"; "+yy.tempVar+"++){"; yy.isRepeatTimes = true;
   
 break;
-case 13:
+case 14:
 this.$ = "while( "+$$[$0]+"){";
 break;
-case 14:
+case 15:
  this.$ = "if("+ $$[$0] +"){"; 
 break;
-case 15:
+case 16:
  this.$ = "}\nelse if("+ $$[$0] +"){"
 break;
-case 16:
+case 17:
  this.$="}\nelse{" 
 break;
-case 17:
+case 18:
 this.$ = $$[$0]+";"
 break;
-case 18:
+case 19:
 this.$ = $$[$0-1] + $$[$0]+";"
 break;
-case 19:
+case 20:
 
       yy.isVarDec = false; 
       if(yy.varArray === undefined){ yy.varArray = [] } 
@@ -147,13 +150,13 @@ case 19:
       this.$= $$[$0-1] + $$[$0]+";";
     
 break;
-case 20:
+case 21:
 this.$=$$[$0]+";"
 break;
-case 21:
+case 22:
  this.$=$$[$0-1]+$$[$0]+";";
 break;
-case 22:
+case 23:
  
       yy.isVarDec = true; 
       if(yy.varArray === undefined){ yy.varArray = [] } 
@@ -161,7 +164,7 @@ case 22:
       this.$ = "var "+$$[$0]; 
     
 break;
-case 23:
+case 24:
  
       yy.isVarDec = true; 
       if(yy.varArray === undefined){ yy.varArray = [] } 
@@ -169,7 +172,7 @@ case 23:
       this.$ = "var "+$$[$0]; 
     
 break;
-case 24:
+case 25:
  
       yy.isVarDec = true; 
       if(yy.varArray === undefined){ yy.varArray = [] }
@@ -177,7 +180,7 @@ case 24:
       this.$ = "var "+$$[$0]; 
   
 break;
-case 25:
+case 26:
 
       yy.isVarDec = false;
       if(yy.varArray === undefined){ yy.varArray = [] }
@@ -186,7 +189,7 @@ case 25:
       this.$ = $$[$0-1] + $$[$0]
     
 break;
-case 26:
+case 27:
 
       yy.isVarDec = true;
       if(yy.varArray === undefined){ yy.varArray = []; console.log("array name"); } 
@@ -194,7 +197,7 @@ case 26:
       this.$ = "var "+$$[$0-1]+$$[$0];
     
 break;
-case 27:
+case 28:
 
       yy.isVarDec = true;
       if(yy.varArray === undefined){ yy.varArray = [] } 
@@ -202,7 +205,7 @@ case 27:
       this.$ = "var "+$$[$0-1]+$$[$0];
     
 break;
-case 28:
+case 29:
 
       yy.isVarDec = true;
       if(yy.varArray === undefined){ yy.varArray = [] } 
@@ -210,51 +213,51 @@ case 28:
       this.$ = "var "+$$[$0-1]+$$[$0];
     
 break;
-case 29:
+case 30:
  this.$ = "["+ $$[$0-2] +"]" + $$[$0]; 
 break;
-case 30:
+case 31:
  this.$ = "["+$$[$0-1]+"]"; console.log("array index"); 
 break;
-case 31:
+case 32:
 this.$ = "=" + $$[$0]
 break;
-case 32:
+case 33:
  this.$ = $$[$0-2]+ "+" +$$[$0]; 
 break;
-case 33:
+case 34:
  this.$ = $$[$0-2]+ "-" +$$[$0]; 
 break;
-case 34:
+case 35:
  this.$ = $$[$0-2]+ "*" +$$[$0]; 
 break;
-case 35:
+case 36:
  this.$ = $$[$0-2]+ "/" +$$[$0]; 
 break;
-case 36:
+case 37:
  this.$ = $$[$0-2]+ "%" +$$[$0]; 
 break;
-case 37:
+case 38:
  this.$ = "-" + $$[$0]; 
 break;
-case 38:
+case 39:
  this.$ = "(" + $$[$0-1] + ")"; 
 break;
-case 39:
+case 40:
 
       this.$ = ""+parseInt($$[$0])+"";
       if(yy.terms === undefined){ yy.terms = [] } 
       yy.terms.push({value: $$[$0], type: "integer" });
     
 break;
-case 40:
+case 41:
  
       this.$ = ""+Number($$[$0])+""; 
       if(yy.terms === undefined){ yy.terms = [] } 
       yy.terms.push({value: $$[$0], type: "number" });
     
 break;
-case 41:
+case 42:
 
       this.$ = $$[$0];
       if(yy.varArray === undefined){ yy.varArray = [] }
@@ -265,31 +268,31 @@ case 41:
       yy.terms.push({value: $$[$0], type: varType });
   
 break;
-case 42:
+case 43:
  this.$ = $$[$0-2]+ "<"   +$$[$0]; 
 break;
-case 43:
+case 44:
  this.$ = $$[$0-2]+ "<="  +$$[$0]; 
 break;
-case 44:
+case 45:
  this.$ = $$[$0-2]+ ">"   +$$[$0]; 
 break;
-case 45:
+case 46:
  this.$ = $$[$0-2]+ ">="  +$$[$0]; 
 break;
-case 46:
+case 47:
  this.$ = $$[$0-2]+ "!==" +$$[$0]; 
 break;
-case 47:
+case 48:
  this.$ = $$[$0-2]+ "===" +$$[$0]; 
 break;
-case 48:
+case 49:
  this.$ = "" + yytext==="true" + ""; 
 break;
 }
 },
-table: [{3:1,4:[1,2],5:3,6:4,8:5,9:6,10:7,11:$V0,12:9,13:$V1,16:$V2,19:$V3,20:$V4,21:$V5,22:$V6,23:10,25:$V7,26:12,27:13,28:$V8,29:$V9,30:$Va},{1:[3]},{1:[2,1]},{4:[1,23]},{4:[2,3],7:[1,24]},o($Vb,[2,5]),o($Vb,[2,6]),o($Vb,[2,7]),o($Vb,[2,8]),o($Vb,[2,9]),o($Vb,[2,17],{24:25,34:$Vc}),{24:27,31:28,32:$Vd,34:$Vc},o($Vb,[2,20]),{24:30,34:$Vc},{17:31,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{15:37,17:38,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},{15:40,17:38,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},{15:41,17:38,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},o($Vb,[2,16]),{14:[1,42],15:43,17:38,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},{25:[1,44]},{25:[1,45]},{25:[1,46]},{1:[2,2]},{5:47,6:4,8:5,9:6,10:7,11:$V0,12:9,13:$V1,16:$V2,19:$V3,20:$V4,21:$V5,22:$V6,23:10,25:$V7,26:12,27:13,28:$V8,29:$V9,30:$Va},o($Vb,[2,18]),{15:48,17:38,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},o($Vb,[2,19]),{34:[2,25]},{17:49,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},o($Vb,[2,21]),{18:[1,50],35:$Vk,36:$Vl,37:$Vm,38:$Vn,39:$Vo},{17:56,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{17:57,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},o($Vp,[2,39]),o($Vp,[2,40]),o($Vp,[2,41]),o($Vb,[2,13],{34:$Vq,48:$Vr}),o($Vs,[2,49],{35:$Vk,36:$Vl,37:$Vm,38:$Vn,39:$Vo,44:[1,60],45:[1,61],46:[1,62],47:[1,63]}),o($Vs,[2,48]),o($Vb,[2,14],{34:$Vq,48:$Vr}),o($Vb,[2,15],{34:$Vq,48:$Vr}),o($Vb,[2,10]),o($Vb,[2,11],{34:$Vq,48:$Vr}),o($Vt,[2,22],{31:64,32:$Vd}),o($Vt,[2,23],{31:65,32:$Vd}),o($Vt,[2,24],{31:66,32:$Vd}),{4:[2,4]},o($Vb,[2,31],{34:$Vq,48:$Vr}),{33:[1,67],35:$Vk,36:$Vl,37:$Vm,38:$Vn,39:$Vo},o($Vb,[2,12]),{17:68,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{17:69,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{17:70,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{17:71,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{17:72,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},o($Vp,[2,37]),{35:$Vk,36:$Vl,37:$Vm,38:$Vn,39:$Vo,41:[1,73]},{15:74,17:38,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},{15:75,17:38,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},{17:76,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{17:77,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{17:78,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{17:79,25:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},o($Vb,[2,26]),o($Vb,[2,27]),o($Vb,[2,28]),o($Vt,[2,30],{31:80,32:$Vd}),o($Vu,[2,32],{37:$Vm,38:$Vn,39:$Vo}),o($Vu,[2,33],{37:$Vm,38:$Vn,39:$Vo}),o($Vp,[2,34]),o($Vp,[2,35]),o($Vp,[2,36]),o($Vp,[2,38]),o($Vs,[2,46]),o($Vs,[2,47]),o($Vs,[2,42],{35:$Vk,36:$Vl,37:$Vm,38:$Vn,39:$Vo}),o($Vs,[2,43],{35:$Vk,36:$Vl,37:$Vm,38:$Vn,39:$Vo}),o($Vs,[2,44],{35:$Vk,36:$Vl,37:$Vm,38:$Vn,39:$Vo}),o($Vs,[2,45],{35:$Vk,36:$Vl,37:$Vm,38:$Vn,39:$Vo}),o($Vt,[2,29])],
-defaultActions: {2:[2,1],23:[2,2],28:[2,25],47:[2,4]},
+table: [{3:1,4:[1,2],5:3,6:4,8:5,9:6,10:7,11:$V0,12:9,13:$V1,15:13,17:$V2,20:$V3,21:$V4,22:$V5,23:$V6,24:10,26:$V7,27:12,28:$V8,29:$V9,30:$Va},{1:[3]},{1:[2,1]},{4:[1,23]},{4:[2,3],7:[1,24]},o($Vb,[2,5]),o($Vb,[2,6]),o($Vb,[2,7]),o($Vb,[2,8]),o($Vb,[2,9]),o($Vb,[2,18],{25:25,34:$Vc}),{25:27,31:28,32:$Vd,34:$Vc},o($Vb,[2,21]),{25:30,34:$Vc},{18:31,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{16:37,18:38,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},{16:40,18:38,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},{16:41,18:38,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},o($Vb,[2,17]),{14:[1,42],15:43,16:44,18:38,26:[1,45],36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},{26:[1,46]},{26:[1,47]},{26:[1,48]},{1:[2,2]},{5:49,6:4,8:5,9:6,10:7,11:$V0,12:9,13:$V1,15:13,17:$V2,20:$V3,21:$V4,22:$V5,23:$V6,24:10,26:$V7,27:12,28:$V8,29:$V9,30:$Va},o($Vb,[2,19]),{16:50,18:38,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},o($Vb,[2,20]),o($Vk,[2,26]),{18:51,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},o($Vb,[2,22]),{19:[1,52],35:$Vl,36:$Vm,37:$Vn,38:$Vo,39:$Vp},{18:58,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{18:59,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},o($Vq,[2,40]),o($Vq,[2,41]),o($Vq,$Vr),o($Vb,[2,14],{34:$Vs,48:$Vt}),o($Vu,[2,50],{35:$Vl,36:$Vm,37:$Vn,38:$Vo,39:$Vp,44:[1,62],45:[1,63],46:[1,64],47:[1,65]}),o($Vu,[2,49]),o($Vb,[2,15],{34:$Vs,48:$Vt}),o($Vb,[2,16],{34:$Vs,48:$Vt}),o($Vb,[2,10]),o($Vb,[2,11]),o($Vb,[2,12],{34:$Vs,48:$Vt}),o([4,7,34,35,36,37,38,39,44,45,46,47,48],$Vr,{31:28,32:$Vd}),o($Vk,[2,23],{31:66,32:$Vd}),o($Vk,[2,24],{31:67,32:$Vd}),o($Vk,[2,25],{31:68,32:$Vd}),{4:[2,4]},o($Vb,[2,32],{34:$Vs,48:$Vt}),{33:[1,69],35:$Vl,36:$Vm,37:$Vn,38:$Vo,39:$Vp},o($Vb,[2,13]),{18:70,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{18:71,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{18:72,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{18:73,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{18:74,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},o($Vq,[2,38]),{35:$Vl,36:$Vm,37:$Vn,38:$Vo,39:$Vp,41:[1,75]},{16:76,18:38,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},{16:77,18:38,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi,49:$Vj},{18:78,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{18:79,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{18:80,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},{18:81,26:$Ve,36:$Vf,40:$Vg,42:$Vh,43:$Vi},o($Vb,[2,27]),o($Vb,[2,28]),o($Vb,[2,29]),o($Vk,[2,31],{31:82,32:$Vd}),o($Vv,[2,33],{37:$Vn,38:$Vo,39:$Vp}),o($Vv,[2,34],{37:$Vn,38:$Vo,39:$Vp}),o($Vq,[2,35]),o($Vq,[2,36]),o($Vq,[2,37]),o($Vq,[2,39]),o($Vu,[2,47]),o($Vu,[2,48]),o($Vu,[2,43],{35:$Vl,36:$Vm,37:$Vn,38:$Vo,39:$Vp}),o($Vu,[2,44],{35:$Vl,36:$Vm,37:$Vn,38:$Vo,39:$Vp}),o($Vu,[2,45],{35:$Vl,36:$Vm,37:$Vn,38:$Vo,39:$Vp}),o($Vu,[2,46],{35:$Vl,36:$Vm,37:$Vn,38:$Vo,39:$Vp}),o($Vk,[2,30])],
+defaultActions: {2:[2,1],23:[2,2],49:[2,4]},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -800,17 +803,17 @@ case 3:return 29
 break;
 case 4:return 30
 break;
-case 5:return 16
+case 5:return 17
 break;
-case 6:return 18
+case 6:return 19
 break;
-case 7:return 19
+case 7:return 20
 break;
-case 8:return 20
+case 8:return 21
 break;
-case 9:return 21
+case 9:return 22
 break;
-case 10:return 22
+case 10:return 23
 break;
 case 11:return 11
 break;
@@ -822,7 +825,7 @@ case 14:return 48
 break;
 case 15:return 49
 break;
-case 16:return 25
+case 16:return 26
 break;
 case 17:return 14
 break;

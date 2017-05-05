@@ -40,6 +40,7 @@ $(document).ready(function(){
     compData.tail = null;
   });
 
+/////////////////////////////////////////////////////////// RUN CODE
   // Click function to run code. Get strings from edit panel then interpret then evalueate
   $('#run-code').click(function(event){
     var parser = quorum;
@@ -47,43 +48,46 @@ $(document).ready(function(){
     var ptr = compData.head;
     var ptr1;
     var code = "";
-    // while(ptr !== null){
-    //   code += $(ptr.node).is(".block.value") ? "'"+ptr.select("text").attr("text")+"'": ptr.select("text").attr("text");
+/////////////////////////////////////////////////////// TRANSLATE CODE TO JS
+    while(ptr !== null){
+      code += $(ptr.node).is(".block.value") ? "'"+ptr.select("text").attr("text")+"'": ptr.select("text").attr("text");
 
-    //   ptr1 = ptr.node.right;
-    //   while(ptr1!==null){
-    //     code += " " + ptr1.select("text").attr("text");
-    //     ptr1 = ptr1.node.right;
-    //   }
+      ptr1 = ptr.node.right;
+      while(ptr1!==null){
+        code += " " + ptr1.select("text").attr("text");
+        ptr1 = ptr1.node.right;
+      }
 
-    //   code += "\n";
-    //   ptr = ptr.node.nextLine;
-    // }
+      code += "\n";
+      ptr = ptr.node.nextLine;
+    }
     $("#console-body").empty();
     $(".display.output").remove();
     console.log(code);
     var varArray = [];
-    var code = 
-      "integer i = 5\n"+
-      "integer k = i + i\n"+
-      "integer j[i][k]\n"+
-      "j[0][i] = 52";
+    // var code = 
+    //   "integer i = 5\n"+
+    //   "integer k = i + i\n"+
+    //   "integer j[i][k]\n"+
+    //   "j[0][i] = 52";
     var lines = code.split('\n');
     var isError = false;
     var outputCode = "";
     var lineCount = 0;
-    // console.log(code);
+/////////////////////////////////////////////////////// ERROR CHECKING
     $.each( lines, function(index, line){
       try{
         parser.yy.data = varArray;
         parser.yy.lineCount = lineCount;
         var output = parser.parse(line);
         var outputVarArray = output.variables;
+        var outputTerms = output.terms;
         outputCode += (output.isVarDec && outputVarArray[outputVarArray.length-1].isArray) ? 
               ("var "+ outputVarArray[outputVarArray.length-1].name + " = "+getArraySize(outputVarArray[outputVarArray.length-1].arraySize)+";") :
               output.code;
         if(output.isOutput) lineCount+=1;
         console.log(outputVarArray);
+        console.log(outputTerms);
 
         // If VARIABLE DECLARAION: Save to array of variables and check if it exists 
         if(output.isVarDec){
@@ -106,14 +110,24 @@ $(document).ready(function(){
         }
 
         // Check if correct data type in arithmetic expressions
-        var outputTerms = output.terms;
         $.each(outputTerms, function(i, term){
           var type = (outputVarArray && outputVarArray[0].type) ? outputVarArray[0].type : outputTerms[0].type;
-          if(type === "integer" && type !== term.type && !outputVarArray[0].isArray){
+          console.log((outputVarArray[0].arraySize.indexOf(term.value)));
+          if(type === "integer" && type !== term.type){
             isError = true;
             $("#console-body").append("<p>Error at line "+ (index+1) +": '" + term.value + ((term.type === "integer" || term.type === "undefined") ? "' is an '" : "' is a '") + term.type + "'. Expecting "+ ((type === "integer" || type === "undefined") ? "an '" : "a '") +type+"'</p>");
             // console.log("Error at line "+ (index+1) +": '" + term.value + ((term.type === "integer" || "undefined") ? "' is an '" : "' is a '") + term.type + "'. Expecting "+ (type === "integer" ? "an '" : "a '") +type+"'");
           }
+          // DEBUG: Boolean array
+          // else if(!output.isVarDec && type === "boolean" && !~outputVarArray[0].arraySize.indexOf(term.value) && type !== term.type){
+          //   isError = true;
+          //   $("#console-body").append("<p>Error at line "+ (index+1) +": '" + term.value + ((term.type === "integer" || term.type === "undefined") ? "' is an '" : "' is a '") + term.type + "'. Expecting "+ ((type === "integer" || type === "undefined") ? "an '" : "a '") +type+"'</p>");
+          // }
+          // if(type === "integer" && outputVarArray[0].isArray && type !== term.type){
+          //   isError = true;
+          //   $("#console-body").append("<p>Error at line "+ (index+1) +": '" + term.value + ((term.type === "integer" || term.type === "undefined") ? "' is an '" : "' is a '") + term.type + "'. Expecting "+ ((type === "integer" || type === "undefined") ? "an '" : "a '") +type+"'</p>");
+          //   // console.log("Error at line "+ (index+1) +": '" + term.value + ((term.type === "integer" || "undefined") ? "' is an '" : "' is a '") + term.type + "'. Expecting "+ (type === "integer" ? "an '" : "a '") +type+"'");
+          // }
 
           // Check if expression returns integer in repeat times
           if(output.isRepeatTimes && term.type !== "integer"){
@@ -164,6 +178,55 @@ $(document).ready(function(){
     console.log(outputCode);
   });
   
+/////////////////////////////////////////////////////////// INITIALIZE FUNCTION
+  var initializeBlockPanel = function(blocksNeeded){
+    var prevBlock = defaultBlock;
+    var tempText;
+    var groupedBlock;
+    var w;
+
+    // Populate blocks
+    $.each(blocksNeeded, function(x, i){
+      // Clone rectangle block
+      tempElem = prevBlock.clone();
+      tempElem.attr({
+        x: parseInt(prevBlock.attr('x')) + parseInt(prevBlock.attr('width')) + blockMargin,
+        stroke: blocks[i].color
+      });
+
+      // Clone text
+      tempText = defaultText.clone();
+      tempText.attr({
+        x: tempElem.getBBox().x + textXPadding,
+        text: blocks[i].text
+      });
+
+      // Compute padding of rectangle relative to text width
+      w = tempText.getBBox().width + (textXPadding*2);
+      w = w > 40 ? w : 40;
+      tempElem.attr({
+        width: w
+      });
+
+      // Group and add drag
+      groupedBlock = snapBlock.g(tempElem, tempText);
+      groupedBlock.attr({
+        class: blocks[i].class,
+        "code-level": 0
+      });
+      groupedBlock.drag(move,start,end);
+      prevBlock = tempElem;
+    });
+
+    // Update blockpanel dimensions
+    if(blocksNeeded){
+      blockPanel.attr({
+        width: parseInt(prevBlock.attr('x')) + parseInt(prevBlock.attr('width')) + blockMargin,
+        height: blockMargin + blockMargin + blockHeight
+      });
+    }
+  }
+
   // Get the array dimension of the declared variable
   var getArraySize = function(arrSize){
     output = "";
@@ -176,13 +239,132 @@ $(document).ready(function(){
     }
     return output;
   }
-  
+
+  var appendToTail = function(block){
+    var x = blockMargin;
+    var y = 0;
+    if(compData.head === null){
+      x = blockMargin;
+      y = blockMargin;
+      compData.head = block;
+    }else{
+      x = blockMargin;
+      y = compData.tail.getBBox().y2 + blockMargin;
+      compData.tail.node.nextLine = block;
+      block.node.prevLine = compData.head;
+    }
+    block.select('rect').attr({
+      x: x,
+      y: y
+    });
+    block.select('text').attr({
+      x: x + textXPadding,
+      y: y + textYPadding
+    });
+    addHover(block.node);
+    compData.tail = block;
+    snapEdit.add(block);
+  }
+
+  var appendToRight = function(target,block){
+    var x = target.getBBox().x2 + blockMargin;
+    var y = target.getBBox().y;
+    block.select('rect').attr({
+      x: x,
+      y: y
+    });
+    block.select('text').attr({
+      x: x + textXPadding,
+      y: y + textYPadding
+    });
+    addHover(block.node);
+
+    target.node.right = block;
+    block.node.left = target;
+    snapEdit.add(block);
+  }
+
+  var nullifyBlock = function(block){
+    block.node.left = null;
+    block.node.right = null;
+    block.node.nextLine = null;
+    block.node.prevLine = null;
+  }
+
+  var createBlock = function(type, text, panel=snapBlock){
+    var block = panel.select(type).clone();
+    if(text) block.select('text').attr({ text: text });
+
+    nullifyBlock(block);
+    updateRect(block);
+    return block;
+  }
+
+  var initializeEditPanel = function(level){
+    switch(level){
+      case "1_1":
+        // Do something
+        break;
+      case "1_2":
+        var type = createBlock('g.block.type','boolean');
+        $(type.node).addClass('immovable uneditable undeletable');
+        appendToTail(type);
+
+        var array = createBlock('g.block.variable',"array[5]");
+        $(array.node).addClass('immovable uneditable undeletable');
+        appendToRight(type,array);
+
+        var arr = [];
+        var temp;
+        var eq, val;
+        for(var i=0; i<5; i++){ 
+          arr.push(createBlock('g.block.variable','array['+i+']'));
+          $(arr[i].node).addClass('immovable uneditable undeletable');
+          temp = arr[i];
+          appendToTail(temp);
+
+          eq = createBlock('g.block.equal');
+          $(eq.node).addClass('immovable uneditable undeletable');
+          appendToRight(arr[i],eq);
+
+          val = createBlock('g.block.value',""+i+"");
+          $(val.node).addClass('immovable undeletable');
+          appendToRight(eq,val);
+        }
+
+
+        console.log(compData);
+        break;
+      default:
+        // Do something
+    }
+  }
+
+  var initializeDisplayPanel = function(level){
+    switch(level){
+      case "1_1":
+        snapDisplay.rect(10,10,$(snapDisplay.node).width()/1.04,$(snapDisplay.node).height()/2,9).attr({'fill-opacity': 0, stroke: black, strokeWidth: 2,});
+        snapDisplay.line(20,45,($(snapDisplay.node).width()/1.04)-4,45).attr({stroke: black, strokeWidth: 2,});
+        snapDisplay.text(20,35,'Output >>').attr({'font-size': 15, fill: black});
+        break;
+      case "1_2":
+        // var type = snapBlock.select('g.block.type').clone();
+        console.log(snapBlock.select('.type'));
+        
+        break;
+      default:
+        // Do something
+    }
+  }
+
+/////////////////////////////////////////////////////////// HTML INITIALIZATION
   // Default list of blocks
   var blocksNeeded = ["type","variable","equal","value","output",
                       "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
                       "less", "greater", "less_equal","greater_equal", "equal_equal","not_equal",
                       "if","repeat"];
   switch(level){
+/////////////////////////////////////////////////////// LEVEL 1_1
     case "1_1":
       // Initialize Sidebar
       $("a#side-prev").remove();
@@ -194,10 +376,10 @@ $(document).ready(function(){
       $("#display-div #display-panel-pop.custom.popup").append(gameTexts['1_1'].tutorial.display);
       $("#display-div #console-pop.custom.popup").append(gameTexts['1_1'].tutorial.console);
 
+      initializeBlockPanel(blocksNeeded);
+      initializeDisplayPanel(level);
       // Initialize Display SVG
-      snapDisplay.rect(10,10,$(snapDisplay.node).width()/1.04,$(snapDisplay.node).height()/2,9).attr({'fill-opacity': 0, stroke: black, strokeWidth: 2,});
-      snapDisplay.line(20,45,($(snapDisplay.node).width()/1.04)-4,45).attr({stroke: black, strokeWidth: 2,});
-      snapDisplay.text(20,35,'Output >>').attr({'font-size': 15, fill: black});
+      
       // snapDisplay.text(20,70,'HELLO WORLD!').attr({'font-size': 20, fill: blackActive});
       // snapDisplay.text(20,90,'HELLO WORLD!').attr({'font-size': 20, fill: blackActive});
       // snapDisplay.text(20,110,'HELLO WORLD!').attr({'font-size': 20, fill: blackActive});
@@ -391,18 +573,50 @@ $(document).ready(function(){
         });
       });
       break;
+/////////////////////////////////////////////////////// LEVEL 1_2
     case "1_2":
-      blocksNeeded = ["type","variable","equal","value","output",
+      blocksNeeded = ["type","variable","equal","value",
                       "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
                       "less", "greater", "less_equal","greater_equal", "equal_equal","not_equal",
                       "if","repeat"];
+            // Initialize Sidebar
+      $("a#side-prev").attr({href:'game.html?level=1_1'});
+      $("a#side-next").attr({href:'game.html?level=1_3'});
+
+      initializeBlockPanel(blocksNeeded);
+      initializeEditPanel(level);
+      // Initialize Popups
+      $("#dimmer-message .content .center").append(gameTexts['1_2'].arrays);
+      // $("#block-div .custom.popup").append(gameTexts['1_1'].tutorial.block);
+      // $("#edit-div .custom.popup").append(gameTexts['1_1'].tutorial.edit);
+      // $("#display-div #display-panel-pop.custom.popup").append(gameTexts['1_1'].tutorial.display);
+      // $("#display-div #console-pop.custom.popup").append(gameTexts['1_1'].tutorial.console);
+      $('div#dimmer-message').dimmer({
+        onShow: function(){
+          // $('div#block-panel-pop').hide();
+        },
+        onHide: function(){
+          // $('#block-container')
+          //   .popup({
+          //     position: "bottom left",
+          //     hoverable : false,
+          //     closable: false,
+          //     exclusive: true,
+          //     on: 'manual',
+          //     popup : $('#block-panel-pop'),
+          //     variation: "very wide"
+          //   }).popup('toggle');
+        }
+      }).dimmer('show');
       break;
+/////////////////////////////////////////////////////// LEVEL 1_3
     case "1_3":
       blocksNeeded = ["type","variable","equal","value","output",
                       "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
                       "less", "greater", "less_equal","greater_equal", "equal_equal","not_equal",
                       "if","repeat"];
       break;
+/////////////////////////////////////////////////////// LEVEL 1_4
     case "1_4":
       blocksNeeded = ["type","variable","equal","value","output",
                       "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
@@ -410,53 +624,7 @@ $(document).ready(function(){
                       "if","repeat"];
       break;
     default:
-      console.log("Internal error had occured!");
-  }
-/////////////////////////////////////////////////////////// INITIALIZE BLOCK PANEL
-  var prevBlock = defaultBlock;
-  var tempText;
-  var groupedBlock;
-  var w;
-
-  // Populate blocks
-  $.each(blocksNeeded, function(x, i){
-    // Clone rectangle block
-    tempElem = prevBlock.clone();
-    tempElem.attr({
-      x: parseInt(prevBlock.attr('x')) + parseInt(prevBlock.attr('width')) + blockMargin,
-      stroke: blocks[i].color
-    });
-
-    // Clone text
-    tempText = defaultText.clone();
-    tempText.attr({
-      x: tempElem.getBBox().x + textXPadding,
-      text: blocks[i].text
-    });
-
-    // Compute padding of rectangle relative to text width
-    w = tempText.getBBox().width + (textXPadding*2);
-    w = w > 40 ? w : 40;
-    tempElem.attr({
-      width: w
-    });
-
-    // Group and add drag
-    groupedBlock = snapBlock.g(tempElem, tempText);
-    groupedBlock.attr({
-      class: blocks[i].class,
-      "code-level": 0
-    });
-    groupedBlock.drag(move,start,end);
-    prevBlock = tempElem;
-  });
-
-  // Update blockpanel dimensions
-  if(blocksNeeded){
-    blockPanel.attr({
-      width: parseInt(prevBlock.attr('x')) + parseInt(prevBlock.attr('width')) + blockMargin,
-      height: blockMargin + blockMargin + blockHeight
-    });
+      // Do something
   }
 
   // Scroll Button Click functions for Block Panel

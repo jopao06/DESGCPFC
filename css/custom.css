@@ -53,22 +53,6 @@ body.game {
 #game-body .ui.basic.grey.label {
   background-color: #F4F4F4 !important;
 }
-.custom.popup h3 {
-  margin-top: 12px !important;
-}
-.custom.popup .button.next {
-  box-shadow: none;
-  float: right;
-}
-.dimmer h1.header i.icon {
-  font-size: 6em !important;
-}
-.dimmer h1.header p {
-  font-size: 1.5em;
-}
-.dimmer p {
-  font-size: 1.25em;
-}
 svg-container,
 #block-div #block-container,
 #edit-div #edit-container,
@@ -193,34 +177,4 @@ svg text {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-.fixed.launch.button {
-  position: fixed;
-  top: 31.5em;
-  left: 0px;
-  width: 43px;
-  height: auto;
-  white-space: nowrap;
-  overflow: hidden;
-  -webkit-transition: 0.3s width ease, 0.5s transform ease;
-  -moz-transition: 0.3s width ease, 0.5s transform ease;
-  -o-transition: 0.3s width ease, 0.5s transform ease;
-  -ms-transition: 0.3s width ease, 0.5s transform ease;
-  transition: 0.3s width ease, 0.5s transform ease;
-  background-color: #131923;
-  /*color: @blackActive; */
-  color: #F4F4F4;
-}
-.fixed.launch.button:hover {
-  width: 100px;
-  background-color: #1e2633;
-  /*color: @blackActive; */
-  color: #F4F4F4;
-}
-.launch.button {
-  display: block;
-}
-.sidebar {
-  background-color: #131923 !important;
-  color: #F4F4F4 !important;
 }

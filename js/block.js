@@ -69,7 +69,7 @@ $(document).ready(function(){
     var isNewRepeatBlock = newBlock ? $(newBlock.node).hasClass("block repeat") : false;
     var isNewTimesBlock = newBlock ? $(newBlock.node).hasClass("block times") : false;
     // Draged to TOP of block
-    if(cy < target.getBBox().y){
+    if(!$(target.node).is('.immovable') && cy < target.getBBox().y){
       verticalGuide.attr({
         d: "M"+(target.getBBox().x+guideMargin)+" "+target.getBBox().y+"L"+(target.getBBox().x2-guideMargin)+" "+target.getBBox().y,
         stroke: target.select('rect').attr('stroke')
@@ -82,7 +82,7 @@ $(document).ready(function(){
       caseNum = 0;
     }
     // Dragged to BOTTOM of block
-    else if(cy > target.getBBox().y2){
+    else if(!($(target.node).is('.immovable') && target.node.nextLine!== null) && cy > target.getBBox().y2){
       verticalGuide.attr({
         d: "M"+(target.getBBox().x+guideMargin)+" "+target.getBBox().y2+"L"+(target.getBBox().x2-guideMargin)+" "+target.getBBox().y2,
         stroke: target.select('rect').attr('stroke')
@@ -91,7 +91,7 @@ $(document).ready(function(){
       caseNum = 1;
     }
     // Dragged to RIGHT of block
-    else if(cx > target.getBBox().x2 && (target.getBBox().y < cy && cy < target.getBBox().y2)){
+    else if(!$(target.node).is('.immovable') && cx > target.getBBox().x2 && (target.getBBox().y < cy && cy < target.getBBox().y2)){
       if(!isEndBlock && !isTimesBlock && !isElseBlock && !isNewIfBlock && !isNewRepeatBlock){
         // if((isNewIfBlock || isNewRepeatBlock) && (isIfBlock || isElseIfBlock || isRepeatBlock)){
         //   caseNum = -1;
@@ -110,10 +110,13 @@ $(document).ready(function(){
       }
     }
     // Dragged to LEFT of block
-    else if(cx < target.getBBox().x && (target.getBBox().y < cy && cy < target.getBBox().y2)){
+    else if(!$(target.node).is('.immovable') && cx < target.getBBox().x && (target.getBBox().y < cy && cy < target.getBBox().y2)){
       console.log("DRAGGING TO LEFT");
       if(!isEndBlock && !(isIfBlock || isRepeatBlock || isElseIfBlock || isElseBlock)){
-        if((isNewIfBlock || isNewRepeatBlock) && isInIfRepeat(target)){
+        if((isNewIfBlock || isNewRepeatBlock) && isInIfRepeat(target)){   // Prevent IF and REPEAT to be dragged between IF and REPEAT statements
+          caseNum = -1;
+        }
+        else if(isNewIfBlock || isNewRepeatBlock){                        // Prevent IF and REPEAT between blocks
           caseNum = -1;
         }
         else{
@@ -131,16 +134,23 @@ $(document).ready(function(){
     // Dragged to ON TOP of block
     else{
 
-      // }else{
-      if((isNewIfBlock || isNewRepeatBlock) && isInIfRepeat(target)){
-        caseNum = -1;        
+      if($(target.node).is('.immovable')){
+        caseNum = -1;
       }else{
-        $(target.node).find('rect').css({"stroke-width":4});
-        if(target.node.left === null){
-          caseNum = 0;
+        if((isNewIfBlock || isNewRepeatBlock) && isInIfRepeat(target)){             // Prevent IF and REPEAT to be dragged between IF and REPEAT statements
+          caseNum = -1;        
+        }
+        else if((isNewIfBlock || isNewRepeatBlock) && target.node.left !== null){   // Prevent IF and REPEAT between blocks
+          caseNum = -1;
         }
         else{
-          caseNum = 3;
+          $(target.node).find('rect').css({"stroke-width":4});
+          if(target.node.left === null){
+            caseNum = 0;
+          }
+          else{
+            caseNum = 3;
+          }
         }
       }
     }
@@ -150,7 +160,7 @@ $(document).ready(function(){
 
   function isInIfRepeat(target){
     ptr = target;
-    if($(ptr.node).hasClass("block if") || $(ptr.node).hasClass("block elseif") || $(ptr.node).hasClass("block repeat")) return false;
+    if($(ptr.node).hasClass("block if") || $(ptr.node).hasClass("block elseif") || $(ptr.node).hasClass("block repeat")) return true;
     while(ptr.node.left !== null){
       ptr = ptr.node.left;
     }
@@ -211,32 +221,33 @@ $(document).ready(function(){
   };
 
   var lastBlock;
-  var finalRect;
-  
+  // var finalRect;
+
 /////////////////////////////////////////////////////// END
   var endClone, codeLine, timesClone;
   end = function(e){
     var x, y;
     $('#overlay').css('visibility', 'hidden');
+    var validDrag = ~caseNum ? true : false;
     var target = tempElem.data('target');
     var caseNum = tempElem.data('caseNum');
-    var validDrag = ~caseNum ? true : false;
-    finalElem = this.clone();
 
-    var isIfBlock = $(finalElem.node).hasClass("block if");
-    var isRepeatBlock = $(finalElem.node).hasClass("block repeat");
-    var isEndBlock = $(finalElem.node).hasClass("block end");
-    var isTimesBlock = $(finalElem.node).hasClass("block times");
+    if(validDrag){
+      finalElem = this.clone();
 
-    var isTargetIfBlock = target ? $(target.node).hasClass("block if") : false;
-    var isTargetElseIfBlock = target ? $(target.node).hasClass("block elseif") : false;
-    var isTargetElseBlock = target ? $(target.node).hasClass("block else") : false;
-    var isTargetRepeatBlock = target ? $(target.node).hasClass("block repeat") : false;
-    var isTargetEndBlock = target ? $(target.node).hasClass("block end") : false;
+      var isIfBlock = $(finalElem.node).hasClass("block if");
+      var isRepeatBlock = $(finalElem.node).hasClass("block repeat");
+      var isEndBlock = $(finalElem.node).hasClass("block end");
+      var isTimesBlock = $(finalElem.node).hasClass("block times");
 
-    // console.log(validDrag+" "+caseNum + " " + target);
+      var isTargetIfBlock = target ? $(target.node).hasClass("block if") : false;
+      var isTargetElseIfBlock = target ? $(target.node).hasClass("block elseif") : false;
+      var isTargetElseBlock = target ? $(target.node).hasClass("block else") : false;
+      var isTargetRepeatBlock = target ? $(target.node).hasClass("block repeat") : false;
+      var isTargetEndBlock = target ? $(target.node).hasClass("block end") : false;
+    }
+
     if(validDrag && ~caseNum && (isIfBlock || isRepeatBlock)){
-      console.log("UY! Si IF/REPEAT BLOCK oh~!");
       endClone = endBlock.clone();
 
       finalElem.node.nextLine = endClone;
@@ -456,7 +467,7 @@ $(document).ready(function(){
     }
 
     if(validDrag){
-      finalRect = $(finalElem.node).find("rect");
+      var finalRect = $(finalElem.node).find("rect");
       finalRect.attr({            // Update the x and y of the rectangle
         x: x,
         y: y
@@ -546,12 +557,14 @@ $(document).ready(function(){
         snapEdit.add(finalElem);
       }
     }else{
-      finalElem.remove();
-      if(endBlock) endBlock.remove();
+      // finalElem.remove();
+      // if(endBlock) endBlock.remove();
       // codeLine.remove();
     }
 
 ///////////////////////////////////////////////////////// Reset objects and elements
+    // console.log(finalElem);
+    if(!validDrag) finalElem.remove();
     tempElem.remove();
     verticalGuide.remove();
     horizontalGuide.remove();

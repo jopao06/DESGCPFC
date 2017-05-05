@@ -109,7 +109,8 @@ statement
 
 outputStatement
   : output string {$$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$2+").attr({'font-size': 20, fill: blackActive, class:'display output'});"; yy.isOutput = true;}
-  | output relational_expr {$$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$2+").attr({'font-size': 20, fill: blackActive, class:'display output'});" ; yy.isOutput = true}
+  | output arrayVariable  { $$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$2+").attr({'font-size': 20, fill: blackActive, class:'display output'});"; yy.isOutput = true;}
+  | output relational_expr {$$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$2+").attr({'font-size': 20, fill: blackActive, class:'display output'});"; yy.isOutput = true}
 ;
 
 
