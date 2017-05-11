@@ -204,7 +204,7 @@ var removeSpecialBlock = function(triggerBlock){
   var x, y;
   ptr = firstAdjust;
 
-  console.log(ifData);
+  // console.log(ifData);
   while(ptr !== null){
     // console.log(ptr.node);
     x = blockMargin * (parseInt(ptr.attr('code-level'))+1);
@@ -241,7 +241,7 @@ var removeSpecialBlock = function(triggerBlock){
     yAdj += (blockMargin + blockHeight);
   }
 };
-
+var isBlockDelete = false;
 var deleteBlock = function(key, options){
   var triggerBlock = Snap(options.$trigger[0]);
   var isIfBlock = $(triggerBlock.node).hasClass("block if");
@@ -250,6 +250,9 @@ var deleteBlock = function(key, options){
   var isEndBlock = $(triggerBlock.node).hasClass("block end");
 
   triggerBlock = isEndBlock ? triggerBlock.node.ifBlock : triggerBlock;
+
+  // EventManager.publish("blockDeleted", {target: triggerBlock});
+  isBlockDelete = true;
 
   // CASE 1: DELETE HEAD
   if(triggerBlock === compData.head){
@@ -262,7 +265,7 @@ var deleteBlock = function(key, options){
   }
   // CASE 2: DELETE TAIL
   else if(triggerBlock === compData.tail){
-    console.log("Delete Tail");
+    // console.log("Delete Tail");
     if(isEndBlock){
       removeSpecialBlock(triggerBlock);
     }else{
@@ -335,6 +338,7 @@ var updateBlock = function(block, newText){
 var updateType = function(key, options){
   var triggerBlock = Snap(options.$trigger[0]);
   updateBlock(triggerBlock, key);
+  EventManager.publish('updateType',{type: key});
 };
 
 var updateRepeat = function(key, options){
@@ -414,6 +418,7 @@ var insertElse = function(key, options){
 
   snapEdit.add(elseClone);
   addHover(elseClone.node);
+  EventManager.publish("elseInserted", {else: elseClone});
 };
 
 var insertElseIf = function(key, options){
@@ -428,8 +433,8 @@ var insertElseIf = function(key, options){
 
   var elseIfClone = elseIfBlock.clone();
 
-  if(!isIfBlock)
-    console.log(triggerBlock.node.prevIf.node);
+  // if(!isIfBlock)
+  //   console.log(triggerBlock.node.prevIf.node);
   var x = triggerBlock.getBBox().x;
   var y = isElseBlock ? 
             triggerBlock.node.prevIf.getBBox().y2 + blockMargin : 
@@ -579,6 +584,15 @@ $.contextMenu({
       options.items.repeatWhile.visible = false;
       options.items.addElseIf.visible = false;
       options.items.addElse.visible = false;
+
+      options.items.select.disabled = false;
+      options.items.input.disabled = false;
+      options.items.editValue.disabled = false;
+      options.items.addElseIf.disabled = false;
+      options.items.addElse.disabled = false;
+      options.items.repeatTimes.disabled = false;
+      options.items.repeatWhile.disabled = false;
+
       if($(this).is(".undeletable"))
         options.items.delete.disabled = true;
       else
@@ -633,29 +647,30 @@ $.contextMenu({
         }
       }
 
-      this.data().input = ""+triggerBlock.select('text').attr('text')+"";
+      // this.data().input = ""+triggerBlock.select('text').attr('text')+"";
       $.contextMenu.setInputValues(options, this.data());
     },
     hide: function(options) {
       var triggerBlock = Snap(options.$trigger[0]);
       var menu = options.$menu;
       
-      if(options.items.input.visible || options.items.editValue.visible){
+      if(!isBlockDelete && (options.items.input.visible || options.items.editValue.visible)){
         var inputText = $(menu).find("li.context-menu-input:visible").find("input");
-        // console.log(inputText);
 
         if(options.items.input.visible) variableArray.push($(inputText).val());
         if($(inputText).val()) updateBlock(triggerBlock,$(inputText).val());
         
         if(options.items.editValue.visible){
-          if(level === "1_1"){
-            EventManager.publish("valueChanged", {newText: $(inputText).val()});
-          }
+          EventManager.publish("valueChanged", {newText: $(inputText).val()});
+        }
+        else if(options.items.input.visible){
+          EventManager.publish("variableChanged", {newName: $(inputText).val()});
         }
       }
-      this.data().input = ""+triggerBlock.select('text').attr('text')+"";
+      // this.data().input = ""+triggerBlock.select('text').attr('text')+"";
       $.contextMenu.getInputValues(options, this.data());
       // console.log(this.data());
+      isBlockDelete = false;
     }
   }
 });

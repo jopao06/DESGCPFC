@@ -36,6 +36,8 @@
 
 "mod"                     return 'mod'
 "not="                    return 'not='
+"and"                     return 'and'
+"or"                      return 'or'
 ("true"|"false")\b        return 'boolean'
 [a-zA-Z][a-zA-Z0-9]*\b    return 'variable'
 
@@ -74,7 +76,7 @@
 %left '^'
 %left UMINUS
 %left '<' '<=' '>' '>=' 
-%left 'not=' '='
+%left 'not=' '=' 'and' 'or'
 
 %start program
 
@@ -109,7 +111,6 @@ statement
 
 outputStatement
   : output string {$$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$2+").attr({'font-size': 20, fill: blackActive, class:'display output'});"; yy.isOutput = true;}
-  | output arrayVariable  { $$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$2+").attr({'font-size': 20, fill: blackActive, class:'display output'});"; yy.isOutput = true;}
   | output relational_expr {$$ = "snapDisplay.text(20,"+ (yy.lineCount*20 + 70) +","+$2+").attr({'font-size': 20, fill: blackActive, class:'display output'});"; yy.isOutput = true}
 ;
 
@@ -166,38 +167,40 @@ variableDeclaration
 
 arrayVariable
   : variable indexInitializer {{
-      yy.isVarDec = false;
       if(yy.varArray === undefined){ yy.varArray = [] }
       var varType = yy.data[$1] ? yy.data[$1].type : undefined;
-      yy.varArray.push({type: varType, name: $1, isArray: true, arraySize: $2});
-      $$ = $1 + $2
+      yy.varArray.push({type: varType, name: $1, isArray: true, arraySize: $2.match(/\[.*?\]/g).map(function(match) { return match.slice(1, -1); })});
+      $$ = $1 + $2;
+
+      if(yy.terms === undefined){ yy.terms = [] };
+      yy.terms.push({value: $1, type: varType, isArray: true, arraySize: $2.match(/\[.*?\]/g).map(function(match) { return match.slice(1, -1); })});
     }}
 ;
 
 arrayDeclaration
   : int_type variable indexInitializer {{
       yy.isVarDec = true;
-      if(yy.varArray === undefined){ yy.varArray = []; console.log("array name"); } 
-      yy.varArray.push({type: "integer", name: $2, isArray: true, arraySize: $3});
+      if(yy.varArray === undefined){ yy.varArray = [];} 
+      yy.varArray.push({type: "integer", name: $2, isArray: true, arraySize: $3.match(/\[.*?\]/g).map(function(match) { return match.slice(1, -1); })});
       $$ = "var "+$2+$3;
     }}
   | num_type variable indexInitializer {{
       yy.isVarDec = true;
       if(yy.varArray === undefined){ yy.varArray = [] } 
-      yy.varArray.push({type: "number", name: $2, isArray: true, arraySize: $3});
+      yy.varArray.push({type: "number", name: $2, isArray: true, arraySize: $3.match(/\[.*?\]/g).map(function(match) { return match.slice(1, -1); })});
       $$ = "var "+$2+$3;
     }}
   | bool_type variable indexInitializer {{
       yy.isVarDec = true;
       if(yy.varArray === undefined){ yy.varArray = [] } 
-      yy.varArray.push({type: "boolean", name: $2, isArray: true, arraySize: $3});
+      yy.varArray.push({type: "boolean", name: $2, isArray: true, arraySize: $3.match(/\[.*?\]/g).map(function(match) { return match.slice(1, -1); })});
       $$ = "var "+$2+$3;
     }}
 ;
 
 indexInitializer
   : '[' expression ']' indexInitializer { $$ = "["+ $2 +"]" + $4; }
-  | '[' expression ']' { $$ = "["+$2+"]"; console.log("array index"); }
+  | '[' expression ']' { $$ = "["+$2+"]";}
 ;
 
 initializer
@@ -214,22 +217,25 @@ expression
   | '(' expression ')'                    { $$ = "(" + $2 + ")"; }
   | integer {{
       $$ = ""+parseInt($1)+"";
-      if(yy.terms === undefined){ yy.terms = [] } 
+      if(yy.terms === undefined){ yy.terms = [] };
       yy.terms.push({value: $1, type: "integer" });
     }}
   | number {{ 
       $$ = ""+Number($1)+""; 
-      if(yy.terms === undefined){ yy.terms = [] } 
+      if(yy.terms === undefined){ yy.terms = [] };
       yy.terms.push({value: $1, type: "number" });
     }}
   | variable {{
       $$ = $1;
-      if(yy.varArray === undefined){ yy.varArray = [] }
+      if(yy.varArray === undefined){ yy.varArray = [] };
       var varType = yy.data[$1] ? yy.data[$1].type : undefined;
       yy.varArray.push({type: varType, name: $1});
 
-      if(yy.terms === undefined){ yy.terms = [] } 
+      if(yy.terms === undefined){ yy.terms = [] }; 
       yy.terms.push({value: $1, type: varType });
+  }}
+  | arrayVariable {{
+    $$ = $1;
   }}
 ;
 
@@ -241,6 +247,8 @@ relational_expr
 
   | relational_expr 'not=' relational_expr  { $$ = $1+ "!==" +$3; }
   | relational_expr '=' relational_expr     { $$ = $1+ "===" +$3; }
+  | relational_expr 'and' relational_expr  { $$ = $1+ "&&" +$3; }
+  | relational_expr 'or' relational_expr     { $$ = $1+ "||" +$3; }
   | boolean { $$ = "" + yytext==="true" + ""; }
   | expression
 ;

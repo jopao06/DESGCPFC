@@ -102,7 +102,7 @@ svg-container,
 #edit-div #edit-container .secondary.segment {
   height: 92%;
   background-color: transparent;
-  overflow-x: auto;
+  overflow: auto;
 }
 #display-div {
   height: 85%;

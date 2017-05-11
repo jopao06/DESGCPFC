@@ -161,3 +161,16 @@ horizontalGuide.attr({
     'stroke-linecap':'round'
 });
 horizontalGuide.remove();
+
+// Popup
+var blockPop = $('#block-container');
+var editPop = $('#edit-div');
+var displayPop = $('#display-svg svg');
+var consolePop = $('#console-title');
+var dimmerMessage = $("#dimmer-message")
+// Custom popup contents
+var blockPopContent = $('#block-panel-pop');
+var editPopContent = $('#edit-panel-pop');
+var displayPopContent = $('#display-panel-pop');
+var consolePopContent = $('#console-pop');
+var dimmerMessageContent =$("#dimmer-message .content .center")

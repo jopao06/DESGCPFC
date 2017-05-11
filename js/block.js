@@ -19,7 +19,7 @@ $(document).ready(function(){
     // Check if block is dragged within editor
     if( ( x + dragAllowance > compData.editPanelLeft ) && ( y + dragAllowance > compData.editPanelTop )
       ){
-        compX = tempElem.data('shift').dx + tempElem.data('origin').ox - editPanel.parent().offset().left;    // EXPLANATION: Parent of edit panel instead of edit panel becausee parent is fixed and cannot be scrolled
+        compX = tempElem.data('shift').dx + tempElem.data('origin').ox - editPanel.parent().offset().left + editPanel.parent().scrollLeft();    // EXPLANATION: Parent of edit panel instead of edit panel becausee parent is fixed and cannot be scrolled
         compY = tempElem.data('shift').dy + tempElem.data('origin').oy - compData.editPanelTop + editPanel.parent().scrollTop();
 
         newTarget = findTarget(compX + (tempElem.getBBox().width / 2), compY + (tempElem.getBBox().height / 2), tempElem);
@@ -477,7 +477,6 @@ $(document).ready(function(){
         y: y + textYPadding
       });
 
-    if(level === "1_1") EventManager.publish('blockDragged', { block: finalElem});
 ////////////////////////////////////////////////////////// IF "IF-BLOCK"
       if(isIfBlock || isRepeatBlock){
         // compData.tail = endClone;
@@ -556,6 +555,7 @@ $(document).ready(function(){
         addHover(finalElem.node);
         snapEdit.add(finalElem);
       }
+      EventManager.publish('blockDragged', { block: finalElem});
     }else{
       // finalElem.remove();
       // if(endBlock) endBlock.remove();
@@ -571,11 +571,11 @@ $(document).ready(function(){
     if(targetBlock !== null) $(targetBlock.node).find('rect').css({"stroke-width":2});
     targetBlock = null;
 
-    if ($('svg#edit-panel').find('g').length > 12) {
-      editPanel.attr({
-        height: (blockHeight  + blockMargin) * $('svg#edit-panel').find('g').length + 5
-      });
-    }
+    // if ($('svg#edit-panel').find('g').length > 12) {
+    //   editPanel.attr({
+    //     height: (blockHeight  + blockMargin) * $('svg#edit-panel').find('g').length + 5
+    //   });
+    // }
 
     // console.log(compData);
   };

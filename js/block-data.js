@@ -94,12 +94,22 @@ blocks.greater_equal = {
 blocks.equal_equal = {
     text: "=",
     color: green,
-    class: "block equal"
+    class: "block equal-equal"
   };
 blocks.not_equal = {
     text: "not=",
     color: green,
     class: "block not-equal"
+  };
+blocks.and = {
+    text: "and",
+    color: green,
+    class: "block and"
+  };
+blocks.or = {
+    text: "or",
+    color: green,
+    class: "block or"
   };
 ////////////////////////////// Control Flow
 blocks.if = {
