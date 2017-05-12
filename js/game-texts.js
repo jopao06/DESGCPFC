@@ -189,6 +189,34 @@ var gameTexts = {
     level_exit:
       '<h1 class="ui inverted icon header">' +
         '<i class="massive rocket icon"></i>' +
+        "<p>Well Done!</p>" +
+      '</h1>'+
+      "<p>Now we know how to do multiplication using repeated addition and<br>division using repeated subtraction. We can now proceed<br>to the next level or you can stay here and further explore your code.</p>",
+  },
+  "1_4" : {
+    fibo_intro: 
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive hashtag icon"></i>' +
+        "<p>The Fibonacci Sequence</p>" +
+      '</h1>'+
+      "<p>Fibonacci is an Italian mathematician that created the Fibonacci sequence as a result of one<br>his mathematical problem about rabbit breeding. The problem was this:</p><p>Beginning with a single pair of rabbits (one male and one female), how many pairs of rabbits<br>will be born in a year, assuming that every month each male and female rabbit<br>gives birth to a new pair of rabbits, and the new pair of rabbits itself starts<br>giving birth to additional pairs of rabbits after the first month of their birth?</p><p>Doing the sequence, it would be like this<br>1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144<br> where each number represent total pairs each month.</p>",
+    fibo_array:
+      '<h1>Fibo</h1>'+
+      '<p>On this level, we are going to make a Fibonacci sequence up to the fifth number. Here, we have already declared array "fibo" and its size. All we have to do now is to build the loop where we are going to save each term to array "fibo". Always remember that the first two numbers should be 1 then the succeeding values would be "n-2" plus "n-1" where "n" is the index number</p>'+
+      '<button id="exit-fibo-array" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'OK'+
+      '</button>',
+    fibo_success:
+      '<h1>Fibonacci will be so proud!</h1>'+
+      '<p>Excellent! With loops and if-statements, we can effectively manipulate the values of the array</p>'+
+      '<button id="exit-fibo-success" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'Done'+
+      '</button>',
+    level_exit:
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive rocket icon"></i>' +
         "<p>Multiplication using Repeated Addition</p>" +
       '</h1>'+
       "<p>Now we know how to do multiplication using repeated addition and<br>division using repeated subtraction. We can now proceed<br>to the next level or you can stay here and further explore your code.</p>",

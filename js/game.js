@@ -187,6 +187,8 @@ $(document).ready(function(){
               EventManager.publish("successfulRun",{array: array});
             else if(level === "1_3")
               EventManager.publish("successfulRun",{result: result, value1: parseInt($(".block.value.value1").find('text').html()), value2: parseInt($(".block.value.value2").find('text').html())});
+            if(level === "1_4")
+              EventManager.publish("successfulRun",{fibo: fibo});
             else
               EventManager.publish("successfulRun");
           }
@@ -356,9 +358,6 @@ $(document).ready(function(){
           $(val.node).addClass('immovable undeletable');
           appendToRight(eq,val);
         }
-
-
-        console.log(compData);
         break;
       case "1_3":
         // VALUE 1
@@ -413,6 +412,33 @@ $(document).ready(function(){
         appendToRight(equal3,val3);
 
         break;
+      case "1_4":
+        var type = createBlock('g.block.type','integer');
+        $(type.node).addClass('immovable uneditable undeletable');
+        appendToTail(type);
+
+        var array = createBlock('g.block.variable',"fibo[5]");
+        $(array.node).addClass('fibo immovable uneditable undeletable');
+        appendToRight(type,array);
+
+        // var arr = [];
+        // var temp;
+        // var eq, val;
+        // for(var i=0; i<5; i++){ 
+        //   arr.push(createBlock('g.block.variable','array['+i+']'));
+        //   $(arr[i].node).addClass('immovable uneditable undeletable');
+        //   temp = arr[i];
+        //   appendToTail(temp);
+
+        //   eq = createBlock('g.block.equal');
+        //   $(eq.node).addClass('immovable undeletable');
+        //   appendToRight(arr[i],eq);
+
+        //   val = createBlock('g.block.value',""+i+"");
+        //   $(val.node).addClass('immovable undeletable');
+        //   appendToRight(eq,val);
+        // }
+      break;
       default:
         // Do something
     }
@@ -1163,6 +1189,24 @@ $(document).ready(function(){
         snapDisplay.rect(10,10,$(snapDisplay.node).width()/1.04,$(snapDisplay.node).height()/2,9).attr({'fill-opacity': 0, stroke: black, strokeWidth: 2,});
         snapDisplay.line(20,45,($(snapDisplay.node).width()/1.04)-4,45).attr({stroke: black, strokeWidth: 2,});
         snapDisplay.text(20,35,'Output >>').attr({'font-size': 15, fill: black});
+        break;
+      case "1_4":
+        var rectSize = 50;
+        var x = $(snapDisplay.node).width()/3.5;
+        var y = $(snapDisplay.node).height()*1.5/5;
+        var xAdjust, yAdjust;
+        var arrMargin = 10;
+
+        snapDisplay.text(x-65,y+35,'fibo').attr({'font-size': 30, fill: black});
+        for(var i=0; i<5 ; i++){
+          xAdjust = x + i*(rectSize+10 + arrMargin);
+          var arrayRect = snapDisplay.rect(xAdjust,y,rectSize+10,rectSize,9).attr({'fill-opacity': 0, stroke: black, strokeWidth: 2,});
+          var arrayText = snapDisplay.text(xAdjust,y+35,"").attr({'font-size': 25, fill: black});
+              arrayText.attr({x: xAdjust+(arrayRect.getBBox().width/2)-(arrayText.getBBox().width/2)});
+          var arrayIndex = snapDisplay.text(xAdjust,y+rectSize+arrMargin*2,""+i+"").attr({'font-size': 16, fill: black});
+              arrayIndex.attr({x: xAdjust+(arrayRect.getBBox().width/2)-(arrayIndex.getBBox().width/2)});
+          var array = snapDisplay.g(arrayRect, arrayText).attr({class: "array-"+i});
+        }
       default:
         // Do something
     }
@@ -1175,7 +1219,6 @@ $(document).ready(function(){
                       "less", "greater", "less_equal","greater_equal", "equal_equal","not_equal", "and", "or",
                       "if","repeat"];
   switch(level){
-/////////////////////////////////////////////////////// LEVEL 1_1
     case "1_1":
       // Initialize Sidebar
       $("a#side-prev").remove();
@@ -1384,7 +1427,6 @@ $(document).ready(function(){
         });
       });
       break;
-/////////////////////////////////////////////////////// LEVEL 1_2
     case "1_2":
       blocksNeeded = ["type","variable","equal","value",
                       "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
@@ -1459,7 +1501,6 @@ $(document).ready(function(){
       }).dimmer('show');
 
       break;
-/////////////////////////////////////////////////////// LEVEL 1_3
     case "1_3":
       blocksNeeded = ["type","variable","equal","value","output",
                       "addition","subtraction", "open_par","close_par",
@@ -1525,7 +1566,7 @@ $(document).ready(function(){
         }
       });
 
-      var runCounter = 0;
+      var failCounter = 0;
       var outputChecker = EventManager;
       var isMultDone = false;
       var isDivDone = false;
@@ -1554,6 +1595,7 @@ $(document).ready(function(){
             }).popup('show');
             $("#exit-mult-success").click(function(){
               isMultDone = true;
+              failCounter = 0;
               displayPop.popup('hide').popup('destroy');
               dimmerMessageContent.empty().append(gameTexts[level].div_repeated_sub);
               dimmerMessage
@@ -1578,6 +1620,7 @@ $(document).ready(function(){
                 }).dimmer('show');
             });
           }else{
+            failCounter +=1;
             if(!isRepeatDragged){
               displayPop
                 .popup('destroy')
@@ -1587,7 +1630,7 @@ $(document).ready(function(){
                   closable: false,
                   title: 'You forgot something..',
                   content: "We need to use the REPEAT block on this level.",
-                  on: 'hover',
+                  on: 'click',
                   variation: "wide",
                   onHide: function(){
                     displayPop.popup('destroy');
@@ -1603,9 +1646,9 @@ $(document).ready(function(){
                   closable: false,
                   title: 'You forgot something..',
                   content: "Don't forget to output your result.",
-                  on: 'hover',
+                  on: 'click',
                   variation: "wide",
-                  onHide: function(){
+                  onHidden: function(){
                     displayPop.popup('destroy');
                   }
               }).popup('show');
@@ -1620,16 +1663,33 @@ $(document).ready(function(){
                   content: "Oops! It seems your result does not match. Check if you correctly add your values and store it to variable 'result'. Don't forget to initialize the result as 0.",
                   on: 'click',
                   variation: "wide",
-                  onHide: function(){
+                  onHidden: function(){
                     displayPop.popup('destroy');
                   }
               }).popup('show');
+
+              if(failCounter > 6){
+                editPop
+                .popup('destroy')
+                .popup({
+                  position: "top left",
+                  offset : -(compData.editPanelHeight / 2) + $($("svg#edit-panel .block.repeat")[0]).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  title: "Hint",
+                  content: "5x2 means add 2 to result 5 times.",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+              }
             }
+
           }
         }
         else{
-          console.log(value1+", "+value2);
-          console.log(parseInt(value1/value2))
           if(isRepeatDragged && isOutputDragged && parseInt(value1/value2) === output){
             displayPopContent.empty().append(gameTexts[level].div_display_success);
             displayPop
@@ -1644,6 +1704,7 @@ $(document).ready(function(){
                 variation: "wide"
             }).popup('show');
             $("#exit-div-success").click(function(){
+              failCounter = 0;
               displayPop.popup('hide').popup('destroy');
               dimmerMessageContent.empty().append(gameTexts[level].level_exit);
               dimmerMessage
@@ -1654,12 +1715,14 @@ $(document).ready(function(){
                     editPop.popup('destroy');
                     outputChecker.unsubscribe('blockDragged');
                     outputChecker.unsubscribe('successfulRun');
+                    outputChecker.unsubscribe('unsuccessfulRun');
                     outputChecker.unsubscribe('blockDeleted');
                     outputChecker.unsubscribe('repeatUpdated');
                   }
                 }).dimmer('show');
             });
           }else{
+            failCounter += 1;
             if(!isRepeatDragged){
               displayPop
                 .popup('destroy')
@@ -1706,13 +1769,31 @@ $(document).ready(function(){
                     displayPop.popup('destroy');
                   }
               }).popup('show');
+              if(failCounter > 6){
+                editPop
+                .popup('destroy')
+                .popup({
+                  position: "top left",
+                  offset : -(compData.editPanelHeight / 2) + $($("svg#edit-panel .block.repeat")[0]).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  title: "Hint",
+                  content: "We can use the variable 'result' to count the the number of times we subtracted 'value2' to 'value1' until we cannot subtract 'value2' to 'value1'",
+                  on: 'click',
+                  variation: "wide",
+                  onHide: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+              }
             }
           }
         }
-
-        runCounter +=1;
       });
 
+      outputChecker.subscribe('unsuccessfulRun', function(e, param){
+        failCounter += 1;
+      });
       outputChecker.subscribe('blockDragged', function(e, param){
         var block = param.block;
         if($(block.node).is(".block.output")){
@@ -1752,7 +1833,6 @@ $(document).ready(function(){
         }
       });
       break;
-/////////////////////////////////////////////////////// LEVEL 1_4
     case "1_4":
       blocksNeeded = ["type","variable","equal","value",
                       "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
@@ -1765,7 +1845,177 @@ $(document).ready(function(){
       initializeEditPanel(level);
       initializeDisplayPanel(level);
       // Initialize Popups
-      dimmerMessageContent.append(gameTexts[level].mult_repeated_add);
+      dimmerMessageContent.append(gameTexts[level].fibo_intro);
+      dimmerMessage.dimmer({
+        onHide: function(){
+          editPopContent.empty().append(gameTexts[level].fibo_array);
+          editPop
+            .popup('destroy')
+            .popup({
+              position : 'top left',
+              offset : -(compData.editPanelHeight / 2) + $($(".block.variable.fibo")[0]).offset().top - 65,
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'manual',
+              popup : editPopContent,
+              variation: "very wide",
+            }).popup('show');
+          $("button#exit-fibo-array").click(function(){
+            editPop.popup('hide').popup('destroy');
+          });
+        }
+      });
+
+      // Display Array Defaults
+      var rectSize = 50;
+      var x = $(snapDisplay.node).width()/3.5;
+      var y = $(snapDisplay.node).height()*1.5/5;
+      var xAdjust, yAdjust;
+      var arrMargin = 10;
+
+      var outputChecker = EventManager;
+      var isFiboCorrect = false;
+      var isRepeatDragged = false;
+      var isIfDragged = false;
+      var failCounter = 0;
+      outputChecker.subscribe('successfulRun', function(e, param){
+        var fibo = param.fibo;
+        var expected = [1,1,2,3,5];
+        var arrayBox, newText;
+
+
+        for(var i=0; i<fibo.length; i++){
+          arrayBox = snapDisplay.select('g.array-'+i);
+          xAdjust = x + i*(rectSize+10 + arrMargin);
+          newText = fibo[i] ? arrayBox.select('text').attr({ text: ""+fibo[i]+"" }) : arrayBox.select('text').attr({ text: "" });
+          newText.attr({x: xAdjust+(arrayBox.getBBox().width/2)-(newText.getBBox().width/2)});
+        }
+
+        if(isRepeatDragged && isIfDragged && checkFibo(fibo, expected)){
+          displayPopContent.empty().append(gameTexts[level].fibo_success);
+          displayPop
+            .popup('destroy')
+            .popup({
+              position: "top center",
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'manual',
+              popup : displayPopContent,
+              variation: "wide"
+          }).popup('show');
+          $("button#exit-fibo-success").click(function(){
+            displayPop.popup('hide').popup('destroy');
+            editPop.popup('destroy');
+            dimmerMessageContent.empty().append(gameTexts[level].level_exit);
+            dimmerMessage.dimmer({
+              onHide: function(){
+                outputChecker.unsubscribe('successfulRun');
+                outputChecker.unsubscribe('unsuccessfulRun');
+                outputChecker.unsubscribe('blockDragged');
+                outputChecker.unsubscribe('blockDeleted');
+              }
+            }).dimmer('show');
+          });
+        }else{
+          failCounter += 1;
+          if(!isRepeatDragged){
+            editPop
+            .popup('destroy')
+            .popup({
+              position: "left center",
+              hoverable : false,
+              closable: false,
+              offset : -(compData.editPanelHeight / 2) + $($(".block.variable.fibo")[0]).offset().top + blockHeight + blockMargin - 65,
+              content: "You forgot to use the REPEAT bock. We need to loop 5 times to access each index.",
+              on: 'click',
+              variation: "wide",
+              onHidden: function(){
+                editPop.popup('destroy');
+              }
+            }).popup('show');
+          }else if(!isIfDragged){
+            editPop
+            .popup('destroy')
+            .popup({
+              position: "left center",
+              hoverable : false,
+              closable: false,
+              offset : -(compData.editPanelHeight / 2) + $($(".block.variable.fibo")[0]).offset().top + blockHeight + blockMargin - 65,
+              content: "Remember, first two numbers should be equal to 1 and the succeeding numbers equal to 'n-2' plus 'n-1' where 'n' is the index number. So we're going to use IF statements with these conditions.",
+              on: 'click',
+              variation: "wide",
+              onHidden: function(){
+                editPop.popup('destroy');
+              }
+            }).popup('show');
+          }
+          else{
+            displayPop
+              .popup('destroy')
+              .popup({
+                position: "top center",
+                hoverable : false,
+                closable: false,
+                exclusive: true,
+                on: 'click',
+                content: "Oops! The array is not the expected output. Try again.",
+                variation: "wide",
+                onHidden: function(){
+                   displayPop.popup('destroy');
+                }
+            }).popup('show');
+          }
+
+          if(failCounter > 10){
+            editPop
+            .popup('destroy')
+            .popup({
+              position: "top left",
+              offset : -(compData.editPanelHeight / 2) + $($(".block.variable.fibo")[0]).offset().top + blockHeight + blockMargin - 65,
+              hoverable : false,
+              closable: false,
+              title: "Hint",
+              content: "We need to repeat 5 times and if n is 1 or 0, fibo[n] should be 1, else fibo[n] is fibo[n-2] plus fibo[n-1]",
+              on: 'click',
+              variation: "wide",
+              onHidden: function(){
+                editPop.popup('destroy');
+              }
+            }).popup('show');
+          }
+        }
+      });
+
+      outputChecker.subscribe('unsuccessfulRun', function(e, param){
+        failCounter += 1;
+      });
+
+      outputChecker.subscribe('blockDragged', function(e, param){
+        var block = $(param.block.node);
+
+        if(block.is(".block.repeat")){
+          isRepeatDragged = true;
+        }
+        else if(block.is(".block.if")){
+          isIfDragged = true;
+        }
+      });
+
+      outputChecker.subscribe('blockDeleted', function(e, param){
+        var block = $(param.target.node);
+
+        if(block.is(".block.repeat")){
+          isRepeatDragged = false;
+        }
+      });
+
+      var checkFibo = function(output, expected){
+        return (output.length == expected.length) && output.every(function(element, index) {
+            return parseInt(element) === expected[index]; 
+        })
+      }
       break;
     default:
       // Do something
