@@ -376,6 +376,8 @@ var updateRepeat = function(key, options){
     triggerBlock.node.right = null;
     updateBlock(triggerBlock, "repeatwhile");
   }
+
+  EventManager.publish("repeatUpdated", {text: key});
 };
 
 var insertElse = function(key, options){

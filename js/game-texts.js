@@ -49,8 +49,7 @@ var gameTexts = {
           '<i class="right arrow icon"></i>'+
           'Next'+
         '</button>'
-    }
-  
+    }  
   },
   "1_2" : {
     arrays: 
@@ -141,6 +140,57 @@ var gameTexts = {
         "<p>We're Done!</p>" +
       '</h1>'+
       "<p>YEHEY! We now know how to use arrays, repeats, and if statemetns! On the next level, we're going<br>to practice our knowledge we just learned. So always remember what you've learned on this level.<br>You can now proceed to level 3 or you can stay to explore more about the finished tutorial.</p>"
+  },
+  "1_3" : {
+    mult_repeated_add: 
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive plus icon"></i>' +
+        "<p>Multiplication using Repeated Addition</p>" +
+      '</h1>'+
+      "<p>When we are doing multiplication, for example 5x2, we are<br>adding 5 twice or adding 2 five times. On this level, we are going to build<br>a code that can do multiplication using repeated additon.<br>To do that we are going to use loops.</p>",
+    mult_var:
+      '<p>So here we already declared two integer variables. You can change the values to test different cases. For the sake of this level, we will only be doing multiplication of two positive integers.</p>'+
+      '<button id="next-to-result" class="ui basic icon button next">'+
+        '<i class="right arrow icon"></i>'+
+        'Next'+
+      '</button>',
+    mult_result:
+      '<p>Save the result to this variable, then print the result using the OUTPUT block. </p>'+
+      '<button id="next-to-start" class="ui basic icon button next">'+
+        '<i class="right arrow icon"></i>'+
+        'Next'+
+      '</button>',
+    mult_start:
+      "<p>Now let's start coding! We are going to use the REPEAT-TIMES block so we are going to apply our knowledge on loops. Build the code and when you're done, click run to test your code.</p>"+
+      '<button id="start-mult" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'Done'+
+      '</button>',
+    mult_display_success:
+      "<h1>Good Job!</h1>" +
+      "<p>Yay! You got it! Now let's do division this time</p>"+
+      '<button id="exit-mult-success" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'Ok'+
+      '</button>',
+    div_repeated_sub: 
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive minus icon"></i>' +
+        "<p>Division using Repeated Subtraction</p>" +
+      '</h1>'+
+      "<p>Like in multiplication, we can perform division using repeated subtraction.<br>We count the number of times we subtract value2 to value1. So here,<br>we can use variable 'result' to count the number of times we subtract.</p>",
+    div_display_success:
+      "<h1>Great!</h1>" +
+      "<p>Piece of cake! Now, we are more familiar with loops.</p>"+
+      '<button id="exit-div-success" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'Yay'+
+      '</button>',
+    level_exit:
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive rocket icon"></i>' +
+        "<p>Multiplication using Repeated Addition</p>" +
+      '</h1>'+
+      "<p>Now we know how to do multiplication using repeated addition and<br>division using repeated subtraction. We can now proceed<br>to the next level or you can stay here and further explore your code.</p>",
   }
 };
-

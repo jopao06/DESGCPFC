@@ -54,7 +54,16 @@ $(document).ready(function(){
 
       ptr1 = ptr.node.right;
       while(ptr1!==null){
-        code += " " + ptr1.select("text").attr("text");
+        if($(ptr1.node).is(".block.value")){
+          var valueText = ptr1.select("text").attr("text")
+          if(/\"[\S\s]*\"/.test(valueText) || /\'[\S\s]*\'/.test(valueText) || /[0-9]+\.[0-9]+/.test(valueText) || /[0-9]+/.test(valueText)){
+            code += " " + valueText;
+          }else{
+            code += " '" + valueText + "'";
+          }
+        }else{
+          code += " " + ptr1.select("text").attr("text");
+        }
         ptr1 = ptr1.node.right;
       }
 
@@ -75,7 +84,6 @@ $(document).ready(function(){
     var outputCode = "";
     var lineCount = 0;
 /////////////////////////////////////////////////////// ERROR CHECKING
-
     $.each(lines, function(index, line){
       try{
         parser.yy.data = varArray;
@@ -172,15 +180,28 @@ $(document).ready(function(){
     else{
       // console.log(outputCode);
       try{
-        eval(outputCode);
-        if(level === "1_2")
-          EventManager.publish("successfulRun",{array: array});
-        else
-          EventManager.publish("successfulRun");
+        limitEval(outputCode.replace(/snapDisplay[^;]*;/g,""), function(success, returnValue) {
+          if (success) {
+            eval(outputCode);
+            if(level === "1_2")
+              EventManager.publish("successfulRun",{array: array});
+            else if(level === "1_3")
+              EventManager.publish("successfulRun",{result: result, value1: parseInt($(".block.value.value1").find('text').html()), value2: parseInt($(".block.value.value2").find('text').html())});
+            else
+              EventManager.publish("successfulRun");
+          }
+          else {
+            if($('#open-console').css('display') === "block") $('#open-console').click();
+            $("#console-body").append("<p>Error: There is an infinite loop.</p>");
+            EventManager.publish("unsuccessfulRun");
+          }
+        }, 5000);
       }catch(e){
         console.log(e.message);
         var errorMessage = e.message.split("\n")[0];
+        if($('#open-console').css('display') === "block") $('#open-console').click();
         $("#console-body").append("<p>"+errorMessage+"</p>");
+        EventManager.publish("unsuccessfulRun");
       }
     }
     console.log(outputCode);
@@ -338,6 +359,59 @@ $(document).ready(function(){
 
 
         console.log(compData);
+        break;
+      case "1_3":
+        // VALUE 1
+        var typeValue1 = createBlock('g.block.type','integer');
+        $(typeValue1.node).addClass('immovable uneditable undeletable');
+        appendToTail(typeValue1);
+
+        var var1 = createBlock('g.block.variable',"value1");
+        $(var1.node).addClass('var1 immovable uneditable undeletable');
+        appendToRight(typeValue1,var1);
+
+        var equal1 = createBlock('g.block.equal',"=");
+        $(equal1.node).addClass('immovable uneditable undeletable');
+        appendToRight(var1,equal1);
+
+        var val1 = createBlock('g.block.value',"5");
+        $(val1.node).addClass('value1 immovable undeletable');
+        appendToRight(equal1,val1);
+
+        // VALUE 2 
+        var typeValue2 = createBlock('g.block.type','integer');
+        $(typeValue2.node).addClass('immovable uneditable undeletable');
+        appendToTail(typeValue2);
+
+        var var2 = createBlock('g.block.variable',"value2");
+        $(var2.node).addClass('var2 immovable uneditable undeletable');
+        appendToRight(typeValue2,var2);
+
+        var equal2 = createBlock('g.block.equal',"=");
+        $(equal2.node).addClass('immovable uneditable undeletable');
+        appendToRight(var2,equal2);
+
+        var val2 = createBlock('g.block.value',"2");
+        $(val2.node).addClass('value2 immovable undeletable');
+        appendToRight(equal2,val2);
+
+        // RESULT
+        var typeResult = createBlock('g.block.type','integer');
+        $(typeResult.node).addClass('immovable uneditable undeletable');
+        appendToTail(typeResult);
+
+        var result = createBlock('g.block.variable',"result");
+        $(result.node).addClass('result immovable uneditable undeletable');
+        appendToRight(typeResult,result);
+
+        var equal3 = createBlock('g.block.equal',"=");
+        $(equal3.node).addClass('immovable uneditable undeletable');
+        appendToRight(result,equal3);
+
+        var val3 = createBlock('g.block.value',"0");
+        $(val3.node).addClass('value2 immovable uneditable undeletable');
+        appendToRight(equal3,val3);
+
         break;
       default:
         // Do something
@@ -861,7 +935,7 @@ $(document).ready(function(){
               }
               break;
             case 2: // IF TEST
-              $("#run-code").addClass('disabled');
+              // $("#run-code").addClass('disabled');
               displayPopContent.empty().append(gameTexts[level].loop_done);
               displayPop
                 .popup('destroy')
@@ -1025,7 +1099,7 @@ $(document).ready(function(){
                             editPop.popup('destroy');
                           }
                         }).popup('show');
-                      $("#run-code").removeClass('disabled');
+                      // $("#run-code").removeClass('disabled');
                       isDone = true;
                     }
                     break;
@@ -1085,6 +1159,10 @@ $(document).ready(function(){
           }
         });        
         break;
+      case "1_3":
+        snapDisplay.rect(10,10,$(snapDisplay.node).width()/1.04,$(snapDisplay.node).height()/2,9).attr({'fill-opacity': 0, stroke: black, strokeWidth: 2,});
+        snapDisplay.line(20,45,($(snapDisplay.node).width()/1.04)-4,45).attr({stroke: black, strokeWidth: 2,});
+        snapDisplay.text(20,35,'Output >>').attr({'font-size': 15, fill: black});
       default:
         // Do something
     }
@@ -1384,18 +1462,310 @@ $(document).ready(function(){
 /////////////////////////////////////////////////////// LEVEL 1_3
     case "1_3":
       blocksNeeded = ["type","variable","equal","value","output",
-                      "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
+                      "addition","subtraction", "open_par","close_par",
                       "less", "greater", "less_equal","greater_equal", "equal_equal","not_equal", "and", "or",
                       "if","repeat"];
+      $("a#side-prev").attr({href:'game.html?level=1_2'});
+      $("a#side-next").attr({href:'game.html?level=1_4'});
+
       initializeBlockPanel(blocksNeeded);
+      initializeEditPanel(level);
+      initializeDisplayPanel(level);
+      // Initialize Popups
+      dimmerMessageContent.append(gameTexts[level].mult_repeated_add);
+      dimmerMessage.dimmer({
+        onHide: function(){
+          editPopContent.empty().append(gameTexts[level].mult_var);
+          editPop
+            .popup('destroy')
+            .popup({
+              position : 'top left',
+              offset : -(compData.editPanelHeight / 2) + $(".block.variable.var1").offset().top - 65,
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'manual',
+              popup : editPopContent,
+              variation: "wide",
+            }).popup('show');
+          $("#next-to-result").click(function(){
+            editPopContent.empty().append(gameTexts[level].mult_result);
+            editPop
+              .popup('destroy')
+              .popup({
+                position : 'top left',
+                offset : -(compData.editPanelHeight / 2) + $(".block.variable.result").offset().top - 65,
+                hoverable : false,
+                closable: false,
+                exclusive: true,
+                on: 'manual',
+                popup : editPopContent,
+                variation: "wide",
+              }).popup('show');
+            $("#next-to-start").click(function(){
+              // editPop.popup('hide').popup('destroy');
+              editPopContent.empty().append(gameTexts[level].mult_start);
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $(".block.variable.result").offset().top + blockHeight + blockMargin - 65,
+                  hoverable : false,
+                  closable: false,
+                  exclusive: true,
+                  on: 'manual',
+                  popup : editPopContent,
+                  variation: "wide",
+                }).popup('show');
+              $("#start-mult").click(function(){
+                editPop.popup('hide').popup('destroy');
+              });
+            });
+          });
+        }
+      });
+
+      var runCounter = 0;
+      var outputChecker = EventManager;
+      var isMultDone = false;
+      var isDivDone = false;
+
+      var isOutputDragged = false;
+      var isRepeatDragged = false;
+
+      outputChecker.subscribe('successfulRun', function(e, param){
+        var output = param.result;
+        var value1 = parseInt(param.value1);
+        var value2 = parseInt(param.value2);
+
+        if(!isMultDone){
+          if(isRepeatDragged && isOutputDragged && value1*value2 === output){
+            displayPopContent.empty().append(gameTexts[level].mult_display_success);
+            displayPop
+              .popup('destroy')
+              .popup({
+                position: "top center",
+                hoverable : false,
+                closable: false,
+                exclusive: true,
+                on: 'manual',
+                popup : displayPopContent,
+                variation: "wide"
+            }).popup('show');
+            $("#exit-mult-success").click(function(){
+              isMultDone = true;
+              displayPop.popup('hide').popup('destroy');
+              dimmerMessageContent.empty().append(gameTexts[level].div_repeated_sub);
+              dimmerMessage
+                .dimmer('destroy')
+                .dimmer({
+                  onHide: function(){
+                    editPop
+                      .popup('destroy')
+                      .popup({
+                        position: "top left",
+                        offset : -(compData.editPanelHeight / 2) + $($("svg#edit-panel .block.repeat")[0]).offset().top - 65,
+                        hoverable : false,
+                        closable: false,
+                        content: "Here, we are going to use REPEATWHILE so right click on the REPEAT block and choose 'repeat while'",
+                        on: 'hover',
+                        variation: "wide",
+                        onHidden: function(){
+                          editPop.popup('destroy');
+                        }
+                    }).popup('show');
+                  }
+                }).dimmer('show');
+            });
+          }else{
+            if(!isRepeatDragged){
+              displayPop
+                .popup('destroy')
+                .popup({
+                  position: "top center",
+                  hoverable : false,
+                  closable: false,
+                  title: 'You forgot something..',
+                  content: "We need to use the REPEAT block on this level.",
+                  on: 'hover',
+                  variation: "wide",
+                  onHide: function(){
+                    displayPop.popup('destroy');
+                  }
+              }).popup('show');
+            }
+            else if(!isOutputDragged){
+              displayPop
+                .popup('destroy')
+                .popup({
+                  position: "top center",
+                  hoverable : false,
+                  closable: false,
+                  title: 'You forgot something..',
+                  content: "Don't forget to output your result.",
+                  on: 'hover',
+                  variation: "wide",
+                  onHide: function(){
+                    displayPop.popup('destroy');
+                  }
+              }).popup('show');
+            }else{
+              displayPop
+                .popup('destroy')
+                .popup({
+                  position: "top center",
+                  hoverable : false,
+                  closable: false,
+                  title: 'Not Quite',
+                  content: "Oops! It seems your result does not match. Check if you correctly add your values and store it to variable 'result'. Don't forget to initialize the result as 0.",
+                  on: 'click',
+                  variation: "wide",
+                  onHide: function(){
+                    displayPop.popup('destroy');
+                  }
+              }).popup('show');
+            }
+          }
+        }
+        else{
+          console.log(value1+", "+value2);
+          console.log(parseInt(value1/value2))
+          if(isRepeatDragged && isOutputDragged && parseInt(value1/value2) === output){
+            displayPopContent.empty().append(gameTexts[level].div_display_success);
+            displayPop
+              .popup('destroy')
+              .popup({
+                position: "top center",
+                hoverable : false,
+                closable: false,
+                exclusive: true,
+                on: 'manual',
+                popup : displayPopContent,
+                variation: "wide"
+            }).popup('show');
+            $("#exit-div-success").click(function(){
+              displayPop.popup('hide').popup('destroy');
+              dimmerMessageContent.empty().append(gameTexts[level].level_exit);
+              dimmerMessage
+                .dimmer('destroy')
+                .dimmer({
+                  onHide: function(){
+                    displayPop.popup('destroy');
+                    editPop.popup('destroy');
+                    outputChecker.unsubscribe('blockDragged');
+                    outputChecker.unsubscribe('successfulRun');
+                    outputChecker.unsubscribe('blockDeleted');
+                    outputChecker.unsubscribe('repeatUpdated');
+                  }
+                }).dimmer('show');
+            });
+          }else{
+            if(!isRepeatDragged){
+              displayPop
+                .popup('destroy')
+                .popup({
+                  position: "top center",
+                  hoverable : false,
+                  closable: false,
+                  title: 'You forgot something..',
+                  content: "We need to use the REPEAT block on this level.",
+                  on: 'hover',
+                  variation: "wide",
+                  onHide: function(){
+                    displayPop.popup('destroy');
+                  }
+              }).popup('show');
+            }
+            else if(!isOutputDragged){
+              displayPop
+                .popup('destroy')
+                .popup({
+                  position: "top center",
+                  hoverable : false,
+                  closable: false,
+                  title: 'You forgot something..',
+                  content: "Don't forget to output your result.",
+                  on: 'hover',
+                  variation: "wide",
+                  onHide: function(){
+                    displayPop.popup('destroy');
+                  }
+              }).popup('show');
+            }else{
+              displayPop
+                .popup('destroy')
+                .popup({
+                  position: "top center",
+                  hoverable : false,
+                  closable: false,
+                  title: 'Not Quite',
+                  content: "Oops! It seems your result does not match. Check if you correctly add your values and store it to variable 'result'. Don't forget to initialize the result as 0.",
+                  on: 'click',
+                  variation: "wide",
+                  onHide: function(){
+                    displayPop.popup('destroy');
+                  }
+              }).popup('show');
+            }
+          }
+        }
+
+        runCounter +=1;
+      });
+
+      outputChecker.subscribe('blockDragged', function(e, param){
+        var block = param.block;
+        if($(block.node).is(".block.output")){
+          isOutputDragged = true;
+        }
+        else if($(block.node).is(".block.repeat")){
+          isRepeatDragged = true;
+        }
+      });
+
+      outputChecker.subscribe('blockDeleted', function(e, param){
+        var block = param.target;
+        if($(block.node).is(".block.output")){
+          isOutputDragged = false;
+        }
+        else if($(block.node).is(".block.repeat")){
+          isRepeatDragged = false;
+        }
+      });
+
+      outputChecker.subscribe('repeatUpdated', function(e, param){
+        if(isMultDone){
+          editPop
+            .popup('destroy')
+            .popup({
+              position: "top left",
+              offset : -(compData.editPanelHeight / 2) + $($("svg#edit-panel .block.repeat")[0]).offset().top - 65,
+              hoverable : false,
+              closable: false,
+              content: "Now, think of a condition when to stop the loop to get the desired result.",
+              on: 'click',
+              variation: "wide",
+              onHide: function(){
+                editPop.popup('destroy');
+              }
+          }).popup('show');
+        }
+      });
       break;
 /////////////////////////////////////////////////////// LEVEL 1_4
     case "1_4":
-      blocksNeeded = ["type","variable","equal","value","output",
+      blocksNeeded = ["type","variable","equal","value",
                       "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
                       "less", "greater", "less_equal","greater_equal", "equal_equal","not_equal", "and", "or",
                       "if","repeat"];
+      $("a#side-prev").attr({href:'game.html?level=1_3'});
+      $("a#side-next").attr({href:'game.html?level=2_1'});
+
       initializeBlockPanel(blocksNeeded);
+      initializeEditPanel(level);
+      initializeDisplayPanel(level);
+      // Initialize Popups
+      dimmerMessageContent.append(gameTexts[level].mult_repeated_add);
       break;
     default:
       // Do something
@@ -1429,14 +1799,16 @@ $(document).ready(function(){
     var lastBlock = compData.tail;
     var rightMostBlock = findRightMost(block);
 
+    compData.rightmost = (compData.rightmost && compData.rightmost.getBBox().x2 > rightMostBlock.getBBox().x2) ? compData.rightmost : rightMostBlock;
+
     console.log(compData);
     if((lastBlock.getBBox().y2 + blockHeight * 2) > snapEdit.getBBox().y2){
       editPanel.attr({
-        height: snapEdit.getBBox().height + blockHeight + blockMargin*10
+        height: snapEdit.getBBox().height + (blockHeight + blockMargin)*5
       });
     }
 
-    if((rightMostBlock.getBBox().x2 + block.getBBox().width + blockMargin) > snapEdit.getBBox().x2){
+    if((compData.rightmost.getBBox().x2 + block.getBBox().width + blockMargin) > snapEdit.getBBox().x2){
       editPanel.attr({
         width: snapEdit.getBBox().width + (block.getBBox().width + blockMargin) * 2
       });
