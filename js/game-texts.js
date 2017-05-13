@@ -311,5 +311,61 @@ var gameTexts = {
         "<p>X Pattern</p>" +
       '</h1>'+
       "<p>Now we are done, we can proceed to the next level or you can stay<br>and try to remove half of the 'X' pattern to get the left triangle.</p>",
+  },
+  "2_3" : {
+    plus_intro: 
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive plus outline icon"></i>' +
+        "<p>Divided into Four</p>" +
+      '</h1>'+
+      "<p>The Philippine flag is separated into three colors: blue, red, and white.<br>Removing the white triangle, you can observe that the flag is horizontally divided into<br>blue at the top and red at the bottom. On this level, we are going to divide the array and<br>to add more challenge, we are going to divide it horizontally and vertically.</p>",
+    been_here: 
+      "<h1>We've been here before!</h1>"+
+      "<p>By this time, we are already familiar how to loop the array. Whenver you are done, just click run. You are also free to visit the previous levels to refresh your knowledge. Good luck!</p>"+
+      '<button id="exit-been-here" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'OK'+
+      '</button>',
+    level_success:
+      '<h1>Good Job!</h1>'+
+      "<p>You got a plus point!</p>"+
+      '<button id="exit-level-plus" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'Done'+
+      '</button>',
+    level_exit: 
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive plus outline icon"></i>' +
+        "<p>+ Pattern</p>" +
+      '</h1>'+
+      "<p>Now we have created the 'X' pattern and the '+' pattern. On the next level<br>we are going to merge these pattern to make the shapes of the Philippine flag.</p>",
+  },
+  "2_4" : {
+    plus_intro: 
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive plus outline icon"></i>' +
+        "<p>Divided into Four</p>" +
+      '</h1>'+
+      "<p>The Philippine flag is separated into three colors: blue, red, and white.<br>Removing the white triangle, you can observe that the flag is horizontally divided into<br>blue at the top and red at the bottom. On this level, we are going to divide the array and<br>to add more challenge, we are going to divide it horizontally and vertically.</p>",
+    been_here: 
+      "<h1>We've been here before!</h1>"+
+      "<p>By this time, we are already familiar how to loop the array. Whenver you are done, just click run. You are also free to visit the previous levels to refresh your knowledge. Good luck!</p>"+
+      '<button id="exit-been-here" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'OK'+
+      '</button>',
+    level_success:
+      '<h1>Good Job!</h1>'+
+      "<p>You got a plus point!</p>"+
+      '<button id="exit-level-plus" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'Done'+
+      '</button>',
+    level_exit: 
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive plus outline icon"></i>' +
+        "<p>+ Pattern</p>" +
+      '</h1>'+
+      "<p>Now we have created the 'X' pattern and the '+' pattern. On the next level<br>we are going to merge these pattern to make the shapes of the Philippine flag.</p>",
   }
 };

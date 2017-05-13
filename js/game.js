@@ -197,7 +197,7 @@ $(document).ready(function(){
     else{
       // console.log(outputCode);
       try{
-        if(level === "2_1" || level === "2_2"){
+        if(level === "2_1" || level === "2_2" || level === "2_3" || level === "2_4"){
           outputCode = outputCode.replace(/var\sflag\s\=\s\[\[\]\]\;/g,"var flag = [[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]];")
         }
         limitEval(outputCode.replace(/snapDisplay[^;]*;/g,""), function(success, returnValue) {
@@ -209,7 +209,7 @@ $(document).ready(function(){
               EventManager.publish("successfulRun",{result: result, value1: parseInt($(".block.value.value1").find('text').html()), value2: parseInt($(".block.value.value2").find('text').html())});
             else if(level === "1_4")
               EventManager.publish("successfulRun",{fibo: fibo});
-            else if(level === "2_1" || level === "2_2")
+            else if(level === "2_1" || level === "2_2" || level === "2_3" || level === "2_4")
               EventManager.publish("successfulRun",{flag: flag});
             else
               EventManager.publish("successfulRun");
@@ -445,6 +445,8 @@ $(document).ready(function(){
         break;
       case "2_1":
       case "2_2":
+      case "2_3":
+      case "2_4":
         var type = createBlock('g.block.type','integer');
         $(type.node).addClass('immovable uneditable undeletable');
         appendToTail(type);
@@ -1253,6 +1255,8 @@ $(document).ready(function(){
         }
       case "2_1":
       case "2_2":
+      case "2_3":
+      case "2_4":
         var rectSize = 50;
         var x = $(snapDisplay.node).width()/4;
         var y = $(snapDisplay.node).height()/8;
@@ -3210,6 +3214,310 @@ $(document).ready(function(){
                         [0,0,1,0,0,0,0],
                         [0,1,0,1,0,0,0],
                         [1,0,0,0,1,0,0]];
+        
+        for(var i=0; i<5; i++){
+          for (var j=0; j < 7; j++) {
+            if(parseInt(flag[i][j]) !== expected[i][j]){
+              return false;
+            }
+          }
+        }
+        isCorrect = true;
+
+        return isCorrect;
+      }
+      break;
+    case "2_3":
+      blocksNeeded = ["type","variable","equal","value",
+                      "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
+                      "less", "greater", "less_equal","greater_equal", "equal_equal","not_equal", "and", "or",
+                      "if","repeat"];
+      $("a#side-prev").attr({href:'game.html?level=2_2'});
+      $("a#side-next").attr({href:'game.html?level=2_4'});
+
+      initializeBlockPanel(blocksNeeded);
+      initializeEditPanel(level);
+      initializeDisplayPanel(level);
+      // Initialize Popups
+      dimmerMessageContent.append(gameTexts[level].plus_intro);
+      dimmerMessage.dimmer({
+        onHide: function(){
+          editPopContent.empty().append(gameTexts[level].been_here);
+          editPop
+            .popup('destroy')
+            .popup({
+              position : 'top left',
+              offset : -(compData.editPanelHeight / 2) + $($(".block.variable.varCol")[0]).offset().top + blockHeight + blockMargin - 65,
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'manual',
+              popup : editPopContent,
+              variation: "very wide",
+            }).popup('show');
+          $("button#exit-been-here").click(function(){
+            editPop.popup('hide').popup('destroy');
+          });
+        }
+      });
+
+      var outputChecker = EventManager;
+      var failCounter = 0;
+      outputChecker.subscribe('successfulRun', function(e, param){
+        var flag = param.flag;
+
+        colorFlag(flag);
+        if(checkFlag(flag)){
+          displayPopContent.empty().append(gameTexts[level].level_success);
+          displayPop
+            .popup('destroy')
+            .popup({
+              position: "top center",
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'manual',
+              popup : displayPopContent,
+              variation: "wide"
+          }).popup('show');
+          $("button#exit-level-plus").click(function(){
+            displayPop.popup('hide').popup('destroy');
+            dimmerMessageContent.empty().append(gameTexts[level].level_exit);
+            dimmerMessage.dimmer({
+              onHide: function(){
+                displayPop.popup('destroy');
+                editPop.popup('destroy');
+              }
+            }).dimmer('show');
+          });
+        }else{
+          failCounter += 1;
+          displayPop
+            .popup('destroy')
+            .popup({
+              position: "top center",
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'click',
+              title: "WOOPS!",
+              content: "It seems the result does not match with the expected output. The array should be divided at the vertical and horizontal center.",
+              variation: "wide",
+              onHidden: function(){
+                displayPop.popup('destroy');
+              }
+          }).popup('show');
+
+          if(failCounter >= 10 && failCounter < 15){
+            editPop.popup('hide').popup('destroy');
+            repeatDone = true;
+            editPop
+              .popup('destroy')
+              .popup({
+                // position : 'top left',
+                position: 'left center',
+                // offset : -(compData.editPanelHeight / 2) + $($(".block.if")[1]).offset().top - 65,
+                hoverable : false,
+                closable: false,
+                title: "Hint",
+                content: "One condition is when 'row' is equal to 2.",
+                on: 'click',
+                variation: "wide",
+                onHidden: function(){
+                  editPop.popup('destroy');
+                }
+              }).popup('show');
+          }else if(failCounter >= 15){
+            editPop.popup('hide').popup('destroy');
+            repeatDone = true;
+            editPop
+              .popup('destroy')
+              .popup({
+                // position : 'top left',
+                position: 'left center',
+                // offset : -(compData.editPanelHeight / 2) + $($(".block.if")[1]).offset().top - 65,
+                hoverable : false,
+                closable: false,
+                title: "Hint",
+                content: "Another condition is when 'col' is equal to 3.",
+                on: 'click',
+                variation: "wide",
+                onHidden: function(){
+                  editPop.popup('destroy');
+                }
+              }).popup('show');
+          }
+        }
+      });
+
+      var colorFlag = function(flag){
+        for(var i=0; i<5; i++){
+          for(var j=0; j<7; j++){
+            if(flag[i][j] === 1)
+              Snap($("rect.rect_"+i+"_"+j)[0]).attr({'fill-opacity': 1, fill: black});
+          }
+        }
+      }
+
+      var checkFlag = function(flag){
+        var isCorrect = false;
+        var expected = [[0,0,0,1,0,0,0],
+                        [0,0,0,1,0,0,0],
+                        [1,1,1,1,1,1,1],
+                        [0,0,0,1,0,0,0],
+                        [0,0,0,1,0,0,0]];
+        
+        for(var i=0; i<5; i++){
+          for (var j=0; j < 7; j++) {
+            if(parseInt(flag[i][j]) !== expected[i][j]){
+              return false;
+            }
+          }
+        }
+        isCorrect = true;
+
+        return isCorrect;
+      }
+      break;
+    case "2_4":
+      blocksNeeded = ["type","variable","equal","value",
+                      "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
+                      "less", "greater", "less_equal","greater_equal", "equal_equal","not_equal", "and", "or",
+                      "if","repeat"];
+      $("a#side-prev").attr({href:'game.html?level=2_3'});
+      $("a#side-next").remove();
+
+      initializeBlockPanel(blocksNeeded);
+      initializeEditPanel(level);
+      initializeDisplayPanel(level);
+      // Initialize Popups
+      dimmerMessageContent.append(gameTexts[level].plus_intro);
+      dimmerMessage.dimmer({
+        onHide: function(){
+          editPopContent.empty().append(gameTexts[level].been_here);
+          editPop
+            .popup('destroy')
+            .popup({
+              position : 'top left',
+              offset : -(compData.editPanelHeight / 2) + $($(".block.variable.varCol")[0]).offset().top + blockHeight + blockMargin - 65,
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'manual',
+              popup : editPopContent,
+              variation: "very wide",
+            }).popup('show');
+          $("button#exit-been-here").click(function(){
+            editPop.popup('hide').popup('destroy');
+          });
+        }
+      });
+
+      var outputChecker = EventManager;
+      var failCounter = 0;
+      outputChecker.subscribe('successfulRun', function(e, param){
+        var flag = param.flag;
+
+        colorFlag(flag);
+        if(checkFlag(flag)){
+          displayPopContent.empty().append(gameTexts[level].level_success);
+          displayPop
+            .popup('destroy')
+            .popup({
+              position: "top center",
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'manual',
+              popup : displayPopContent,
+              variation: "wide"
+          }).popup('show');
+          $("button#exit-level-plus").click(function(){
+            displayPop.popup('hide').popup('destroy');
+            dimmerMessageContent.empty().append(gameTexts[level].level_exit);
+            dimmerMessage.dimmer({
+              onHide: function(){
+                displayPop.popup('destroy');
+                editPop.popup('destroy');
+              }
+            }).dimmer('show');
+          });
+        }else{
+          failCounter += 1;
+          displayPop
+            .popup('destroy')
+            .popup({
+              position: "top center",
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'click',
+              title: "WOOPS!",
+              content: "It seems the result does not match with the expected output. The array should be divided at the vertical and horizontal center.",
+              variation: "wide",
+              onHidden: function(){
+                displayPop.popup('destroy');
+              }
+          }).popup('show');
+
+          if(failCounter >= 10 && failCounter < 15){
+            editPop.popup('hide').popup('destroy');
+            repeatDone = true;
+            editPop
+              .popup('destroy')
+              .popup({
+                // position : 'top left',
+                position: 'left center',
+                // offset : -(compData.editPanelHeight / 2) + $($(".block.if")[1]).offset().top - 65,
+                hoverable : false,
+                closable: false,
+                title: "Hint",
+                content: "One condition is when 'row' is equal to 2.",
+                on: 'click',
+                variation: "wide",
+                onHidden: function(){
+                  editPop.popup('destroy');
+                }
+              }).popup('show');
+          }else if(failCounter >= 15){
+            editPop.popup('hide').popup('destroy');
+            repeatDone = true;
+            editPop
+              .popup('destroy')
+              .popup({
+                // position : 'top left',
+                position: 'left center',
+                // offset : -(compData.editPanelHeight / 2) + $($(".block.if")[1]).offset().top - 65,
+                hoverable : false,
+                closable: false,
+                title: "Hint",
+                content: "Another condition is when 'col' is equal to 3.",
+                on: 'click',
+                variation: "wide",
+                onHidden: function(){
+                  editPop.popup('destroy');
+                }
+              }).popup('show');
+          }
+        }
+      });
+
+      var colorFlag = function(flag){
+        for(var i=0; i<5; i++){
+          for(var j=0; j<7; j++){
+            if(flag[i][j] === 1)
+              Snap($("rect.rect_"+i+"_"+j)[0]).attr({'fill-opacity': 1, fill: black});
+          }
+        }
+      }
+
+      var checkFlag = function(flag){
+        var isCorrect = false;
+        var expected = [[0,0,0,1,0,0,0],
+                        [0,0,0,1,0,0,0],
+                        [1,1,1,1,1,1,1],
+                        [0,0,0,1,0,0,0],
+                        [0,0,0,1,0,0,0]];
         
         for(var i=0; i<5; i++){
           for (var j=0; j < 7; j++) {
