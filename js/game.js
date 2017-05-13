@@ -2644,6 +2644,8 @@ $(document).ready(function(){
           for(var j=0; j<7; j++){
             if(flag[i][j] === 1)
               Snap($("rect.rect_"+i+"_"+j)[0]).attr({'fill-opacity': 1, fill: black});
+            else
+              Snap($("rect.rect_"+i+"_"+j)[0]).attr({'fill-opacity': 0});
           }
         }
       }
@@ -3203,6 +3205,8 @@ $(document).ready(function(){
           for(var j=0; j<7; j++){
             if(flag[i][j] === 1)
               Snap($("rect.rect_"+i+"_"+j)[0]).attr({'fill-opacity': 1, fill: black});
+            else
+              Snap($("rect.rect_"+i+"_"+j)[0]).attr({'fill-opacity': 0});
           }
         }
       }
@@ -3355,6 +3359,8 @@ $(document).ready(function(){
           for(var j=0; j<7; j++){
             if(flag[i][j] === 1)
               Snap($("rect.rect_"+i+"_"+j)[0]).attr({'fill-opacity': 1, fill: black});
+            else
+              Snap($("rect.rect_"+i+"_"+j)[0]).attr({'fill-opacity': 0});
           }
         }
       }
@@ -3391,7 +3397,7 @@ $(document).ready(function(){
       initializeEditPanel(level);
       initializeDisplayPanel(level);
       // Initialize Popups
-      dimmerMessageContent.append(gameTexts[level].plus_intro);
+      dimmerMessageContent.append(gameTexts[level].last_intro);
       dimmerMessage.dimmer({
         onHide: function(){
           editPopContent.empty().append(gameTexts[level].been_here);
@@ -3507,28 +3513,38 @@ $(document).ready(function(){
           for(var j=0; j<7; j++){
             if(flag[i][j] === 1)
               Snap($("rect.rect_"+i+"_"+j)[0]).attr({'fill-opacity': 1, fill: black});
+            else
+              Snap($("rect.rect_"+i+"_"+j)[0]).attr({'fill-opacity': 0});
           }
         }
       }
 
       var checkFlag = function(flag){
-        var isCorrect = false;
-        var expected = [[0,0,0,1,0,0,0],
-                        [0,0,0,1,0,0,0],
-                        [1,1,1,1,1,1,1],
-                        [0,0,0,1,0,0,0],
-                        [0,0,0,1,0,0,0]];
+        var isCorrect1 = true;
+        var isCorrect2 = true;
+        var expected1 = [[1,0,0,0,0,0,0],
+                         [0,1,0,0,0,0,0],
+                         [0,0,1,1,1,1,1],
+                         [0,1,0,0,0,0,0],
+                         [1,0,0,0,0,0,0]];
+        var expected2 = [[1,1,1,1,1,1,1],
+                         [1,1,0,0,0,0,1],
+                         [1,0,1,1,1,1,1],
+                         [1,1,0,0,0,0,1],
+                         [1,1,1,1,1,1,1]];
         
         for(var i=0; i<5; i++){
           for (var j=0; j < 7; j++) {
-            if(parseInt(flag[i][j]) !== expected[i][j]){
-              return false;
+            if(parseInt(flag[i][j]) !== expected1[i][j]){
+              isCorrect1 = false;
+            }
+            if(parseInt(flag[i][j]) !== expected2[i][j]){
+              isCorrect2 = false;
             }
           }
         }
-        isCorrect = true;
 
-        return isCorrect;
+        return (isCorrect1 || isCorrect2);
       }
       break;
     default:

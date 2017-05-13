@@ -214,7 +214,6 @@ expression
   | expression '/' expression             { $$ = $1+ "/" +$3; }
   | expression 'mod' expression           { $$ = $1+ "%" +$3; }
   | '-' expression %prec UMINUS           { $$ = "-" + $2; }
-  | '(' expression ')'                    { $$ = "(" + $2 + ")"; }
   | integer {{
       $$ = ""+parseInt($1)+"";
       if(yy.terms === undefined){ yy.terms = [] };
@@ -249,6 +248,7 @@ relational_expr
   | relational_expr '=' relational_expr     { $$ = $1+ "===" +$3; }
   | relational_expr 'and' relational_expr  { $$ = $1+ "&&" +$3; }
   | relational_expr 'or' relational_expr     { $$ = $1+ "||" +$3; }
+  | '(' relational_expr ')'                    { $$ = "(" + $2 + ")"; }
   | boolean { $$ = "" + yytext==="true" + ""; }
   | expression
 ;

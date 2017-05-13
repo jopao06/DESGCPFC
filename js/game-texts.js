@@ -341,31 +341,31 @@ var gameTexts = {
       "<p>Now we have created the 'X' pattern and the '+' pattern. On the next level<br>we are going to merge these pattern to make the shapes of the Philippine flag.</p>",
   },
   "2_4" : {
-    plus_intro: 
+    last_intro: 
       '<h1 class="ui inverted icon header">' +
-        '<i class="massive plus outline icon"></i>' +
-        "<p>Divided into Four</p>" +
+          '<i class="world icon"></i>'+
+        "<p>Flag of the Philippines</p>" +
       '</h1>'+
-      "<p>The Philippine flag is separated into three colors: blue, red, and white.<br>Removing the white triangle, you can observe that the flag is horizontally divided into<br>blue at the top and red at the bottom. On this level, we are going to divide the array and<br>to add more challenge, we are going to divide it horizontally and vertically.</p>",
+      "<p>Using what we learned on the previous levels, we are going to build<br>the basic outline of the Philippine flag (ofcourse not including the sun and stars).</p>",
     been_here: 
-      "<h1>We've been here before!</h1>"+
-      "<p>By this time, we are already familiar how to loop the array. Whenver you are done, just click run. You are also free to visit the previous levels to refresh your knowledge. Good luck!</p>"+
+      "<h1>Synthesis</h1>"+
+      "<p>We are going to use the different if-conditions from the previous levels. Again, whenever you are done just hit run. You can go back to the previous level to refresh your memory</p>"+
       '<button id="exit-been-here" class="ui basic icon button next">'+
         '<i class="right checkmark icon"></i>'+
         'OK'+
       '</button>',
     level_success:
-      '<h1>Good Job!</h1>'+
-      "<p>You got a plus point!</p>"+
+      '<h1>Excellent</h1>'+
+      "<p>This is how we make a pattern like a Philippine Flag</p>"+
       '<button id="exit-level-plus" class="ui basic icon button next">'+
         '<i class="right checkmark icon"></i>'+
         'Done'+
       '</button>',
     level_exit: 
       '<h1 class="ui inverted icon header">' +
-        '<i class="massive plus outline icon"></i>' +
-        "<p>+ Pattern</p>" +
+        '<i class="massive rocket icon"></i>' +
+        "<p>END</p>" +
       '</h1>'+
-      "<p>Now we have created the 'X' pattern and the '+' pattern. On the next level<br>we are going to merge these pattern to make the shapes of the Philippine flag.</p>",
+      "<p>Now we are done, I hope you learned some basic<br>knowledge about arrays, loops, and if-statements.</p>",
   }
 };
