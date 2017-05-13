@@ -197,7 +197,7 @@ $(document).ready(function(){
     else{
       // console.log(outputCode);
       try{
-        if(level === "2_1"){
+        if(level === "2_1" || level === "2_2"){
           outputCode = outputCode.replace(/var\sflag\s\=\s\[\[\]\]\;/g,"var flag = [[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]];")
         }
         limitEval(outputCode.replace(/snapDisplay[^;]*;/g,""), function(success, returnValue) {
@@ -209,7 +209,7 @@ $(document).ready(function(){
               EventManager.publish("successfulRun",{result: result, value1: parseInt($(".block.value.value1").find('text').html()), value2: parseInt($(".block.value.value2").find('text').html())});
             else if(level === "1_4")
               EventManager.publish("successfulRun",{fibo: fibo});
-            else if(level === "2_1")
+            else if(level === "2_1" || level === "2_2")
               EventManager.publish("successfulRun",{flag: flag});
             else
               EventManager.publish("successfulRun");
@@ -444,6 +444,7 @@ $(document).ready(function(){
         appendToRight(type,array);
         break;
       case "2_1":
+      case "2_2":
         var type = createBlock('g.block.type','integer');
         $(type.node).addClass('immovable uneditable undeletable');
         appendToTail(type);
@@ -1251,6 +1252,7 @@ $(document).ready(function(){
           var array = snapDisplay.g(arrayRect, arrayText).attr({class: "array-"+i});
         }
       case "2_1":
+      case "2_2":
         var rectSize = 50;
         var x = $(snapDisplay.node).width()/4;
         var y = $(snapDisplay.node).height()/8;
@@ -2597,7 +2599,7 @@ $(document).ready(function(){
                   offset : -(compData.editPanelHeight / 2) + $($(".block.repeat")[2]).offset().top - 65,
                   hoverable : false,
                   closable: false,
-                  content: "Before we traverse the column, our 'column' variable should reset to zero. Above this repeat, build 'col = 0'",
+                  content: "Before we traverse the column, our 'col' variable should reset to zero. Above this repeat, build 'col = 0'",
                   on: 'click',
                   variation: "wide",
                   onHidden: function(){
@@ -2676,6 +2678,550 @@ $(document).ready(function(){
 
       break;
     case "2_2":
+      blocksNeeded = ["type","variable","equal","value",
+                      "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
+                      "less", "greater", "less_equal","greater_equal", "equal_equal","not_equal", "and", "or",
+                      "if","repeat"];
+      $("a#side-prev").attr({href:'game.html?level=2_1'});
+      $("a#side-next").attr({href:'game.html?level=2_3'});
+
+      initializeBlockPanel(blocksNeeded);
+      initializeEditPanel(level);
+      initializeDisplayPanel(level);
+      // Initialize Popups
+      dimmerMessageContent.append(gameTexts[level].x_intro);
+      dimmerMessage.dimmer({
+        onHide: function(){
+          editPopContent.empty().append(gameTexts[level].same_as_before);
+          editPop
+            .popup('destroy')
+            .popup({
+              position : 'top left',
+              offset : -(compData.editPanelHeight / 2) + $($(".block.variable.varCol")[0]).offset().top + blockHeight + blockMargin - 65,
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'manual',
+              popup : editPopContent,
+              variation: "very wide",
+            }).popup('show');
+          $("button#exit-same").click(function(){
+            editPop.popup('hide').popup('destroy');
+          });
+        }
+      });
+
+      var outputChecker = EventManager;
+      var repeatCounter = 0;
+      var timesChecker = 0;
+      var repeatDone = false;
+
+      var isRowDragged = false;
+      var isRowAdded = false;
+      var isEqualDragged = false;
+      var isPlusDragged = false;
+      var isValue1 = false;
+      var rowIncDone = false;
+
+      var isColDragged = false;
+      var isColAdded = false;
+      var isEqualDragged1 = false;
+      var isPlusDragged1 = false;
+      var isValue11 = false;
+      var colIncDone = false;
+
+      var isColDragged1 = false;
+      var isEqualDragged2 = false;
+      var isValue0 = false;
+      var colResetDone = false;
+
+      outputChecker.subscribe('blockDeleted', function(e, param){
+        var block = $(param.target.node);
+        if(!repeatDone){
+          if(block.is(".block.repeat")){
+            repeatCounter -= 1;
+          }
+        }else{
+          if(!rowIncDone){
+            if(block.is(".block.variable")){
+              if(isRowDragged){
+                isRowDragged = false;
+              }else{
+                isRowAdded = false;
+              }
+            }else if(block.is(".block.equal")){
+              isEqualDragged = false;
+            }else if(block.is(".block.add")){
+              isPlusDragged = false;
+            }else if(block.is(".block.value")){
+              isValue1 = false;
+            }
+          }else{
+            if(!colIncDone){
+              if(block.is(".block.variable")){
+                if(isColDragged){
+                  isColDragged = false;
+                }else{
+                  isColAdded = false;
+                }
+              }else if(block.is(".block.equal")){
+                isEqualDragged1 = false;
+              }else if(block.is(".block.add")){
+                isPlusDragged1 = false;
+              }else if(block.is(".block.value")){
+                isValue11 = false;
+              }
+            }else{
+              if(!colResetDone){
+                if(block.is(".block.variable")){
+                  isColDragged1 = false;
+                }else if(block.is(".block.equal")){
+                  isEqualDragged2 = false;
+                }else if(block.is(".block.value")){
+                  isValue12 = false;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      outputChecker.subscribe('blockDragged', function(e, param){
+        var block = $(param.block.node);
+
+        if(!repeatDone){
+          if(block.is(".block.repeat")){
+            repeatCounter += 1;
+            if(repeatCounter === 2){
+              editPop
+              .popup('destroy')
+              .popup({
+                position : 'top left',
+                offset : -(compData.editPanelHeight / 2) + $($(".block.variable.flag")[0]).offset().top + (blockMargin + blockHeight)*3 - 65,
+                hoverable : false,
+                closable: false,
+                exclusive: true,
+                on: 'click',
+                title: "Good!",
+                content: "Yes, we need nested loops to access our 2D array. Now we add the number of times we are going to loop.",
+                variation: "wide",
+                onHidden: function(){
+                  editPop.popup('destroy');
+                  repeatDone = true;
+                }
+              }).popup('show');
+            }
+          }
+        }else{
+          if(!rowIncDone){
+            if(block.is(".block.equal")){
+              isEqualDragged = true;
+              rowIncDone = checkIfDoneWithInstruction("rowIncrement", {isRowDragged: isRowDragged, isEqualDragged: isEqualDragged, isRowAdded: isRowAdded, isPlusDragged: isPlusDragged, isValue1: isValue1});
+            }else if(block.is(".block.add")){
+              isPlusDragged = true;
+              rowIncDone = checkIfDoneWithInstruction("rowIncrement", {isRowDragged: isRowDragged, isEqualDragged: isEqualDragged, isRowAdded: isRowAdded, isPlusDragged: isPlusDragged, isValue1: isValue1});
+            }
+          }else{
+            if(!colIncDone){
+              if(block.is(".block.equal")){
+                isEqualDragged1 = true;
+                colIncDone = checkIfDoneWithInstruction("colIncrement", {isColDragged: isColDragged, isEqualDragged: isEqualDragged1, isColAdded: isColAdded, isPlusDragged: isPlusDragged1, isValue1: isValue11});
+              }else if(block.is(".block.add")){
+                isPlusDragged1 = true;
+                colIncDone = checkIfDoneWithInstruction("colIncrement", {isColDragged: isColDragged, isEqualDragged: isEqualDragged1, isColAdded: isColAdded, isPlusDragged: isPlusDragged1, isValue1: isValue11});
+              }
+            }else{
+              if(!colResetDone){
+                if(block.is(".block.equal")){
+                  isEqualDragged2 = true;
+                  colResetDone = checkIfDoneWithInstruction("colReset", {isColDragged: isColDragged1, isEqualDragged: isEqualDragged2, isValue0: isValue0});
+                }
+              }else{
+                if(block.is(".block.if")){
+                  editPopContent.empty().append(gameTexts[level].diff_if);
+                  editPop
+                    .popup('destroy')
+                    .popup({
+                      position : 'top left',
+                      offset : -(compData.editPanelHeight / 2) + $($(".block.repeat")[2]).offset().top + blockHeight + blockMargin - 65,
+                      hoverable : false,
+                      closable: false,
+                      exclusive: true,
+                      on: 'manual',
+                      popup : editPopContent,
+                      variation: "very wide",
+                    }).popup('show');
+                  $("button#exit-diff-if").click(function(){
+                    editPop.popup('hide').popup('destroy');
+                  });
+                }
+              }
+            }
+          }
+        }
+      });
+
+      outputChecker.subscribe('valueChanged', function(e, param){
+        var newValue = param.newText;
+        var block = param.block;
+        if(!repeatDone && timesChecker !== 2){
+          if(newValue === "5"){
+            if($(block.node.left.node.prevLine.node).is(".block.repeat")){
+              editPop
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $(block.node).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  content: "The inner loop should traverse the columns. So the value should be the number of columns",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+            }else{
+              timesChecker += 1;
+            }
+          }
+          else if(newValue === "7"){
+            if(!$(block.node.left.node.prevLine.node).is(".block.repeat")){
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $(block.node).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  content: "The outer loop should traverse the rows. So the value should be the number of rows",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+            }else{
+              timesChecker += 1;
+            }
+          }
+        }else{
+          if(!rowIncDone){
+            if(newValue === "1"){
+              isValue1 = true;
+              rowIncDone = checkIfDoneWithInstruction("rowIncrement", {isRowDragged: isRowDragged, isEqualDragged: isEqualDragged, isRowAdded: isRowAdded, isPlusDragged: isPlusDragged, isValue1: isValue1});
+            }else{
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.end")[1]).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  content: "Variable 'row' should increment by 1.",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+            }
+          }
+          else{
+            if(!colIncDone){
+              if(newValue === "1"){
+                isValue11 = true;
+                colIncDone = checkIfDoneWithInstruction("colIncrement", {isColDragged: isColDragged, isEqualDragged: isEqualDragged1, isColAdded: isColAdded, isPlusDragged: isPlusDragged1, isValue1: isValue11});
+              }else{
+                editPop
+                  .popup('destroy')
+                  .popup({
+                    position : 'top left',
+                    offset : -(compData.editPanelHeight / 2) + $($(".block.end")[2]).offset().top - 65,
+                    hoverable : false,
+                    closable: false,
+                    content: "Variable 'col' should increment by 1.",
+                    on: 'click',
+                    variation: "wide",
+                    onHidden: function(){
+                      editPop.popup('destroy');
+                    }
+                  }).popup('show');
+              }
+            }else{
+              if(!colResetDone){
+                if(newValue === "0"){
+                  isValue0 = true;
+                  colResetDone = checkIfDoneWithInstruction("colReset", {isColDragged: isColDragged1, isEqualDragged: isEqualDragged2, isValue0: isValue0});
+                }else{
+                  editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.repeat")[2]).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  content: "Variable 'col' should be re-initialized as 0.",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+                }
+              }
+            }
+          }
+        }
+
+        if(!repeatDone && timesChecker === 2){
+          editPop.popup('hide').popup('destroy');
+            repeatDone = true;
+            editPop
+              .popup('destroy')
+              .popup({
+                position : 'top left',
+                offset : -(compData.editPanelHeight / 2) + $($(".block.end")[1]).offset().top - 65,
+                hoverable : false,
+                closable: false,
+                title: "Yes! You're getting close",
+                content: "Now you need to increment 'row' by 1 every loop.",
+                on: 'click',
+                variation: "wide",
+                onHidden: function(){
+                  editPop.popup('destroy');
+                }
+              }).popup('show');
+        }
+      });
+
+      outputChecker.subscribe('variableChanged', function(e, param){
+        var newName = param.newName;
+        if(repeatDone){
+          if(!rowIncDone){
+            if(newName === "row"){
+              if(!isRowDragged){
+                isRowDragged = true;
+              }else{
+                isRowAdded = true;
+              }
+              rowIncDone = checkIfDoneWithInstruction("rowIncrement", {isRowDragged: isRowDragged, isEqualDragged: isEqualDragged, isRowAdded: isRowAdded, isPlusDragged: isPlusDragged, isValue1: isValue1});
+            }
+          }else{
+            if(!colIncDone){
+              if(newName === "col"){
+                if(!isColDragged){
+                  isColDragged = true;
+                }else{
+                  isColAdded = true;
+                }
+                colIncDone = checkIfDoneWithInstruction("colIncrement", {isColDragged: isColDragged, isEqualDragged: isEqualDragged1, isColAdded: isColAdded, isPlusDragged: isPlusDragged1, isValue1: isValue11});
+              }
+            }else{
+              if(!colResetDone){
+                if(newName === "col"){
+                  isColDragged1 = true;
+                  colResetDone = checkIfDoneWithInstruction("colReset", {isColDragged: isColDragged1, isEqualDragged: isEqualDragged2, isValue0: isValue0});
+                }
+              }
+            }
+          }
+        }
+      });
+
+      var failCounter = 0;
+      outputChecker.subscribe('successfulRun', function(e, param){
+        var flag = param.flag;
+
+        colorFlag(flag);
+        if(checkFlag(flag)){
+          // displayPop.popup('hide').popup('destroy');
+          displayPopContent.empty().append(gameTexts[level].level_success);
+          displayPop
+            .popup('destroy')
+            .popup({
+              position: "top center",
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'manual',
+              popup : displayPopContent,
+              variation: "wide"
+          }).popup('show');
+          $("button#exit-level-x").click(function(){
+            displayPop.popup('hide').popup('destroy');
+            dimmerMessageContent.empty().append(gameTexts[level].level_exit);
+            dimmerMessage.dimmer({
+              onHide: function(){
+                displayPop.popup('destroy');
+                editPop.popup('destroy');
+                blockPop.popup('destroy');
+                outputChecker.unsubscribe('valueChanged');
+                outputChecker.unsubscribe('variableChanged');
+                outputChecker.unsubscribe('unsuccessfulRun');
+                outputChecker.unsubscribe('blockDragged');
+                outputChecker.unsubscribe('blockDeleted');
+              }
+            }).dimmer('show');
+          });
+        }else{
+          failCounter += 1;
+          displayPop
+            .popup('destroy')
+            .popup({
+              position: "top center",
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'click',
+              title: "OH-OH!",
+              content: "It seems the result does not match with the expected output. Check your conditions and check if you save the correct values to each index.",
+              variation: "wide",
+              onHidden: function(){
+                displayPop.popup('destroy');
+              }
+          }).popup('show');
+
+          if(failCounter >= 6 && failCounter < 12){
+            editPop.popup('hide').popup('destroy');
+            repeatDone = true;
+            editPop
+              .popup('destroy')
+              .popup({
+                position : 'top left',
+                // position: 'left center',
+                offset : -(compData.editPanelHeight / 2) + $($(".block.if")[1]).offset().top - 65,
+                hoverable : false,
+                closable: false,
+                title: "Hint",
+                content: "One condition is when 'row' is equal to 'col'.",
+                on: 'click',
+                variation: "wide",
+                onHidden: function(){
+                  editPop.popup('destroy');
+                }
+              }).popup('show');
+          }else if(failCounter >= 12){
+            editPop.popup('hide').popup('destroy');
+            repeatDone = true;
+            editPop
+              .popup('destroy')
+              .popup({
+                position : 'top left',
+                // position: 'left center',
+                offset : -(compData.editPanelHeight / 2) + $($(".block.if")[1]).offset().top - 65,
+                hoverable : false,
+                closable: false,
+                title: "Hint",
+                content: "Another condition is when 'row' plus 'col' is equal to 4.",
+                on: 'click',
+                variation: "wide",
+                onHidden: function(){
+                  editPop.popup('destroy');
+                }
+              }).popup('show');
+          }
+        }
+      });
+
+      var checkIfDoneWithInstruction = function(instruction, condition){
+        var isDone = false;
+        console.log(condition);
+        switch(instruction){
+          case "rowIncrement":
+            if(condition.isRowDragged && condition.isEqualDragged && condition.isRowAdded && condition.isPlusDragged && condition.isValue1){
+              isDone = true;
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.end")[2]).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  title: 'Very Fine!',
+                  content: "Same with 'row', variable 'col' should increment by 1 every loop",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+            }
+            break;
+          case "colIncrement":
+            if(condition.isColDragged && condition.isEqualDragged && condition.isColAdded && condition.isPlusDragged && condition.isValue1){
+              isDone = true;
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.repeat")[2]).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  title: "Easy!",
+                  content: "Now re-initialize 'col' as 0.",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+            }
+            break;
+          case "colReset":
+            if(condition.isColDragged && condition.isEqualDragged && condition.isValue0){
+              isDone = true;
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.repeat")[2]).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  title: "Don't forget our if-statement",
+                  content: "Now drag the IF block inside the nested loop.",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+            }
+            break;
+          default:
+            // Do something
+        }
+
+        return isDone;
+      }
+
+      var colorFlag = function(flag){
+        for(var i=0; i<5; i++){
+          for(var j=0; j<7; j++){
+            if(flag[i][j] === 1)
+              Snap($("rect.rect_"+i+"_"+j)[0]).attr({'fill-opacity': 1, fill: black});
+          }
+        }
+      }
+
+      var checkFlag = function(flag){
+        var isCorrect = false;
+        var expected = [[1,0,0,0,1,0,0],
+                        [0,1,0,1,0,0,0],
+                        [0,0,1,0,0,0,0],
+                        [0,1,0,1,0,0,0],
+                        [1,0,0,0,1,0,0]];
+        
+        for(var i=0; i<5; i++){
+          for (var j=0; j < 7; j++) {
+            if(parseInt(flag[i][j]) !== expected[i][j]){
+              return false;
+            }
+          }
+        }
+        isCorrect = true;
+
+        return isCorrect;
+      }
       break;
     default:
       // Do something

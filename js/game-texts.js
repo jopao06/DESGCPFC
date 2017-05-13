@@ -276,5 +276,40 @@ var gameTexts = {
         "<p>The Shape</p>" +
       '</h1>'+
       "<p>Now we have the shape of the flag next we will do some of its basic shapes.<br>Did you know that the earlier design of the current flag was first conceptualized<br>by Emilio Aguinaldo during his exile in Hong Kong?</p>",
+  },
+  "2_2" : {
+    x_intro: 
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive remove outline icon"></i>' +
+        "<p>X makes Four Traingles</p>" +
+      '</h1>'+
+      "<p>The white triangle on the Philippine flag is a masonic symbol signifying<br>liberty, equality and fraternity. On this level, we are going to create this triangle<br>but let us start with an easier pattern, the 'X'.</p>",
+    same_as_before: 
+      '<h1>Same as Before</h1>'+
+      "<p>Like we did on the previous level, we are going to use nested loops and if-statement, we need to increment the variable 'row' and 'col' every loop, we need to re-initialize 'col' as zero before we traverse the column, and we should save the value 1 to our target indices. Try building the code on your own and click run when you are done.</p>"+
+      '<button id="exit-same" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'OK'+
+      '</button>',
+    diff_if: 
+      '<h1>Different Condition</h1>'+
+      "<p>Since we are going to do a different pattern from before, we need to think of how to achieve the 'X' pattern. To make things easier, we can access only the first five columns to make a perfect 5x5 square. Then we think of a condition how we can achieve the '\\' and '/' patterns. When you are done just hit run and check the result</p>"+
+      '<button id="exit-diff-if" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'OK'+
+      '</button>',
+    level_success:
+      '<h1>Well Done!</h1>'+
+      "<p>We created the pattern 'X'!</p>"+
+      '<button id="exit-level-x" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'Done'+
+      '</button>',
+    level_exit: 
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive remove outline icon"></i>' +
+        "<p>X Pattern</p>" +
+      '</h1>'+
+      "<p>Now we are done, we can proceed to the next level or you can stay<br>and try to remove half of the 'X' pattern to get the left triangle.</p>",
   }
 };
