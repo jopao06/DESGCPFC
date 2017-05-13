@@ -217,8 +217,64 @@ var gameTexts = {
     level_exit:
       '<h1 class="ui inverted icon header">' +
         '<i class="massive rocket icon"></i>' +
-        "<p>Multiplication using Repeated Addition</p>" +
+        "<p>Very Fine!</p>" +
       '</h1>'+
       "<p>Now we know how to do multiplication using repeated addition and<br>division using repeated subtraction. We can now proceed<br>to the next level or you can stay here and further explore your code.</p>",
+  },
+  "2_1" : {
+    outline_intro: 
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive square outline icon"></i>' +
+        "<p>The Philippine Flag</p>" +
+      '</h1>'+
+      "<p>Now we are familiar with loops and if-statements, we can take our knowledge<br>to the next level. On the succeeding levels, we are going to build the Philippine flag<br>step by step. Here, we are going to build the outline of the flag.</p>",
+    array_2D: 
+      '<h1>2D Arrays</h1>'+
+      "<p>Arrays can be two dimensional. Here, we already declared an array named 'flag' that is 5 by 7 which means it has 5 rows and 7 columns. To access each index, we need two loops. The loops will be nested which means one loop is inside another loop. Now let's do that.</p>"+
+      '<button id="exit-array-2D" class="ui basic icon button next">'+
+        '<i class="right checkmark icon"></i>'+
+        'OK'+
+      '</button>',
+    array_indices: 
+      '<h1>Indices</h1>'+
+      "<p>Good! Now we have our loops, we can start traversing the flag. Here we have already declared two variables which we will use as indices for the array.</p>"+
+      '<button id="exit-array-indices" class="ui basic icon button next">'+
+        '<i class="right arrow icon"></i>'+
+        'Next'+
+      '</button>',
+    index_increment: 
+      '<h1>Variable Increment</h1>'+
+      "<p>Every loop, the 'row' and 'column' variables should increment by one but before we traverse the column, we should reset it back to zero so we are back again to column 0. Now let's do that.</p>"+
+      '<button id="exit-index-increment" class="ui basic icon button next">'+
+        '<i class="right arrow icon"></i>'+
+        'OK'+
+      '</button>',
+    if_statement: 
+      '<h1>Add an If-statement</h1>'+
+      "<p>Now let's start adding an if-statement. Let us say, when 'row' is equal to 0, 'flag[row][col]=1', else 'flag[row][col]=0'. Let's build this code inside the nested loop. When you are done, hit run to see what happens.</p>"+
+      '<button id="exit-if-statement" class="ui basic icon button next">'+
+        '<i class="right arrow icon"></i>'+
+        'OK'+
+      '</button>',
+    first_run: 
+      '<h1>Fantastic!</h1>'+
+      "<p>You should see the first column colored gray. Any index that has a value of 1 is displayed as a solid square here. Now we need to color the other borders of this rectangle.</p>"+
+      '<button id="exit-first-run" class="ui basic icon button next">'+
+        '<i class="right arrow icon"></i>'+
+        'OK'+
+      '</button>',
+    level_success: 
+      '<h1>Hoorah!</h1>'+
+      "<p>Now you should see that border should be colored. Remember what you've learned here because we are doing more of this on the next level.</p>"+
+      '<button id="exit-level" class="ui basic icon button next">'+
+        '<i class="right arrow icon"></i>'+
+        'OK'+
+      '</button>',
+    level_exit:
+      '<h1 class="ui inverted icon header">' +
+        '<i class="massive square outline icon"></i>' +
+        "<p>The Shape</p>" +
+      '</h1>'+
+      "<p>Now we have the shape of the flag next we will do some of its basic shapes.<br>Did you know that the earlier design of the current flag was first conceptualized<br>by Emilio Aguinaldo during his exile in Hong Kong?</p>",
   }
 };

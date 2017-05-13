@@ -15,7 +15,6 @@ var limitEval = function (code, fnOnStop, opt_timeoutInMS) {
 
   myWorker.onmessage = function (data) {
     data = data.data;
-    console.log(data);
     if (data) {
       if (data.i === id) {
         id = 0;

@@ -663,7 +663,7 @@ $.contextMenu({
         if($(inputText).val()) updateBlock(triggerBlock,$(inputText).val());
         
         if(options.items.editValue.visible){
-          EventManager.publish("valueChanged", {newText: $(inputText).val()});
+          EventManager.publish("valueChanged", {newText: $(inputText).val(), block: triggerBlock});
         }
         else if(options.items.input.visible){
           EventManager.publish("variableChanged", {newName: $(inputText).val()});

@@ -75,10 +75,27 @@ $(document).ready(function(){
     console.log(code);
     var varArray = [];
     // var code = 
-    //   "integer i = 5\n"+
-    //   "integer k = i + i\n"+
-    //   "integer j[i][k]\n"+
-    //   "j[0][i] = 52";
+    //   "integer flag[5][7]\n"+
+    //   "integer row = 0\n"+
+    //   "integer col = 0\n"+
+    //   "repeat 5 times\n"+
+    //   "col = 0\n"+
+    //   "repeat 7 times\n"+
+    //   "if col = 0\n"+
+    //   "flag[row][col] = 1\n"+
+    //   "elseif row = 0\n"+
+    //   "flag[row][col] = 1\n"+
+    //   "elseif col = 6\n"+
+    //   "flag[row][col] = 1\n"+
+    //   "elseif row = 4\n"+
+    //   "flag[row][col] = 1\n"+
+    //   "else\n"+
+    //   "flag[row][col] = 0\n"+
+    //   "end\n"+
+    //   "col = col + 1\n"+
+    //   "end\n"+
+    //   "row = row + 1\n"+
+    //   "end";
     var lines = code.split('\n');
     var isError = false;
     var outputCode = "";
@@ -180,6 +197,9 @@ $(document).ready(function(){
     else{
       // console.log(outputCode);
       try{
+        if(level === "2_1"){
+          outputCode = outputCode.replace(/var\sflag\s\=\s\[\[\]\]\;/g,"var flag = [[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]];")
+        }
         limitEval(outputCode.replace(/snapDisplay[^;]*;/g,""), function(success, returnValue) {
           if (success) {
             eval(outputCode);
@@ -187,14 +207,16 @@ $(document).ready(function(){
               EventManager.publish("successfulRun",{array: array});
             else if(level === "1_3")
               EventManager.publish("successfulRun",{result: result, value1: parseInt($(".block.value.value1").find('text').html()), value2: parseInt($(".block.value.value2").find('text').html())});
-            if(level === "1_4")
+            else if(level === "1_4")
               EventManager.publish("successfulRun",{fibo: fibo});
+            else if(level === "2_1")
+              EventManager.publish("successfulRun",{flag: flag});
             else
               EventManager.publish("successfulRun");
           }
           else {
             if($('#open-console').css('display') === "block") $('#open-console').click();
-            $("#console-body").append("<p>Error: There is an infinite loop.</p>");
+            $("#console-body").append("<p>Error: There can be an infinite loop or array index out of bound</p>");
             EventManager.publish("unsuccessfulRun");
           }
         }, 5000);
@@ -420,25 +442,49 @@ $(document).ready(function(){
         var array = createBlock('g.block.variable',"fibo[5]");
         $(array.node).addClass('fibo immovable uneditable undeletable');
         appendToRight(type,array);
+        break;
+      case "2_1":
+        var type = createBlock('g.block.type','integer');
+        $(type.node).addClass('immovable uneditable undeletable');
+        appendToTail(type);
 
-        // var arr = [];
-        // var temp;
-        // var eq, val;
-        // for(var i=0; i<5; i++){ 
-        //   arr.push(createBlock('g.block.variable','array['+i+']'));
-        //   $(arr[i].node).addClass('immovable uneditable undeletable');
-        //   temp = arr[i];
-        //   appendToTail(temp);
+        var array = createBlock('g.block.variable',"flag[5][7]");
+        $(array.node).addClass('flag immovable uneditable undeletable');
+        appendToRight(type,array);
 
-        //   eq = createBlock('g.block.equal');
-        //   $(eq.node).addClass('immovable undeletable');
-        //   appendToRight(arr[i],eq);
+        // Row
+        var typeValue1 = createBlock('g.block.type','integer');
+        $(typeValue1.node).addClass('immovable uneditable undeletable');
+        appendToTail(typeValue1);
 
-        //   val = createBlock('g.block.value',""+i+"");
-        //   $(val.node).addClass('immovable undeletable');
-        //   appendToRight(eq,val);
-        // }
-      break;
+        var var1 = createBlock('g.block.variable',"row");
+        $(var1.node).addClass('varRow immovable uneditable undeletable');
+        appendToRight(typeValue1,var1);
+
+        var equal1 = createBlock('g.block.equal',"=");
+        $(equal1.node).addClass('immovable uneditable undeletable');
+        appendToRight(var1,equal1);
+
+        var val1 = createBlock('g.block.value',"0");
+        $(val1.node).addClass('valRow immovable uneditable undeletable');
+        appendToRight(equal1,val1);
+
+        // Column
+        var typeValue2 = createBlock('g.block.type','integer');
+        $(typeValue2.node).addClass('immovable uneditable undeletable');
+        appendToTail(typeValue2);
+
+        var var2 = createBlock('g.block.variable',"col");
+        $(var2.node).addClass('varCol immovable uneditable undeletable');
+        appendToRight(typeValue2,var2);
+
+        var equal2 = createBlock('g.block.equal',"=");
+        $(equal2.node).addClass('immovable uneditable undeletable');
+        appendToRight(var2,equal2);
+
+        var val2 = createBlock('g.block.value',"0");
+        $(val2.node).addClass('valCol immovable uneditable undeletable');
+        appendToRight(equal2,val2);
       default:
         // Do something
     }
@@ -545,9 +591,6 @@ $(document).ready(function(){
                   .append(gameTexts[level].repeat);
                 dimmerMessage
                   .dimmer({
-                    // onShow: function(){
-                    //   testFlag = 2;
-                    // },
                     onHide: function(){
                       dimmerMessage.dimmer("destroy")
                       $('#scrollable-div').animate({scrollLeft:'+=700px'});
@@ -1207,6 +1250,29 @@ $(document).ready(function(){
               arrayIndex.attr({x: xAdjust+(arrayRect.getBBox().width/2)-(arrayIndex.getBBox().width/2)});
           var array = snapDisplay.g(arrayRect, arrayText).attr({class: "array-"+i});
         }
+      case "2_1":
+        var rectSize = 50;
+        var x = $(snapDisplay.node).width()/4;
+        var y = $(snapDisplay.node).height()/8;
+        var xAdjust, yAdjust;
+        var arrMargin = 5;
+
+        snapDisplay.text(x-rectSize,y-arrMargin,'flag').attr({'font-size': 25, fill: black});
+        for(var i=0; i<5 ; i++){
+          yAdjust = y + i*(rectSize + arrMargin);
+          for(var j=0; j<7; j++){
+            xAdjust = x + j*(rectSize + arrMargin);
+            var arrayRect = snapDisplay.rect(xAdjust,yAdjust,rectSize,rectSize,9).attr({'fill-opacity': 0, stroke: black, strokeWidth: 2,});
+            $(arrayRect.node).addClass("rect_"+i+"_"+j);
+            if(i===0){
+              var arrayIndex = snapDisplay.text(xAdjust,y-arrMargin,""+j+"").attr({'font-size': 20, fill: black});
+              arrayIndex.attr({x: xAdjust+(arrayRect.getBBox().width/2)-(arrayIndex.getBBox().width/2)});
+            }
+          }
+          var arrayIndex = snapDisplay.text(x-arrMargin-rectSize/4,y,""+i+"").attr({'font-size': 20, fill: black});
+          arrayIndex.attr({y: yAdjust+(arrayRect.getBBox().width/2)+(arrayIndex.getBBox().height/4)});
+        }
+        break;
       default:
         // Do something
     }
@@ -2017,6 +2083,600 @@ $(document).ready(function(){
         })
       }
       break;
+    case "2_1":
+      blocksNeeded = ["type","variable","equal","value",
+                      "addition","subtraction","multiplication", "division", "modulo", "open_par","close_par",
+                      "less", "greater", "less_equal","greater_equal", "equal_equal","not_equal", "and", "or",
+                      "if","repeat"];
+      $("a#side-prev").attr({href:'game.html?level=1_4'});
+      $("a#side-next").attr({href:'game.html?level=2_2'});
+
+      initializeBlockPanel(blocksNeeded);
+      initializeEditPanel(level);
+      initializeDisplayPanel(level);
+      // Initialize Popups
+      dimmerMessageContent.append(gameTexts[level].outline_intro);
+      dimmerMessage.dimmer({
+        onHide: function(){
+          editPopContent.empty().append(gameTexts[level].array_2D);
+          editPop
+            .popup('destroy')
+            .popup({
+              position : 'top left',
+              offset : -(compData.editPanelHeight / 2) + $($(".block.variable.flag")[0]).offset().top - 65,
+              hoverable : false,
+              closable: false,
+              exclusive: true,
+              on: 'manual',
+              popup : editPopContent,
+              variation: "very wide",
+            }).popup('show');
+          $("button#exit-array-2D").click(function(){
+            editPop.popup('hide').popup('destroy');
+            $('#scrollable-div').animate({scrollLeft:'+=700px'});
+            blockPop
+              .popup({
+                position : 'bottom center',
+                offset : $("#block-container .block.close-parenthesis").offset().left - $("#block-container").width()/2,
+                content  : 'In the edit panel, drag a repeat block inside of another.',
+                on: "hover",
+                onHidden : function(){
+                  blockPop.popup('destroy');
+                }
+              }).popup('show');
+          });
+        }
+      });
+
+      var outputChecker = EventManager;
+      var repeatCounter = 0;
+      var timesChecker = 0;
+      var repeatDone = false;
+
+      var isRowDragged = false;
+      var isRowAdded = false;
+      var isEqualDragged = false;
+      var isPlusDragged = false;
+      var isValue1 = false;
+      var rowIncDone = false;
+
+      var isColDragged = false;
+      var isColAdded = false;
+      var isEqualDragged1 = false;
+      var isPlusDragged1 = false;
+      var isValue11 = false;
+      var colIncDone = false;
+
+      var isColDragged1 = false;
+      var isEqualDragged2 = false;
+      var isValue0 = false;
+      var colResetDone = false;
+
+      outputChecker.subscribe('blockDeleted', function(e, param){
+        var block = $(param.target.node);
+        if(!repeatDone){
+          if(block.is(".block.repeat")){
+            repeatCounter -= 1;
+          }
+        }else{
+          if(!rowIncDone){
+            if(block.is(".block.variable")){
+              if(isRowDragged){
+                isRowDragged = false;
+              }else{
+                isRowAdded = false;
+              }
+            }else if(block.is(".block.equal")){
+              isEqualDragged = false;
+            }else if(block.is(".block.add")){
+              isPlusDragged = false;
+            }else if(block.is(".block.value")){
+              isValue1 = false;
+            }
+          }else{
+            if(!colIncDone){
+              if(block.is(".block.variable")){
+                if(isColDragged){
+                  isColDragged = false;
+                }else{
+                  isColAdded = false;
+                }
+              }else if(block.is(".block.equal")){
+                isEqualDragged1 = false;
+              }else if(block.is(".block.add")){
+                isPlusDragged1 = false;
+              }else if(block.is(".block.value")){
+                isValue11 = false;
+              }
+            }else{
+              if(!colResetDone){
+                if(block.is(".block.variable")){
+                  isColDragged1 = false;
+                }else if(block.is(".block.equal")){
+                  isEqualDragged2 = false;
+                }else if(block.is(".block.value")){
+                  isValue12 = false;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      outputChecker.subscribe('blockDragged', function(e, param){
+        var block = $(param.block.node);
+
+        if(!repeatDone){
+          if(block.is(".block.repeat")){
+            repeatCounter += 1;
+            if(repeatCounter === 2){
+              editPop
+              .popup('destroy')
+              .popup({
+                position : 'top left',
+                offset : -(compData.editPanelHeight / 2) + $($(".block.variable.flag")[0]).offset().top + (blockMargin + blockHeight)*3 - 65,
+                hoverable : false,
+                closable: false,
+                exclusive: true,
+                on: 'click',
+                title: "Nested Loops",
+                content: "The outer REPEAT will be used to access each row while the inner REPEAT will be used to access each column. Now we need to add the number of times we need to loop the rows and columns.",
+                variation: "wide",
+                onHidden: function(){
+                  editPop.popup('destroy');
+                }
+              }).popup('show');
+            }
+          }
+        }else{
+          if(!rowIncDone){
+            if(block.is(".block.equal")){
+              isEqualDragged = true;
+              rowIncDone = checkIfDoneWithInstruction("rowIncrement", {isRowDragged: isRowDragged, isEqualDragged: isEqualDragged, isRowAdded: isRowAdded, isPlusDragged: isPlusDragged, isValue1: isValue1});
+            }else if(block.is(".block.add")){
+              isPlusDragged = true;
+              rowIncDone = checkIfDoneWithInstruction("rowIncrement", {isRowDragged: isRowDragged, isEqualDragged: isEqualDragged, isRowAdded: isRowAdded, isPlusDragged: isPlusDragged, isValue1: isValue1});
+            }
+          }else{
+            if(!colIncDone){
+              if(block.is(".block.equal")){
+                isEqualDragged1 = true;
+                colIncDone = checkIfDoneWithInstruction("colIncrement", {isColDragged: isColDragged, isEqualDragged: isEqualDragged1, isColAdded: isColAdded, isPlusDragged: isPlusDragged1, isValue1: isValue11});
+              }else if(block.is(".block.add")){
+                isPlusDragged1 = true;
+                colIncDone = checkIfDoneWithInstruction("colIncrement", {isColDragged: isColDragged, isEqualDragged: isEqualDragged1, isColAdded: isColAdded, isPlusDragged: isPlusDragged1, isValue1: isValue11});
+              }
+            }else{
+              if(!colResetDone){
+                if(block.is(".block.equal")){
+                  isEqualDragged2 = true;
+                  colResetDone = checkIfDoneWithInstruction("colReset", {isColDragged: isColDragged1, isEqualDragged: isEqualDragged2, isValue0: isValue0});
+                }
+              }
+            }
+          }
+        }
+      });
+
+      outputChecker.subscribe('valueChanged', function(e, param){
+        var newValue = param.newText;
+        var block = param.block;
+        if(!repeatDone && timesChecker !== 2){
+          if(newValue === "5"){
+            if($(block.node.left.node.prevLine.node).is(".block.repeat")){
+              editPop
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $(block.node).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  content: "The inner loop should traverse the columns. So the value should be the number of columns",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+            }else{
+              timesChecker += 1;
+            }
+          }
+          else if(newValue === "7"){
+            if(!$(block.node.left.node.prevLine.node).is(".block.repeat")){
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $(block.node).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  content: "The outer loop should traverse the rows. So the value should be the number of rows",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+            }else{
+              timesChecker += 1;
+            }
+          }
+        }else{
+          if(!rowIncDone){
+            if(newValue === "1"){
+              isValue1 = true;
+              rowIncDone = checkIfDoneWithInstruction("rowIncrement", {isRowDragged: isRowDragged, isEqualDragged: isEqualDragged, isRowAdded: isRowAdded, isPlusDragged: isPlusDragged, isValue1: isValue1});
+            }else{
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.end")[1]).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  content: "Variable 'row' should increment by 1.",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+            }
+          }
+          else{
+            if(!colIncDone){
+              if(newValue === "1"){
+                isValue11 = true;
+                colIncDone = checkIfDoneWithInstruction("colIncrement", {isColDragged: isColDragged, isEqualDragged: isEqualDragged1, isColAdded: isColAdded, isPlusDragged: isPlusDragged1, isValue1: isValue11});
+              }else{
+                editPop
+                  .popup('destroy')
+                  .popup({
+                    position : 'top left',
+                    offset : -(compData.editPanelHeight / 2) + $($(".block.end")[2]).offset().top - 65,
+                    hoverable : false,
+                    closable: false,
+                    content: "Variable 'col' should increment by 1.",
+                    on: 'click',
+                    variation: "wide",
+                    onHidden: function(){
+                      editPop.popup('destroy');
+                    }
+                  }).popup('show');
+              }
+            }else{
+              if(!colResetDone){
+                if(newValue === "0"){
+                  isValue0 = true;
+                  colResetDone = checkIfDoneWithInstruction("colReset", {isColDragged: isColDragged1, isEqualDragged: isEqualDragged2, isValue0: isValue0});
+                }else{
+                  editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.repeat")[2]).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  content: "Variable 'col' should be re-initialized as 0.",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+                }
+              }
+            }
+          }
+        }
+
+        if(!repeatDone && timesChecker === 2){
+          editPopContent.empty().append(gameTexts[level].array_indices);
+          editPop
+            .popup('destroy')
+            .popup({
+              position : 'top left',
+              offset : -(compData.editPanelHeight / 2) + $($(".block.varRow")[0]).offset().top - 65,
+              hoverable : false,
+              closable: false,
+              content: "",
+              on: 'click',
+              variation: "wide",
+              popup: editPopContent
+            }).popup('show');
+            $("button#exit-array-indices").click(function(){
+              editPop.popup('hide');
+              editPopContent.empty().append(gameTexts[level].index_increment);
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.variable.flag")[0]).offset().top + (blockMargin + blockHeight)*3 - 65,
+                  hoverable : false,
+                  closable: false,
+                  content: "",
+                  on: 'click',
+                  variation: "wide",
+                  popup: editPopContent
+                }).popup('show');
+              $("button#exit-index-increment").click(function(){
+                editPop.popup('hide').popup('destroy');
+                repeatDone = true;
+                editPop
+                  .popup('destroy')
+                  .popup({
+                    position : 'top left',
+                    offset : -(compData.editPanelHeight / 2) + $($(".block.end")[1]).offset().top - 65,
+                    hoverable : false,
+                    closable: false,
+                    content: "Every loop, variable 'row' should increment by one. Build 'row = row + 1' above this END block.",
+                    on: 'click',
+                    variation: "wide",
+                    onHidden: function(){
+                      editPop.popup('destroy');
+                    }
+                  }).popup('show');
+              });
+            });
+        }
+      });
+
+      outputChecker.subscribe('variableChanged', function(e, param){
+        var newName = param.newName;
+        if(repeatDone){
+          if(!rowIncDone){
+            if(newName === "row"){
+              if(!isRowDragged){
+                isRowDragged = true;
+              }else{
+                isRowAdded = true;
+              }
+              rowIncDone = checkIfDoneWithInstruction("rowIncrement", {isRowDragged: isRowDragged, isEqualDragged: isEqualDragged, isRowAdded: isRowAdded, isPlusDragged: isPlusDragged, isValue1: isValue1});
+            }
+          }else{
+            if(!colIncDone){
+              if(newName === "col"){
+                if(!isColDragged){
+                  isColDragged = true;
+                }else{
+                  isColAdded = true;
+                }
+                colIncDone = checkIfDoneWithInstruction("colIncrement", {isColDragged: isColDragged, isEqualDragged: isEqualDragged1, isColAdded: isColAdded, isPlusDragged: isPlusDragged1, isValue1: isValue11});
+              }
+            }else{
+              if(!colResetDone){
+                if(newName === "col"){
+                  isColDragged1 = true;
+                  colResetDone = checkIfDoneWithInstruction("colReset", {isColDragged: isColDragged1, isEqualDragged: isEqualDragged2, isValue0: isValue0});
+                }
+              }
+            }
+          }
+        }
+      });
+
+      var runCounter = 0;
+      outputChecker.subscribe('successfulRun', function(e, param){
+        var flag = param.flag;
+        colorFlag(flag);
+        switch(runCounter){
+          case 0:
+            if(checkFlag(runCounter, flag)){
+              displayPopContent.empty().append(gameTexts[level].first_run);
+              displayPop
+                .popup('destroy')
+                .popup({
+                  position: "top center",
+                  hoverable : false,
+                  closable: false,
+                  exclusive: true,
+                  on: 'manual',
+                  popup : displayPopContent,
+                  variation: "wide"
+              }).popup('show');
+              $("button#exit-first-run").click(function(){
+                displayPop.popup('hide').popup('destroy');
+                editPop
+                  .popup('destroy')
+                  .popup({
+                    position : 'top left',
+                    offset : -(compData.editPanelHeight / 2) + $($(".block.if")[1]).offset().top - 65,
+                    hoverable : false,
+                    closable: false,
+                    content: "You can always add ELSEIF blocks to add different conditions. When you are done, just click run and see what happens.",
+                    on: 'click',
+                    variation: "wide",
+                    onHidden: function(){
+                      editPop.popup('destroy');
+                    }
+                  }).popup('show');
+              });
+              runCounter = 1;
+            }else{
+              displayPop
+                .popup('destroy')
+                .popup({
+                  position: "top center",
+                  hoverable : false,
+                  closable: false,
+                  exclusive: true,
+                  on: 'click',
+                  title: "WOOPS!",
+                  content: "It seems the result does not match with the expected output. Check your conditions and check if you save the correct values to each index.",
+                  variation: "wide",
+                  onHidden: function(){
+                    displayPop.popup('destroy');
+                  }
+              }).popup('show');
+            }
+            break;
+          case 1:
+            if(checkFlag(runCounter, flag)){
+              displayPopContent.empty().append(gameTexts[level].level_success);
+              displayPop
+                .popup('destroy')
+                .popup({
+                  position: "top center",
+                  hoverable : false,
+                  closable: false,
+                  exclusive: true,
+                  on: 'manual',
+                  popup : displayPopContent,
+                  variation: "wide"
+              }).popup('show');
+              $("button#exit-level").click(function(){
+                displayPop.popup('hide').popup('destroy');
+                dimmerMessageContent.empty().append(gameTexts[level].level_exit);
+                dimmerMessage.dimmer({
+                  onHide: function(){
+                    displayPop.popup('destroy');
+                    editPop.popup('destroy');
+                    blockPop.popup('destroy');
+                    outputChecker.unsubscribe('valueChanged');
+                    outputChecker.unsubscribe('variableChanged');
+                    outputChecker.unsubscribe('unsuccessfulRun');
+                    outputChecker.unsubscribe('blockDragged');
+                    outputChecker.unsubscribe('blockDeleted');
+                  }
+                }).dimmer('show');
+              });
+              runCounter = 2;
+            }else{
+              displayPop
+                .popup('destroy')
+                .popup({
+                  position: "top center",
+                  hoverable : false,
+                  closable: false,
+                  exclusive: true,
+                  on: 'click',
+                  title: "OH-OH!",
+                  content: "It seems the result does not match with the expected output. Check your conditions and check if you save the correct values to each index.",
+                  variation: "wide",
+                  onHidden: function(){
+                    displayPop.popup('destroy');
+                  }
+              }).popup('show');
+            }
+            break;
+          default:
+            break;
+        }
+      });
+
+      var checkIfDoneWithInstruction = function(instruction, condition){
+        var isDone = false;
+        console.log(condition);
+        switch(instruction){
+          case "rowIncrement":
+            if(condition.isRowDragged && condition.isEqualDragged && condition.isRowAdded && condition.isPlusDragged && condition.isValue1){
+              isDone = true;
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.end")[2]).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  content: "Now on this loop, variable 'column' should increment by 1. Build 'col = col + 1' above this END block.",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+            }
+            break;
+          case "colIncrement":
+            if(condition.isColDragged && condition.isEqualDragged && condition.isColAdded && condition.isPlusDragged && condition.isValue1){
+              isDone = true;
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.repeat")[2]).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  content: "Before we traverse the column, our 'column' variable should reset to zero. Above this repeat, build 'col = 0'",
+                  on: 'click',
+                  variation: "wide",
+                  onHidden: function(){
+                    editPop.popup('destroy');
+                  }
+                }).popup('show');
+            }
+            break;
+          case "colReset":
+            if(condition.isColDragged && condition.isEqualDragged && condition.isValue0){
+              isDone = true;
+              editPopContent.empty().append(gameTexts[level].if_statement);
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.repeat")[2]).offset().top - 65,
+                  hoverable : false,
+                  closable: false,
+                  popup: editPopContent,
+                  on: 'click',
+                  variation: "wide",
+                }).popup('show');
+              $("button#exit-if-statement").click(function(){
+                editPop.popup('hide').popup('destroy');
+              });
+            }
+            break;
+          default:
+            // Do something
+        }
+
+        return isDone;
+      }
+
+      var colorFlag = function(flag){
+        for(var i=0; i<5; i++){
+          for(var j=0; j<7; j++){
+            if(flag[i][j] === 1)
+              Snap($("rect.rect_"+i+"_"+j)[0]).attr({'fill-opacity': 1, fill: black});
+          }
+        }
+      }
+
+      var checkFlag = function(counter, flag){
+        var isCorrect = false;
+        switch(counter){
+          case 0:
+            var expected = [[1,0,0,0,0,0,0],[1,0,0,0,0,0,0],[1,0,0,0,0,0,0],[1,0,0,0,0,0,0],[1,0,0,0,0,0,0]];
+            for(var i=0; i<5; i++){
+              for (var j=0; j < 7; j++) {
+                if(parseInt(flag[i][j]) !== expected[i][j]){
+                  return false;
+                }
+              }
+            }
+            isCorrect = true;
+            break;
+          case 1:
+            var expected = [[1,1,1,1,1,1,1],[1,0,0,0,0,0,1],[1,0,0,0,0,0,1],[1,0,0,0,0,0,1],[1,1,1,1,1,1,1]];
+            
+            for(var i=0; i<5; i++){
+              for (var j=0; j < 7; j++) {
+                if(parseInt(flag[i][j]) !== expected[i][j]){
+                  return false;
+                }
+              }
+            }
+            isCorrect = true;
+            break;
+          default:
+        }
+
+        return isCorrect;
+      }
+
+      break;
+    case "2_2":
+      break;
     default:
       // Do something
   }
@@ -2051,7 +2711,7 @@ $(document).ready(function(){
 
     compData.rightmost = (compData.rightmost && compData.rightmost.getBBox().x2 > rightMostBlock.getBBox().x2) ? compData.rightmost : rightMostBlock;
 
-    console.log(compData);
+    // console.log(compData);
     if((lastBlock.getBBox().y2 + blockHeight * 2) > snapEdit.getBBox().y2){
       editPanel.attr({
         height: snapEdit.getBBox().height + (blockHeight + blockMargin)*5
