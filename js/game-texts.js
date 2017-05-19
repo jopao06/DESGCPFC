@@ -12,7 +12,117 @@ var gameTexts = {
           '<i class="massive checkmark icon"></i>' +
           "<p>Done!</p>" +
         '</h1>'+
-        "<p>Now that we're done with the tour, let's start coding!<br>First we need to print our first 'Hello World!'</p>",
+        "<p>Now that we're done with the tour, let's start coding!</p>",
+      mabuhay : 
+      '<h3>Mabuhay!</h3>' +
+      '<p>Nice! We just did our first code! Any values you output will be displayed here. But is this all we can do? No! We can do more things!</p>' +
+      '<button id="exit-mabuhay" class="ui basic icon button next">' +
+        '<i class="right arrow icon"></i>' +
+        'Next' +
+      '</button>',
+      delete_blocks:
+        '<h3>How to delete Blocks?</h3>' +
+        '<p>All blocks can be deleted unless it is disabled by the game. To delete a block, just right click on the block and select "delete" on the menu. Let us delete these two blocks.</p>' +
+        '<button id="exit-delete-blocks" class="ui basic icon button next">' +
+          '<i class="right checkmark icon"></i>' +
+          'OK' +
+        '</button>',
+      delete_done : 
+        '<h1 class="ui inverted icon header">' +
+          '<i class="massive checkmark icon"></i>' +
+          '<p>Done!</p>' +
+        '</h1>'+
+        "<p>Now we are going to learn about the other blocks, the TYPE, VALUE, VARIABLE, OUTPUT,<br>the arithmetic operators, Boolean operators, IF, and REPEAT.</p>",
+      data_types:
+        '<h3>Data Types</h3>' +
+        '<p>When we declare variables, we need to define its data type. Type is a classification that specifies which type of value a variable has and what type of operations or functions we can perform with it. The possible data types are:<ul><li>integer - positive or negative whole numbers</li><li>number - like integer but it can have a decimal point</li><li>boolean - either true or false</li></ul></p>' +
+        '<button id="exit-data-types" class="ui basic icon button next">' +
+          '<i class="right arrow icon"></i>' +
+          'Next' +
+        '</button>',
+      variable:
+        '<h3>Variable</h3>' +
+        '<p>It is a name representation of a computer memory where you retrieve and store data. As mentioned before, a TYPE is required when declaring a variable.</p>' +
+        '<button id="exit-variable" class="ui basic icon button next">' +
+          '<i class="right arrow icon"></i>' +
+          'Next' +
+        '</button>',
+      variable_dec:
+        '<h3>Variable Declaration</h3>' +
+        '<p>This is how we declare variables. Type is needed to identify what values we can store with this variable, and a name so we can easily use it throughout our code. With this variable, we can store values to it. Let us store an integer to this variable</p>' +
+        '<button id="exit-variable-dec" class="ui basic icon button next">' +
+          '<i class="right checkmarks icon"></i>' +
+          'OK' +
+        '</button>',
+      variable_dec_success:
+        '<h3>Assignement</h3>' +
+        '<p>This is how we assign values to variables. We can assing values to our variable that is already declared anywhere in our code, like "singko=5".</p>' +
+        '<button id="exit-variable-dec-succ" class="ui basic icon button next">' +
+          '<i class="right checkmarks icon"></i>' +
+          'OK' +
+        '</button>',
+      var_dec_done : 
+        '<h1 class="ui inverted icon header">' +
+          '<i class="massive checkmark icon"></i>' +
+          '<p>Done!</p>' +
+        '</h1>'+
+        "<p>We just learned how to declare variables and how to assign values to it.<br>Like in math, we can perform arithmetic operations<br>and also other functions and operations with variables and values</p>",
+      variable_dec_success:
+        '<h3>Assignement</h3>' +
+        '<p>This is how we assign values to variables. The value should be the same data type with the variable.</p>' +
+        '<button id="exit-variable-dec-succ" class="ui basic icon button next">' +
+          '<i class="right checkmarks icon"></i>' +
+          'OK' +
+        '</button>',
+      arithmetic_op : 
+        '<h3>Arithmetic Operations</h3>' +
+        '<p>We can do arithmetic operations between integer numbers only but we can do arithmetic operations between number and interger. The operators are:'+
+        '<ul>'+
+          '<li> + : Addition</li>'+
+          '<li> - : Subtraction</li>'+
+          '<li> * : Multiplication</li>'+
+          '<li> / : Division</li>'+
+          '<li> mod : Modulo(It is like division but returns the remainder instead of the quotient)</li>'+
+        '</ul>'+
+        '</p>' +
+        '<button id="exit-arith" class="ui basic icon button next">' +
+          '<i class="right arrow icon"></i>' +
+          'Next' +
+        '</button>',
+      boolean_op : 
+        '<h3>Boolean Expressions</h3>' +
+        '<p>Boolean expressions are statements that will return true or false. Relational operators are used to compare the values of an integer or a number. These are:'+
+        '<ul>'+
+          '<li> < : Less than</li>'+
+          '<li> > : Greater than</li>'+
+          '<li> <= : Less than or equal</li>'+
+          '<li> >= : Greater than or equal</li>'+
+          '<li> = : Equals</li>'+
+          '<li> not= : Not equal</li>'+
+        '</ul>'+
+        'On the other hand, there are Boolean operators which takes two Boolean values(true or false) and returns a Boolean value. These are:'+
+        '<ul>'+
+          '<li> and : Always returns true if both values are true</li>'+
+          '<li> or : Always returns true if at least one value is true</li>'+
+        '</ul>'+
+        '</p>' +
+        '<button id="exit-boolean" class="ui basic icon button next">' +
+          '<i class="right arrow icon"></i>' +
+          'Next' +
+        '</button>',
+      control_flow : 
+        '<h3>Control Flow</h3>' +
+        '<p>Control flow statements are statements that control which statements, instructions, functions, or expressions to be executed. These are: '+
+        '<ul>'+
+          '<li> IF : If-statements</li>'+
+          '<li> REPEAT : Loops</li>'+
+        '</ul>'+
+        'These will be discussed on the next level.'+
+        '</p>' +
+        '<button id="exit-control" class="ui basic icon button next">' +
+          '<i class="right arrow icon"></i>' +
+          'Next' +
+        '</button>',
       experiment : 
         '<h1 class="ui inverted icon header">' +
           '<i class="massive rocket icon"></i>' +
@@ -23,7 +133,7 @@ var gameTexts = {
         "<br> it will be the start of your big journey. Now you can experiment on your own.<br>Print your name, do some simple arithmetic computation or make an intentional error.<br>Do whatever you want! Just remember if you want to delete some blocks,just right click<br>on the block and select [<i class='trash icon'></i>delete ]  or simply delete all blocks with the [<i class='trash outline icon'></i>Clear ] button.<br>When you are done playing, you may now proceed to the next level.</p>",
       block : 
         '<h3>BLOCKS FOR DAYS</h3>' +
-        '<p>This is the block panel. It holds all the code blocks you can drag to the edit panel.The blocks are color coded to distinguish types, variables, values, arithmetic operations( +, -, *, /, mod), relational operations( <, >, <=, >=, =, not=), conditional statements(if, elseif, else) and loops(repeat-times, repeatwhile)</p>' +
+        '<p>This is the block panel. It holds all the code blocks you can drag to the edit panel.The blocks are color coded to distinguish types, variables, values, arithmetic operations( +, -, *, /, mod), Boolean operations( <, >, <=, >=, =, not=), conditional statements(if, elseif, else) and loops(repeat-times, repeatwhile)</p>' +
         '<button id="open-edit" class="ui basic icon button next">' +
           '<i class="right arrow icon"></i>' +
           'Next' +
@@ -49,7 +159,7 @@ var gameTexts = {
           '<i class="right arrow icon"></i>'+
           'Next'+
         '</button>'
-    }  
+    }
   },
   "1_2" : {
     arrays: 
@@ -60,14 +170,14 @@ var gameTexts = {
       "<p>On this level, we're going to learn about arrays, conditional statements,<br>and loops. First we need to know how to declare and manipulate an array.</p>",
     edit_1:
       '<h3>ARRAY</h3>'+
-      '<p>An array is like a collection of variables where we can store multiple data with the same data type. Like declaring a variable, we need to specify its data type and the name of the array. Inside the bracket is the size of the array, in this case, we can store five integers.</p>'+
+      '<p>An array is a collection of variables where we can store multiple data with the same data type. Like declaring a variable, we need to specify its data type and the name of the array. Inside the bracket is the size of the array, in this case, we can store five integers.</p>'+
       '<button id="pop-index" class="ui basic icon button next">'+
         '<i class="right arrow icon"></i>'+
         'Next'+
       '</button>',
     edit_2:
       '<h3>INDEX</h3>'+
-      '<p>We can access each data using an index integer starting from 0 to size-1.</p>'+
+      '<p>We can access each data using an index integer starting from 0 to (size-1). In this case, the indices are from 0 to 4.</p>'+
       '<button id="pop-run" class="ui basic icon button next">'+
         '<i class="right arrow icon"></i>'+
         'Next'+
@@ -80,9 +190,9 @@ var gameTexts = {
         'Next'+
       '</button>',
     edit_3:
-      '<p>Now let us try changing the values of the array. Enter an integer in each index and click run.</p>',
+      '<p>Now let us try changing the values of the array. Right click on values and enter an integer in each index and click run.</p>',
     display_2 : 
-      '<p>Now the values of the array will change and you can see the values you entered earlier.</p>'+
+      '<p>Now the values of the array will change and you can now see the values you entered earlier.</p>'+
       '<button id="trigger-dimmer" class="ui basic icon button next">'+
         '<i class="right arrow icon"></i>'+
         'Next'+
@@ -92,10 +202,10 @@ var gameTexts = {
         '<i class="massive refresh icon"></i>' +
         "<p>Repeats</p>" +
       '</h1>'+
-      "<p>Congrats! Now we know how to use arrays but is there a shorter way to access<br>each index? Yes, there is! We can use loops to access each index and manipulate<br>its data. 'repeat-times' and 'repeatwhile' are the loops we can use here to traverse the array.</p>",
+      "<p>Congrats! Now we know how to use arrays but is there a shorter way to access<br>each index? Yes, there is! We can use loops to access each index and manipulate its data.</p><p>'repeat-times' and 'repeatwhile' are the loops we can use here to traverse the array.Repeat blocks<br>are used to build loops which are sequence of instructions that are repeated until a condition is satisfied.<br>Which means, any statement inside the 'repeat-end' clause will be executed several times until the condition is satisfied.</p>",
     repeat_types:
       '<h3>REPEAT BLOCKS</h3>'+
-      "<p>Repeat blocks are used to build loops which are sequence of instructions that are repeated until a condition is satisfied. Which means, any statement inside the 'repeat-end' clause will be executed several times until the condition is satisfied.</p><p>There are two types of REPEAT blocks: REPEAT-TIMES and REPEATWHILE. REPEAT-TIMES is used to loop statements for a number of times. An integer value is needed between the REPEAT and TIMES block. On the other hand, REPEATWHILE is used to loop statements while the condition is true. A boolean expression is needed on the right side of the block.</p><p>Now let us learn how to traverse the array. First, above the repeat statement, declare an integer variable i with a value 0.</p>"+
+      "<p>There are two types of REPEAT blocks: REPEAT-TIMES and REPEATWHILE. REPEAT-TIMES is used to loop statements for a number of times. An integer value is needed between the REPEAT and TIMES block. On the other hand, REPEATWHILE is used to loop statements while the condition is true. A boolean expression is needed on the right side of the block.</p><p>Now let us learn how to traverse the array. First, above the repeat statement, declare an integer variable i with a value 0.</p>"+
       '<button id="close-repeat" class="ui basic icon button next">'+
         '<i class="right checkmark icon"></i>'+
         'OK'+
@@ -251,7 +361,7 @@ var gameTexts = {
       '</button>',
     if_statement: 
       '<h1>Add an If-statement</h1>'+
-      "<p>Now let's start adding an if-statement. Let us say, when 'row' is equal to 0, 'flag[row][col]=1', else 'flag[row][col]=0'. Let's build this code inside the nested loop. When you are done, hit run to see what happens.</p>"+
+      "<p>Now let's start adding an if-statement. Let us say, when 'col' is equal to 0, 'flag[row][col]=1', else 'flag[row][col]=0'. Let's build this code inside the nested loop. When you are done, hit run to see what happens.</p>"+
       '<button id="exit-if-statement" class="ui basic icon button next">'+
         '<i class="right arrow icon"></i>'+
         'OK'+

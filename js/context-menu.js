@@ -251,7 +251,7 @@ var deleteBlock = function(key, options){
 
   triggerBlock = isEndBlock ? triggerBlock.node.ifBlock : triggerBlock;
 
-  // EventManager.publish("blockDeleted", {target: triggerBlock});
+  EventManager.publish("blockDeleted", {target: triggerBlock});
   isBlockDelete = true;
 
   // CASE 1: DELETE HEAD

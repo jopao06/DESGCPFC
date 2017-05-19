@@ -56,7 +56,7 @@ $(document).ready(function(){
       while(ptr1!==null){
         if($(ptr1.node).is(".block.value")){
           var valueText = ptr1.select("text").attr("text")
-          if(/\"[\S\s]*\"/.test(valueText) || /\'[\S\s]*\'/.test(valueText) || /[0-9]+\.[0-9]+/.test(valueText) || /[0-9]+/.test(valueText)){
+          if(/\"[\S\s]*\"/.test(valueText) || /\'[\S\s]*\'/.test(valueText) || /[0-9]+\.[0-9]+/.test(valueText) || /[0-9]+/.test(valueText) || /(true|false)/.test(valueText)){
             code += " " + valueText;
           }else{
             code += " '" + valueText + "'";
@@ -216,10 +216,10 @@ $(document).ready(function(){
           }
           else {
             if($('#open-console').css('display') === "block") $('#open-console').click();
-            $("#console-body").append("<p>Error: There can be an infinite loop or array index out of bound</p>");
+            $("#console-body").append("<p>Error: There can be an infinite loop. Check your condiotons in your REPEAT loops</p>");
             EventManager.publish("unsuccessfulRun");
           }
-        }, 5000);
+        }, 3000);
       }catch(e){
         console.log(e.message);
         var errorMessage = e.message.split("\n")[0];
@@ -493,6 +493,48 @@ $(document).ready(function(){
     }
   }
 
+  // var initializeDisplayPanel = function(level){
+  //   switch(level){
+  //     case "1_1":
+  //       snapDisplay.rect(10,10,$(snapDisplay.node).width()/1.04,$(snapDisplay.node).height()/2,9).attr({'fill-opacity': 0, stroke: black, strokeWidth: 2,});
+  //       snapDisplay.line(20,45,($(snapDisplay.node).width()/1.04)-4,45).attr({stroke: black, strokeWidth: 2,});
+  //       snapDisplay.text(20,35,'Output >>').attr({'font-size': 15, fill: black});
+  //       break;
+  //     case "1_2":
+  //       var type = createBlock('g.block.type','integer');
+  //       $(type.node).addClass('immovable uneditable undeletable');
+  //       appendToTail(type);
+
+  //       var array = createBlock('g.block.variable',"array[5]");
+  //       $(array.node).addClass('immovable uneditable undeletable');
+  //       appendToRight(type,array);
+
+  //       var arr = [];
+  //       var temp;
+  //       var eq, val;
+  //       for(var i=0; i<5; i++){ 
+  //         arr.push(createBlock('g.block.variable','array['+i+']'));
+  //         $(arr[i].node).addClass('immovable uneditable undeletable');
+  //         temp = arr[i];
+  //         appendToTail(temp);
+
+  //         eq = createBlock('g.block.equal');
+  //         $(eq.node).addClass('immovable undeletable');
+  //         appendToRight(arr[i],eq);
+
+  //         val = createBlock('g.block.value',""+i+"");
+  //         $(val.node).addClass('immovable undeletable');
+  //         appendToRight(eq,val);
+  //       }
+
+
+  //       console.log(compData);
+  //       break;
+  //     default:
+  //       // Do something
+  //   }
+  // }
+
   var initializeDisplayPanel = function(level){
     switch(level){
       case "1_1":
@@ -594,6 +636,9 @@ $(document).ready(function(){
                   .append(gameTexts[level].repeat);
                 dimmerMessage
                   .dimmer({
+                    // onShow: function(){
+                    //   testFlag = 2;
+                    // },
                     onHide: function(){
                       dimmerMessage.dimmer("destroy")
                       $('#scrollable-div').animate({scrollLeft:'+=700px'});
@@ -1162,7 +1207,7 @@ $(document).ready(function(){
                           offset : -(compData.editPanelHeight / 2) + $($("#edit-div .block.if")[0]).offset().top - 65,
                           title: "Good Job!",
                           content  : "Finally let us store zero to 'array[i]' when 'i' is even, else store 1. Just build the code 'array[i]=0' below the IF block and 'array[i]=1' below the ELSE block",
-                          on: "hover",
+                          on: "click",
                           onHidden : function(){
                             eventChecker.unsubscribe('blockDragged');
                             eventChecker.unsubscribe('variableChanged');
@@ -1171,7 +1216,7 @@ $(document).ready(function(){
                             editPop.popup('destroy');
                           }
                         }).popup('show');
-                      // $("#run-code").removeClass('disabled');
+                      $("#run-code").removeClass('disabled');
                       isDone = true;
                     }
                     break;
@@ -1211,11 +1256,12 @@ $(document).ready(function(){
                   });
                 }else{
                   displayPop
+                    .popup('hide')
                     .popup('destroy')
                     .popup({
                       position : 'top center',
                       title: "Not Quite",
-                      content  : "Check if your condition is correct and check if you correctly store 0 to even indices and 1 to odd indices.",
+                      content  : "Check if your condition is correct and check if you correctly store 0 to even indices and 1 to odd indices. Also check if you deleted the expression 'array[i]=i' we did earlier",
                       on: "hover",
                       onHidden : function(){
                         editPop.popup('destroy');
@@ -1253,6 +1299,7 @@ $(document).ready(function(){
               arrayIndex.attr({x: xAdjust+(arrayRect.getBBox().width/2)-(arrayIndex.getBBox().width/2)});
           var array = snapDisplay.g(arrayRect, arrayText).attr({class: "array-"+i});
         }
+        break;
       case "2_1":
       case "2_2":
       case "2_3":
@@ -1378,6 +1425,7 @@ $(document).ready(function(){
           hoverable : true,
           closable: true,
           exclusive:false,
+          on: 'manual',
           onHide: function(){
             $('button#pop-console').hide();
           }
@@ -1388,7 +1436,7 @@ $(document).ready(function(){
           hoverable : false,
           closable: false,
           exclusive: true,
-          on: 'click',
+          on: 'manual',
           popup : $('#console-pop'),
           variation: "very wide",
           offset: 20
@@ -1400,94 +1448,322 @@ $(document).ready(function(){
           hoverable : true,
           closable: true,
           exclusive:false,
-          onHide: function(){
+          onHidden: function(){
             $('button#finish-tutorial').hide();
+            // Destroy popup events
+            $('#block-container').popup('destroy');
+            $('#edit-div').popup('destroy');
+            $('#display-svg svg').popup('destroy');
+            $('#console-title').popup('destroy');
+            // Remove custom popup contents
+            $('#block-panel-pop').remove();
+            $('#edit-panel-pop').remove();
+            $('#display-panel-pop').remove();
+            $('#console-pop').remove();
           }
         });
-        // Destroy popup events
-        $('#block-container').popup('destroy');
-        $('#edit-div').popup('destroy');
-        $('#display-svg svg').popup('destroy');
-        $('#console-title').popup('destroy');
-        // Remove custom popup contents
-        $('#block-panel-pop').remove();
-        $('#edit-panel-pop').remove();
-        $('#display-panel-pop').remove();
-        $('#console-pop').remove();
 
+        $('#close-console').click();
         $('div#dimmer-message .content .center')
           .empty()
-          .append(gameTexts['1_1'].tutorial.end_tutorial);
-        $('#close-console').click();
+          .append(gameTexts[level].tutorial.end_tutorial);
         $('div#dimmer-message')
           .dimmer('destroy')
           .dimmer({
             onHide: function(){
-              $('#block-container')
+              blockPop
                 .popup({
                   position : 'bottom left',
-                  offset : $("#block-container .block.output").offset().left - $("#block-container").offset().left,
-                  content  : 'First, drag the "output" block to the edit panel then the "value" block at right side of the "output"',
-                  onHide : function(){
-                    $('#block-container').popup('destroy');
+                  // offset : $("#block-container .block.output").offset().left - $("#block-container").offset().left,
+                  offset: $($(".block.output")[0]).offset().left,
+                  content  : 'First, drag the OUTPUT block to the edit panel.',
+                  on: 'click',
+                  onHidden : function(){
+                    blockPop.popup('destroy');
                   }
                 }).popup('show');
             }
           })
-          .dimmer('toggle');
+          .dimmer('show');
 
         var outputValueListener = EventManager;
         var isOutputDragged = false;
         var isValueDragged = false;
+        var isTextMabuhay = false;
+        var successfulOutput = false;
+
+        var isOutputDeleted = false;
+        var isValueDeleted = false;
+        var isDeleted = false;
+
+        var isTypeDragged = false;
+        var isVarDragged = false;
+        var isVarDeclared = false;
+        var isTypeInt = false;
+        var isVarChanged = false;
+        var isVarDeclaredCorrect = false;
         outputValueListener.subscribe('blockDragged', function(e, param){
-          var block = param.block;
-          if($(block.node).is(".block.output")){
-            isOutputDragged = true;
-            // if()
-          }else if($(block.node).is(".block.value")){
-            isValueDragged = true;
-            $("#edit-div")
-              .popup({
-                position : 'top left',
-                offset : -(compData.editPanelHeight / 2) + $(block.node).offset().top -2,
-                content  : 'Now right click the "value" block and type "Hello World" (quotes included). If done, hit enter or click anywhere outside the menu.',
-                on: 'click',
-              }).popup('show');
+          var block = $(param.block.node);
+          if(!isDeleted){
+            if(block.is(".block.output")){
+              isOutputDragged = true;
+              blockPop
+                .popup({
+                  position : 'bottom left',
+                  // offset : $("#block-container .block.output").offset().left - $("#block-container").offset().left,
+                  offset: $($(".block.value")[0]).offset().left,
+                  content  : 'Next, drag the VALUE block to the right side of the OUTPUT block',
+                  on: 'click',
+                  onHidden : function(){
+                    blockPop.popup('destroy');
+                  }
+                }).popup('show');
+            }else if(isOutputDragged && block.is(".block.value")){
+              isValueDragged = true;
+              blockPop.popup('hide').popup('destroy');
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.output")[1]).offset().top - 65,
+                  content  : 'Now right click the VALUE block and type "Mabuhay!" (quotes included).'+" When you're done, hit enter or click anywhere outside the menu.",
+                  on: 'click',
+                }).popup('show');
+            }
+          }else{
+            if(!isVarDeclaredCorrect){
+              if(block.is(".block.type")){
+                isTypeDragged = true;
+                isVarDeclared = checkIfDoneWithInstruction('varDeclaration', {isTypeDragged:isTypeDragged, isVarDragged:isVarDragged});
+              }else if(block.is(".block.variable")){
+                isVarDragged = true;
+                isVarDeclared = checkIfDoneWithInstruction('varDeclaration', {isTypeDragged:isTypeDragged, isVarDragged:isVarDragged});
+              }  
+            }else{
+              if(block.is(".block.equal")){
+                blockPop
+                  .popup('hide')
+                  .popup('destroy')
+                  .popup({
+                    position : 'bottom left',
+                    offset: $($(".block.value")[0]).offset().left -10,
+                    content:"Next, drag the VALUE block and chang its value to '5'",
+                    on: 'click'
+                  }).popup('show');
+              }
+            }
           }
         });
-        outputValueListener.subscribe('valueChanged', function(e, param){
-          $("#edit-div").popup('destroy');
-          $("#run-code")
-            .popup({
-              position : 'bottom center',
-              content  : 'Click "Run" to execute your code',
-              on: 'manual',
-            }).popup('show');
-        });
-        outputValueListener.subscribe('successfulRun', function(e, param){
-          $("#run-code").popup('hide').popup('destroy');
-          $("#console-title").popup('hide').popup('destroy');
-          $("#display-svg svg")
-            .popup({
-              position : 'top left',
-              content  : 'See your output message here',
-              on: 'click',
-              onHide: function(){
-                $("#dimmer-message .content .center")
-                  .empty()
-                  .append(gameTexts['1_1'].tutorial.experiment);
-                $("#dimmer-message")
-                  .dimmer('destroy')
-                  .dimmer('show');
 
-                $("#display-svg svg").popup('destroy');
-                outputValueListener.unsubscribe('valueChanged');
-                outputValueListener.unsubscribe('blockDragged');
-                outputValueListener.unsubscribe('successfulRun');
-                outputValueListener.unsubscribe('unsuccessfulRun');
+        outputValueListener.subscribe('valueChanged', function(e, param){
+          var newText = param.newText;
+
+          $("#edit-div").popup('destroy');
+          if(!isTextMabuhay){
+            if(!/mabuhay\!*/i.test(newText)){
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.output")[1]).offset().top - 65,
+                  content  : 'As our first example, type "Mabuhay!" in the VALUE block',
+                  on: 'click',
+                }).popup('show');
+            }else{
+              isTextMabuhay = true;
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.output")[1]).offset().top - 65,
+                  content  : 'Now we have created our first code! The OUTPUT is a function that will display the the value you entered to the display panel. Values can be a string or words, a number, or a Boolean value(true or false). Now hit run to see your output!',
+                  on: 'manual',
+                }).popup('show');
+            }
+          }else{
+            if(isVarDeclaredCorrect){
+              if(newText === "5"){
+                editPopContent.empty().append(gameTexts[level].tutorial.variable_dec_success);
+                editPop
+                  .popup('destroy')
+                  .popup({
+                    position : 'top left',
+                    offset : -(compData.editPanelHeight / 2) + $($(".block.type")[1]).offset().top - 65,
+                    // title: "Yay!",
+                    // content  : "This is how we declare variables. We need the data type, name, and the value(but the value assignment can be omitted)",
+                    popup: editPopContent,
+                    on: 'manual',
+                  }).popup('show');
+                  $("#exit-variable-dec-succ").click(function(){
+                    editPop.popup('hide').popup('destroy');
+                    $("#dimmer-message .content .center")
+                      .empty()
+                      .append(gameTexts['1_1'].tutorial.var_dec_done);
+                    $("#dimmer-message")
+                      .dimmer('destroy')
+                      .dimmer({
+                        onHide: function(){
+                          displayPop.popup('destroy');
+                          editPop.popup('destroy');
+                          blockPop.popup('destroy');
+                          $('#scrollable-div').animate({scrollLeft : $($(".block.add")[0]).offset().left - 70});
+                          blockPopContent.empty().append(gameTexts[level].tutorial.arithmetic_op);
+                          blockPop
+                            .popup({
+                              position : 'bottom left',
+                              offset: $($(".block.type")[0]).offset().left -10,
+                              popup: blockPopContent,
+                              on: 'manual'
+                            }).popup('show');
+                          $('#exit-arith').click(function(){
+                            blockPop.popup('hide').popup('destroy');
+                            $('#scrollable-div').animate({scrollLeft : "+=700"});
+                            blockPopContent.empty().append(gameTexts[level].tutorial.boolean_op);
+                            blockPop
+                              .popup({
+                                position : 'bottom center',
+                                offset: -20,
+                                popup: blockPopContent,
+                                on: 'manual'
+                              }).popup('show');
+                            $('#exit-boolean').click(function(){
+                              blockPop.popup('hide').popup('destroy');
+                              blockPopContent.empty().append(gameTexts[level].tutorial.control_flow);
+                              blockPop
+                                .popup({
+                                  position : 'bottom right',
+                                  // offset: $($(".block.if")[0]).offset().left,
+                                  popup: blockPopContent,
+                                  on: 'manual'
+                                }).popup('show');
+                              $('#exit-control').click(function(){
+                                blockPop.popup('hide').popup('destroy');
+                                $("#dimmer-message .content .center")
+                                  .empty()
+                                  .append(gameTexts['1_1'].tutorial.experiment);
+                                $("#dimmer-message")
+                                  .dimmer('destroy')
+                                  .dimmer({
+                                    onHide: function(){
+                                      displayPop.popup('destroy');
+                                      editPop.popup('destroy');
+                                      blockPop.popup('destroy');
+                                      $("#dimmer-message").dimmer('destroy');
+                                      outputValueListener.unsubscribe('valueChanged');
+                                      outputValueListener.unsubscribe('variableChanged');
+                                      outputValueListener.unsubscribe('updateType');
+                                      outputValueListener.unsubscribe('blockDragged');
+                                      outputValueListener.unsubscribe('successfulRun');
+                                      outputValueListener.unsubscribe('unsuccessfulRun');
+                                      
+                                    }
+                                  })
+                                  .dimmer('show');
+                              });
+                            });
+                          });
+                        }
+                      })
+                      .dimmer('show');
+
+                  });
               }
-            }).popup('show');
+              else{
+                blockPop.popup('hide').popup('destroy');
+                editPop
+                  .popup('destroy')
+                  .popup({
+                    position : 'top left',
+                    offset : -(compData.editPanelHeight / 2) + $($(".block.type")[1]).offset().top - 65,
+                    content  : "Singko means 5. The value should be 5.",
+                    on: 'click',
+                  }).popup('show');
+              }
+            }
+          }
         });
+
+        outputValueListener.subscribe('updateType', function(e, param){
+          var newType = param.type;
+          if(isVarDeclared){
+            if(newType === "integer"){
+              isTypeInt = true;
+              isVarDeclaredCorrect = checkIfDoneWithInstruction("declareSingko", {isTypeInt:isTypeInt,isVarChanged:isVarChanged});
+            }
+          }
+        });
+
+        outputValueListener.subscribe('variableChanged', function(e, param){
+          var newName = param.newName;
+          if(isVarDeclared){
+            if(newName === "singko"){
+              isVarChanged = true;
+              isVarDeclaredCorrect = checkIfDoneWithInstruction("declareSingko", {isTypeInt:isTypeInt,isVarChanged:isVarChanged});
+            }else{
+              editPop
+                .popup('hide')
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.type")[1]).offset().top - 65,
+                  content  : "Variable name should be 'singko'",
+                  on: 'click',
+                }).popup('show');
+            }
+          }
+        });
+
+        outputValueListener.subscribe('blockDeleted', function(e, param){
+          var targetBlock = $(param.target.node);
+          console.log(targetBlock);
+          if(successfulOutput && !isDeleted){
+            if(targetBlock.is(".block.output")){
+              isOutputDeleted = true;
+              isDeleted = checkIfDoneWithInstruction("deleteOutputValue", {isOutputDeleted:isOutputDeleted, isValueDeleted:isValueDeleted});
+            }else if(targetBlock.is(".block.value")){
+              isValueDeleted = true;
+              isDeleted = checkIfDoneWithInstruction("deleteOutputValue", {isOutputDeleted:isOutputDeleted, isValueDeleted:isValueDeleted});
+            }
+          }
+        });
+
+        outputValueListener.subscribe('successfulRun', function(e, param){
+          if(!successfulOutput){
+            successfulOutput = true;
+            editPop.popup('hide').popup('destroy');
+            blockPop.popup('hide').popup('destroy');
+            $("#console-title").popup('hide').popup('destroy');
+            displayPopContent.empty().append(gameTexts[level].tutorial.mabuhay);
+            displayPop
+              .popup('destroy')
+              .popup({
+                position : 'top center',
+                // content  : 'Any values you output will be displayed here',
+                popup: displayPopContent,
+                on: 'manual',
+                variation: "very wide",
+              }).popup('show');
+            $("#exit-mabuhay").click(function(){
+              displayPop.popup('hide').popup('destroy');
+              editPopContent.empty().append(gameTexts[level].tutorial.delete_blocks);
+              editPop
+                .popup('destroy')
+                .popup({
+                  position : 'top left',
+                  popup: editPopContent,
+                  offset : -(compData.editPanelHeight / 2) + $($(".block.output")[1]).offset().top - 65,
+                  on: 'manual',
+                  variation: "very wide",
+                }).popup('show');
+              $("#exit-delete-blocks").click(function(){
+                editPop.popup('hide').popup('destroy');
+              });
+            });
+          }else{
+
+          }
+        });
+
         outputValueListener.subscribe('unsuccessfulRun', function(e, param){
           $("#edit-div").popup('destroy');
           $("#console-title")
@@ -1497,6 +1773,106 @@ $(document).ready(function(){
               on: 'click',
             }).popup('show');
         });
+
+        var checkIfDoneWithInstruction = function(instruction, conditions, eventManager){
+          var isDone = false;
+          console.log(conditions);
+          switch(instruction){
+            case "deleteOutputValue":
+              if(conditions.isOutputDeleted && conditions.isValueDeleted){
+                console.log("Deleted output value");
+                isDone = true;
+                editPop.popup('hide').popup('destroy');
+                dimmerMessageContent.empty().append(gameTexts[level].tutorial.delete_done);
+                dimmerMessage
+                  .dimmer('destroy')
+                  .dimmer({
+                    onHide: function(){
+                      dimmerMessage.dimmer('destroy');
+                      blockPopContent.empty().append(gameTexts[level].tutorial.data_types);
+                      blockPop
+                        .popup('destroy')
+                        .popup({
+                          position : 'bottom left',
+                          offset: $($(".block.type")[0]).offset().left -20,
+                          popup:blockPopContent,
+                          on: 'manual',
+                        }).popup('show');
+                      $('#exit-data-types').click(function(){
+                        console.log("ËXIT");
+                        blockPop.popup('hide');
+                        blockPopContent.empty().append(gameTexts[level].tutorial.variable);
+                        blockPop
+                          .popup('destroy')
+                          .popup({
+                            position : 'bottom left',
+                            offset: $($(".block.variable")[0]).offset().left -10,
+                            popup:blockPopContent,
+                            on: 'manual'
+                          }).popup('show');
+                        $('#exit-variable').click(function(){
+                          blockPop.popup('hide').popup('destroy');
+                          editPop
+                            .popup('destroy')
+                            .popup({
+                              position : 'top left',
+                              offset : -(compData.editPanelHeight / 2) + blockMargin + blockHeight,
+                              content  : "Let's declare an integer variable here. Drag the TYPE block, then the VARIABLE block on the right side.",
+                              on: 'click',
+                            }).popup('show');
+                        });
+                      });
+                    }
+                  }).dimmer("show");
+              }
+              break;
+            case "varDeclaration":
+              if(conditions.isTypeDragged && conditions.isVarDragged){
+                editPop.popup('hide');
+                editPop
+                  .popup('destroy')
+                  .popup({
+                    position : 'top left',
+                    offset : -(compData.editPanelHeight / 2) + $($(".block.type")[1]).offset().top - 65,
+                    content  : "To change the type, right click on the TYPE block and choose 'integer', and to change the variable name, right click on the VARIABLE block and type 'singko'.",
+                    on: 'click',
+                  }).popup('show');
+                isDone = true;
+              }
+              break;
+            case "declareSingko":
+              if(conditions.isTypeInt && conditions.isVarChanged){
+                editPop.popup('hide');
+                editPopContent.empty().append(gameTexts[level].tutorial.variable_dec);
+                editPop
+                  .popup('destroy')
+                  .popup({
+                    position : 'top left',
+                    offset : -(compData.editPanelHeight / 2) + $($(".block.type")[1]).offset().top - 65,
+                    popup: editPopContent,
+                    on: 'manual',
+                    variation:'wide'
+                  }).popup('show');
+                $("#exit-variable-dec").click(function(){
+                  editPop.popup('hide').popup('destroy');
+                  blockPop
+                    .popup('destroy')
+                    .popup({
+                      position : 'bottom left',
+                      offset: $($(".block.equal")[0]).offset().left - 20,
+                      content: "Drag the = block next to the VARIABLE block in the edit panel.",
+                      on: 'click'
+                    }).popup('show');
+                });
+                isDone = true;
+              }
+              break;
+            default:
+              // DO SOMETHING
+          }
+
+          return isDone;
+        }
       });
       break;
     case "1_2":
@@ -1535,7 +1911,7 @@ $(document).ready(function(){
               exclusive: true,
               on: 'manual',
               popup : editPopContent,
-              variation: "wide",
+              variation: "very wide",
               onHidden: function(){
                 editPopContent.empty().append(gameTexts[level].edit_2);
                 $("#pop-run").click(function(){
@@ -1557,7 +1933,7 @@ $(document).ready(function(){
                       $("#run-code").removeClass('disabled');
                       $("#run-code")
                         .popup({
-                          position : 'bottom center',
+                          position : 'left center',
                           content  : "Now let's try to run this code and see what happens on the display panel.",
                           on: 'manual',
                           onHide: function(){
@@ -1682,7 +2058,7 @@ $(document).ready(function(){
                         hoverable : false,
                         closable: false,
                         content: "Here, we are going to use REPEATWHILE so right click on the REPEAT block and choose 'repeat while'",
-                        on: 'hover',
+                        on: 'click',
                         variation: "wide",
                         onHidden: function(){
                           editPop.popup('destroy');
@@ -1804,7 +2180,7 @@ $(document).ready(function(){
                   closable: false,
                   title: 'You forgot something..',
                   content: "We need to use the REPEAT block on this level.",
-                  on: 'hover',
+                  on: 'click',
                   variation: "wide",
                   onHide: function(){
                     displayPop.popup('destroy');
@@ -1820,7 +2196,7 @@ $(document).ready(function(){
                   closable: false,
                   title: 'You forgot something..',
                   content: "Don't forget to output your result.",
-                  on: 'hover',
+                  on: 'click',
                   variation: "wide",
                   onHide: function(){
                     displayPop.popup('destroy');
@@ -2125,7 +2501,7 @@ $(document).ready(function(){
                 position : 'bottom center',
                 offset : $("#block-container .block.close-parenthesis").offset().left - $("#block-container").width()/2,
                 content  : 'In the edit panel, drag a repeat block inside of another.',
-                on: "hover",
+                on: "click",
                 onHidden : function(){
                   blockPop.popup('destroy');
                 }
@@ -3581,7 +3957,7 @@ $(document).ready(function(){
 
     compData.rightmost = (compData.rightmost && compData.rightmost.getBBox().x2 > rightMostBlock.getBBox().x2) ? compData.rightmost : rightMostBlock;
 
-    // console.log(compData);
+    console.log(compData);
     if((lastBlock.getBBox().y2 + blockHeight * 2) > snapEdit.getBBox().y2){
       editPanel.attr({
         height: snapEdit.getBBox().height + (blockHeight + blockMargin)*5
